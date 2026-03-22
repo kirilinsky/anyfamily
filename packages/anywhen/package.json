@@ -36,9 +36,10 @@
     ],
     "license": "MIT",
     "devDependencies": {
+        "@types/node": "^22.19.15",
         "@vitest/coverage-v8": "^3.2.4",
-        "typescript": "^5.9.3",
         "tsdown": "^0.21.4",
+        "typescript": "^5.9.3",
         "vitest": "^3.2.4"
     },
     "repository": {
