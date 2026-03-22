@@ -1,0 +1,39 @@
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm typecheck
+
+      - run: pnpm test -- --coverage
+
+      - uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+
+      - run: pnpm build
+
+      - name: Check bundle size
+        run: |
+          SIZE=$(wc -c < dist/index.js)
+          echo "Bundle size: ${SIZE} bytes"
+          if [ "$SIZE" -gt 1500 ]; then
+            echo "Bundle too large: ${SIZE}b > 1500b"
+            exit 1
+          fi
