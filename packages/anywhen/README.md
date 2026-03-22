@@ -1,7 +1,3 @@
-<p align="center">
-  <img src="https://i.ibb.co/hxfLmB1J/anywhen-logo.png" alt="anywhen" width="320" />
-</p>
-
 <h1 align="center">anywhen</h1>
 
 <p align="center">
@@ -16,9 +12,13 @@
   <em>show me the date.&nbsp;&nbsp;when was it.&nbsp;&nbsp;how long ago.</em>
 </p>
 
+<p align="center">
+  <a href="https://anywhen-kappa.vercel.app/">▸ live demo</a>
+</p>
+
 ---
 
-**~0.8kb gzip. zero dependencies. 200+ locales — for free.**
+**~800b gzip. zero dependencies. 200+ locales — for free.**
 
 No locale files to import. No plugins to register. No config.
 
@@ -46,7 +46,7 @@ npm install anywhen
 
 ## anydate — show me the date.
 
-Absolute formatting — pass any `Intl.DateTimeFormat` options.
+Always absolute. Pass any `Intl.DateTimeFormat` options.
 
 ```ts
 anydate(date, "en"); // "Feb 5, 2016"
@@ -68,7 +68,7 @@ anydate(date, "ar"); // "٥ فبراير ٢٠١٦"
 
 ## anywhen — when was it.
 
-Smart picker — chooses the right format based on how long ago.
+Smart context — picks the right format automatically. Covers past and future.
 
 ```ts
 anywhen(date, "en"); // "just now"
@@ -77,6 +77,8 @@ anywhen(date, "en"); // "today, 2:35 PM"
 anywhen(date, "en"); // "yesterday, 9:00 AM"
 anywhen(date, "de"); // "Mittwoch, 11:20"
 anywhen(date, "en"); // "Feb 5, 2016"
+anywhen(date, "en"); // "in 2 weeks"
+anywhen(date, "ru"); // "через 3 месяца"
 
 anywhen(date, "en", false); // "yesterday" — no clock
 ```
@@ -85,11 +87,12 @@ anywhen(date, "en", false); // "yesterday" — no clock
 
 ## anyago — how long ago.
 
-Relative time — powered by `Intl.RelativeTimeFormat`.
+Always relative. Past and future.
 
 ```ts
 anyago(date, "en"); // "3 hours ago"
 anyago(date, "en"); // "yesterday"
+anyago(date, "en"); // "in 2 weeks"
 anyago(date, "de"); // "vor 3 Stunden"
 anyago(date, "fr"); // "il y a 3 heures"
 anyago(date, "tr"); // "3 saat önce"
@@ -126,7 +129,7 @@ t.anyago(date); // "vor 3 Stunden"
 
 |                     |  anywhen  | dayjs | date-fns |
 | ------------------- | :-------: | :---: | :------: |
-| gzip                | **~850b** | ~7kb  |  ~20kb   |
+| gzip                | **~800b** | ~7kb  |  ~20kb   |
 | locale data bundled |  **no**   |  yes  |   yes    |
 | locales             | **200+**  |  140  |   100    |
 | dependencies        |   **0**   |   0   |    0     |
