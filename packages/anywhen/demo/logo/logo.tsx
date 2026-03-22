@@ -26,7 +26,7 @@ export function Logo({ className }: { className?: string }) {
       </defs>
       <text
         x="0"
-        y="175"
+        y="196"
         fontFamily="'Barlow Condensed', sans-serif"
         fontWeight="800"
         fontStyle="italic"
@@ -38,7 +38,7 @@ export function Logo({ className }: { className?: string }) {
       </text>
 
       <text
-        x="280"
+        x="285"
         y="75"
         fontFamily="'Barlow', sans-serif"
         fontWeight="700"
@@ -65,7 +65,7 @@ export function Logo({ className }: { className?: string }) {
 
       <text
         x="250"
-        y="235"
+        y="230"
         fontFamily="'Barlow', sans-serif"
         fontWeight="700"
         fontSize="81"
