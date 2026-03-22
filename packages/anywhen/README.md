@@ -18,7 +18,7 @@
 
 ---
 
-**~700b gzip. zero dependencies. 200+ locales — for free.**
+**~0.8kb gzip. zero dependencies. 200+ locales — for free.**
 
 No locale files to import. No plugins to register. No config.
 
@@ -126,7 +126,7 @@ t.anyago(date); // "vor 3 Stunden"
 
 |                     |  anywhen  | dayjs | date-fns |
 | ------------------- | :-------: | :---: | :------: |
-| gzip                | **~700b** | ~7kb  |  ~20kb   |
+| gzip                | **~850b** | ~7kb  |  ~20kb   |
 | locale data bundled |  **no**   |  yes  |   yes    |
 | locales             | **200+**  |  140  |   100    |
 | dependencies        |   **0**   |   0   |    0     |
