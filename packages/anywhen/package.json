@@ -20,7 +20,8 @@
         "build": "tsdown",
         "test": "vitest run",
         "test:coverage": "npx vitest run --coverage",
-        "typecheck": "tsc --noEmit"
+        "typecheck": "tsc --noEmit",
+        "release": "npm version patch && git push --follow-tags"
     },
     "keywords": [
         "intl",
@@ -29,7 +30,9 @@
         "i18n",
         "relative",
         "format",
-        "lightweight"
+        "lightweight",
+        "when",
+        "ago"
     ],
     "license": "MIT",
     "devDependencies": {
@@ -37,5 +40,14 @@
         "typescript": "^5.9.3",
         "tsdown": "^0.21.4",
         "vitest": "^3.2.4"
-    }
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/kirilinsky/anywhen.git"
+    },
+    "author": "Kirilinsky (https://github.com/kirilinsky)",
+    "bugs": {
+        "url": "https://github.com/kirilinsky/anywhen/issues"
+    },
+    "homepage": "https://github.com/kirilinsky/anywhen#readme"
 }
