@@ -31,7 +31,7 @@ jobs:
 
       - name: Check bundle size
         run: |
-          SIZE=$(wc -c < dist/index.js)
+          SIZE=$(wc -c < dist/index.cjs)
           echo "Bundle size: ${SIZE} bytes"
           if [ "$SIZE" -gt 1500 ]; then
             echo "Bundle too large: ${SIZE}b > 1500b"
