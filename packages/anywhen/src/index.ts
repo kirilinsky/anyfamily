@@ -82,6 +82,11 @@ export function anywhen(input: DateInput, locale: string, time = true): string {
   if (abs < 45) return rtf(locale, "auto").format(0, "second");
   if (abs < 3600) return rtf(locale, "auto").format(unit(ms)[0], "minute");
 
+  if (ms > 0) {
+    const [v, u] = unit(ms);
+    return rtf(locale, "auto").format(v, u);
+  }
+
   if (sameDay(date, now))
     return time
       ? `${rtf(locale, "auto").format(0, "day")}, ${t()}`

@@ -171,6 +171,18 @@ describe("anywhen — mode switching", () => {
   it("10 days ago → no time in absolute", () => {
     expect(anywhen(NOW - 10 * 86_400_000, "en")).not.toMatch(/\d{1,2}:\d{2}/);
   });
+  it("future > 1h → relative", () => {
+    expect(anywhen(NOW + 3 * 3_600_000, "en")).toBe("in 3 hours");
+  });
+  it("future 2 weeks → relative", () => {
+    expect(anywhen(NOW + 14 * 86_400_000, "en")).toBe("in 2 weeks");
+  });
+  it("future 3 months → relative", () => {
+    expect(anywhen(NOW + 90 * 86_400_000, "en")).toBe("in 3 months");
+  });
+  it("future in russian → relative", () => {
+    expect(anywhen(NOW + 14 * 86_400_000, "ru")).toBe("через 2 недели");
+  });
 });
 
 describe("anywhen — time option", () => {
