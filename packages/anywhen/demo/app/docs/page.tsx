@@ -215,7 +215,12 @@ export default function Docs() {
         <main ref={mainRef} className="flex-1 min-w-0 pb-32">
           <Section id="overview" title="Overview">
             <p>
-              <strong style={{ color: "var(--text-primary)" }}>anywhen</strong>
+              <a href="https://www.npmjs.com/package/anywhen">
+                <strong style={{ color: "var(--text-primary)" }}>
+                  anywhen
+                </strong>
+              </a>
+              <br />
               is a ~800b gzip date formatting library built entirely on the
               native{" "}
               <code style={{ color: "var(--emerald)" }} className="font-mono">
