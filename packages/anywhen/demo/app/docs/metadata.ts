@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { DocsClient } from "./DocsClient";
 
 export const metadata: Metadata = {
   title: "Docs",
@@ -10,13 +9,9 @@ export const metadata: Metadata = {
     title: "anywhen docs",
     description:
       "API reference — anydate(), anywhen(), anyago(), anywhere(). Compatibility, limitations, input types.",
-    images: [{ url: "/og", width: 1200, height: 630 }],
+    images: [{ url: "/og.png", width: 1200, height: 630 }],
   },
   alternates: {
     canonical: "https://anywhen-kappa.vercel.app/docs",
   },
 };
-
-export default function DocsPage() {
-  return <DocsClient />;
-}

@@ -1,22 +1,71 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
 export const metadata: Metadata = {
-  title: "Any | when | ago | date ",
-  description: "Here you can play with anywhen NPM package",
+  metadataBase: new URL("https://anywhen-kappa.vercel.app"),
+
+  title: {
+    default: "Anywhen | Any locale date formatting",
+    template: "%s | anywhen",
+  },
+
+  description:
+    "~800b gzip. Zero dependencies. anydate(), anywhen(), anyago() — relative and absolute date formatting powered by native Intl. 200+ locales out of the box.",
+
+  keywords: [
+    "date formatting",
+    "relative time",
+    "intl",
+    "i18n",
+    "javascript",
+    "typescript",
+    "npm",
+    "zero dependencies",
+    "localization",
+    "date library",
+    "fuzzy",
+  ],
+
+  authors: [{ name: "kirilinsky", url: "https://github.com/kirilinsky" }],
+
+  creator: "kirilinsky",
+
+  openGraph: {
+    type: "website",
+    url: "https://anywhen-kappa.vercel.app",
+    title: "anywhen — date formatting for any locale",
+    description:
+      "~800b gzip. Zero deps. Fuzzy date & time, 200+ locales via native Intl. No extra imports, no config.",
+    siteName: "anywhen",
+    images: [
+      {
+        url: "/og.png",
+        width: 1200,
+        height: 630,
+        alt: "anywhen — date formatting for any locale",
+      },
+    ],
+  },
+
+  twitter: {
+    card: "summary_large_image",
+    title: "anywhen — date formatting for any locale",
+    description:
+      "~800b gzip. Zero deps. 200+ locales via native Intl. anydate() anyago() anywhen()",
+    images: ["/og.png"],
+    creator: "@kirilinsky",
+  },
+
+  robots: {
+    index: true,
+    follow: true,
+  },
+
+  alternates: {
+    canonical: "https://anywhen-kappa.vercel.app",
+  },
 };
 
 export default function RootLayout({
@@ -25,10 +74,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-    >
+    <html lang="en">
       <Analytics />
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
