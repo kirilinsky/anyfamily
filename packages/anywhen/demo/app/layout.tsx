@@ -41,7 +41,7 @@ export const metadata: Metadata = {
     siteName: "anywhen",
     images: [
       {
-        url: "/og.png",
+        url: "/og.jpg",
         width: 1200,
         height: 630,
         alt: "anywhen — date formatting for any locale",
@@ -54,7 +54,7 @@ export const metadata: Metadata = {
     title: "anywhen — date formatting for any locale",
     description:
       "~800b gzip. Zero deps. 200+ locales via native Intl. anydate() anyago() anywhen()",
-    images: ["/og.png"],
+    images: ["/og.jpg"],
     creator: "@kirilinsky",
   },
 
