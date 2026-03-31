@@ -9,7 +9,6 @@ export default defineConfig({
   outExtensions: () => ({
     dts: ".d.ts",
   }),
-  clean: true,
-
+  clean: true, 
   treeshake: true,
 });

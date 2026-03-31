@@ -9,6 +9,10 @@
 </p>
 
 <p align="center">
+  Human-readable date formatting for any locale — relative, absolute, or smart context.
+</p>
+
+<p align="center">
   <em>show me the date.&nbsp;&nbsp;when was it.&nbsp;&nbsp;how long ago.</em>
 </p>
 
@@ -20,7 +24,7 @@
 
 **~800b gzip. zero dependencies. 200+ locales — for free.**
 
-No locale files to import. No plugins to register. No config.
+Built entirely on native `Intl`. No locale files to import. No plugins to register. No config.
 
 ```ts
 import { anydate, anywhen, anyago } from "anywhen";

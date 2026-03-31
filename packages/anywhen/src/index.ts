@@ -7,11 +7,14 @@ export interface AnywhereInstance {
   anywhen(input: DateInput, time?: boolean): string;
 }
 
-const T: [number, RelativeUnit, number][] = [
+const MS_DAY = 864e5;
+const MS_YEAR = 315360e5;
+
+const THRESHOLDS: [number, RelativeUnit, number][] = [
   [45, "second", 1e3],
   [2700, "minute", 6e4],
   [79200, "hour", 36e5],
-  [518400, "day", 864e5],
+  [518400, "day", MS_DAY],
   [2160000, "week", 6048e5],
   [28512000, "month", 2592e6],
 ];
@@ -26,23 +29,23 @@ const TIME_OPTS: Intl.DateTimeFormatOptions = {
   minute: "2-digit",
 };
 
-const rc = new Map<string, Intl.RelativeTimeFormat>();
-const dc = new Map<string, Intl.DateTimeFormat>();
+const rtfCache = new Map<string, Intl.RelativeTimeFormat>();
+const dtfCache = new Map<string, Intl.DateTimeFormat>();
 
 const rtf = (l: string, n: "always" | "auto") => {
   const k = l + n;
   return (
-    rc.get(k) ??
-    rc.set(k, new Intl.RelativeTimeFormat(l, { numeric: n })).get(k)!
+    rtfCache.get(k) ??
+    rtfCache.set(k, new Intl.RelativeTimeFormat(l, { numeric: n })).get(k)!
   );
 };
 
 const dtf = (l: string, o: Intl.DateTimeFormatOptions) => {
-  const k = l + o.weekday + o.month + o.year + o.day + o.hour + o.minute;
-  return dc.get(k) ?? dc.set(k, new Intl.DateTimeFormat(l, o)).get(k)!;
+  const k = `${l}|${o.weekday}|${o.month}|${o.year}|${o.day}|${o.hour}|${o.minute}`;
+  return dtfCache.get(k) ?? dtfCache.set(k, new Intl.DateTimeFormat(l, o)).get(k)!;
 };
 
-const d = (i: DateInput) => (i instanceof Date ? i : new Date(i));
+const toDate = (i: DateInput) => (i instanceof Date ? i : new Date(i));
 
 const sameDay = (a: Date, b: Date) =>
   a.getFullYear() === b.getFullYear() &&
@@ -51,8 +54,8 @@ const sameDay = (a: Date, b: Date) =>
 
 function unit(ms: number): [number, RelativeUnit] {
   const s = Math.abs(ms) / 1000;
-  for (const [th, u, div] of T) if (s < th) return [Math.round(ms / div), u];
-  return [Math.round(ms / 315360e5), "year"];
+  for (const [th, u, div] of THRESHOLDS) if (s < th) return [Math.round(ms / div), u];
+  return [Math.round(ms / MS_YEAR), "year"];
 }
 
 export function anyago(
@@ -60,7 +63,7 @@ export function anyago(
   locale: string,
   numeric = false,
 ): string {
-  const [v, u] = unit(d(input).getTime() - Date.now());
+  const [v, u] = unit(toDate(input).getTime() - Date.now());
   return rtf(locale, numeric ? "always" : "auto").format(v, u);
 }
 
@@ -69,18 +72,18 @@ export function anydate(
   locale: string,
   options: Intl.DateTimeFormatOptions = DATE_OPTS,
 ): string {
-  return dtf(locale, options).format(d(input));
+  return dtf(locale, options).format(toDate(input));
 }
 
 export function anywhen(input: DateInput, locale: string, time = true): string {
-  const date = d(input);
-  const ms = date.getTime() - Date.now();
-  const abs = Math.abs(ms) / 1000;
-  const t = () => dtf(locale, TIME_OPTS).format(date);
+  const date = toDate(input);
   const now = new Date();
+  const ms = date.getTime() - now.getTime();
+  const abs = Math.abs(ms) / 1000;
+  const timeStr = () => dtf(locale, TIME_OPTS).format(date);
 
   if (abs < 45) return rtf(locale, "auto").format(0, "second");
-  if (abs < 3600) return rtf(locale, "auto").format(unit(ms)[0], "minute");
+  if (abs < 3600) return rtf(locale, "auto").format(Math.round(ms / 6e4), "minute");
 
   if (ms > 0) {
     const [v, u] = unit(ms);
@@ -89,19 +92,19 @@ export function anywhen(input: DateInput, locale: string, time = true): string {
 
   if (sameDay(date, now))
     return time
-      ? `${rtf(locale, "auto").format(0, "day")}, ${t()}`
+      ? `${rtf(locale, "auto").format(0, "day")}, ${timeStr()}`
       : dtf(locale, { day: "numeric", month: "short" }).format(date);
 
   const yest = new Date(now);
   yest.setDate(now.getDate() - 1);
   if (sameDay(date, yest)) {
     const s = rtf(locale, "auto").format(-1, "day");
-    return time ? `${s}, ${t()}` : s;
+    return time ? `${s}, ${timeStr()}` : s;
   }
 
-  if (Math.abs(ms) / 864e5 < 7) {
+  if (Math.abs(ms) / MS_DAY < 7) {
     const w = dtf(locale, { weekday: "long" }).format(date);
-    return time ? `${w}, ${t()}` : w;
+    return time ? `${w}, ${timeStr()}` : w;
   }
 
   return dtf(locale, DATE_OPTS).format(date);
