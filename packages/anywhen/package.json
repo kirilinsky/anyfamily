@@ -1,6 +1,6 @@
 {
     "name": "anywhen",
-    "version": "0.1.4",
+    "version": "0.1.5",
     "description": "Lightweight human date formatting for any locale. Zero deps, native Intl.",
     "type": "module",
     "main": "./dist/index.cjs",
