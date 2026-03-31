@@ -165,8 +165,8 @@ export function DocsClient() {
         style={{ borderColor: "var(--border)", background: "var(--bg)" }}
         className="fixed top-0 left-0 right-0 z-50 border-b backdrop-blur-sm"
       >
-        <div className="max-w-6xl mx-auto px-6 h-12 flex items-center justify-between">
-          <div className="flex items-center gap-6">
+        <div className="max-w-6xl mx-auto px-6 h-12 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-6 shrink-0">
             <a
               href="/"
               style={{ color: "var(--text-muted)" }}
@@ -176,15 +176,31 @@ export function DocsClient() {
             </a>
             <span
               style={{ color: "var(--text-muted)" }}
-              className="text-xs tracking-widest uppercase"
+              className="hidden sm:inline text-xs tracking-widest uppercase"
             >
               docs
             </span>
           </div>
+          <select
+            value={active}
+            onChange={(e) => scrollTo(e.target.value)}
+            style={{
+              color: "var(--text-secondary)",
+              background: "var(--bg-secondary)",
+              borderColor: "var(--border)",
+            }}
+            className="md:hidden flex-1 min-w-0 text-xs font-mono rounded-md px-2 py-1 border cursor-pointer outline-none"
+          >
+            {NAV.map(({ id, label }) => (
+              <option key={id} value={id}>
+                {label}
+              </option>
+            ))}
+          </select>
           <button
             onClick={() => setDark((d) => !d)}
             style={{ color: "var(--text-muted)", borderColor: "var(--border)" }}
-            className="text-xs font-mono rounded-md px-3 py-1 border hover:opacity-80 transition-opacity cursor-pointer"
+            className="shrink-0 text-xs font-mono rounded-md px-3 py-1 border hover:opacity-80 transition-opacity cursor-pointer"
           >
             {dark ? "☀ light" : "☾ dark"}
           </button>

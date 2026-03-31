@@ -233,13 +233,13 @@ export default function Home() {
       </div>
 
       <footer className="fixed bottom-0 left-0 right-0 z-20 border-t border-white/[0.05] bg-[#0a0a0a]/80 backdrop-blur-sm">
-        <div className="max-w-2xl mx-auto px-6 h-10 flex items-center justify-between">
-          <div className="flex items-center gap-5">
+        <div className="max-w-2xl mx-auto px-6 h-12 flex items-center justify-between">
+          <div className="flex items-center gap-1">
             <a
               href="https://github.com/kirilinsky/anywhen"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-white/25 hover:text-white/60 text-xs tracking-widest uppercase transition-colors duration-300"
+              className="text-white/25 hover:text-white/60 text-xs tracking-widest uppercase transition-colors duration-300 px-3 py-3"
             >
               github
             </a>
@@ -247,12 +247,12 @@ export default function Home() {
               href="https://www.npmjs.com/package/anywhen"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-white/25 hover:text-white/60 text-xs tracking-widest uppercase transition-colors duration-300"
+              className="text-white/25 hover:text-white/60 text-xs tracking-widest uppercase transition-colors duration-300 px-3 py-3"
             >
               npm
             </a>
             <Link
-              className="text-white/25 hover:text-white/60 text-xs tracking-widest uppercase transition-colors duration-300"
+              className="text-white/25 hover:text-white/60 text-xs tracking-widest uppercase transition-colors duration-300 px-3 py-3"
               href={"/docs"}
             >
               docs
