@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { anydate, anywhen, anyago } from "anywhen";
+import { Calendar } from "react-calendar-datetime";
 import { Logo } from "@/logo/logo";
 import Link from "next/link";
 
@@ -67,6 +68,22 @@ export default function Home() {
   const [numeric, setNumeric] = useState(false);
   const [noClock, setNoClock] = useState(false);
   const [localeFocused, setFocused] = useState(false);
+  const [calendarOpen, setCalendarOpen] = useState(false);
+  const calendarRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!calendarOpen) return;
+    const handler = (e: MouseEvent) => {
+      if (
+        calendarRef.current &&
+        !calendarRef.current.contains(e.target as Node)
+      ) {
+        setCalendarOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [calendarOpen]);
 
   const date = new Date(dateStr);
   const valid = !isNaN(date.getTime()) && locale.length >= 2;
@@ -107,7 +124,7 @@ export default function Home() {
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-white/[0.015] blur-[120px]" />
       </div>
 
-      <div className="relative z-20 flex flex-col items-center gap-6 w-full max-w-3xl px-6">
+      <div className="relative z-20 flex flex-col items-center gap-6 w-full max-w-3xl px-4">
         <Logo className="w-48 h-auto -mb-2" />
 
         <div className="w-full rounded-2xl border border-white/[0.08] bg-white/[0.03] backdrop-blur-sm p-5 shadow-[0_0_0_1px_rgba(255,255,255,0.03),0_32px_64px_-12px_rgba(0,0,0,0.8)]">
@@ -133,13 +150,43 @@ export default function Home() {
 
             <span className="text-white/30">(</span>
 
-            <input
-              type="datetime-local"
-              value={dateStr}
-              onChange={(e) => setDateStr(e.target.value)}
-              className="bg-transparent text-sky-300 font-mono text-base outline-none cursor-pointer rounded-md px-2 py-1 hover:bg-white/[0.06] transition-colors border border-transparent hover:border-white/[0.1]"
-              style={{ colorScheme: "dark" }}
-            />
+            <div className="relative" ref={calendarRef}>
+              <button
+                onClick={() => setCalendarOpen((o) => !o)}
+                className={`bg-transparent text-sky-300 font-mono text-base outline-none cursor-pointer rounded-md px-2 py-1 transition-colors border ${calendarOpen ? "bg-white/[0.06] border-white/[0.15]" : "border-transparent hover:bg-white/[0.06] hover:border-white/[0.1]"}`}
+              >
+                {date && !isNaN(date.getTime())
+                  ? date.toLocaleString(locale || "en", {
+                      month: "short",
+                      day: "numeric",
+                      year: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })
+                  : "pick date"}
+              </button>
+              {calendarOpen && (
+                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mt-1 z-50 shadow-2xl rounded-xl overflow-hidden">
+                  <Calendar
+                    date={date}
+                    onChangeDate={(d) => {
+                      if (d) {
+                        const pad = (n: number) => String(n).padStart(2, "0");
+                        setDateStr(
+                          `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`,
+                        );
+                      }
+                    }}
+                    theme="carbon"
+                    locale={locale || "en"}
+                    time
+                    gestures
+                    compactYears
+                    width="287px"
+                  />
+                </div>
+              )}
+            </div>
 
             <span className="text-white/30">,</span>
 
