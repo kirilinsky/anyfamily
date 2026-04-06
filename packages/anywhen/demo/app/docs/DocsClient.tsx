@@ -160,7 +160,7 @@ export function DocsClient() {
         minHeight: "100vh",
         transition: "background .2s, color .2s",
       }}
-    > 
+    >
       <header
         style={{ borderColor: "var(--border)", background: "var(--bg)" }}
         className="fixed top-0 left-0 right-0 z-50 border-b backdrop-blur-sm"
@@ -207,7 +207,7 @@ export function DocsClient() {
         </div>
       </header>
 
-      <div className="max-w-6xl mx-auto px-6 pt-20 flex gap-12"> 
+      <div className="max-w-6xl mx-auto px-6 pt-20 flex gap-12">
         <aside className="hidden md:block w-44 shrink-0 sticky top-20 self-start">
           <nav className="flex flex-col gap-0.5">
             {NAV.map(({ id, label }) => (
@@ -226,7 +226,7 @@ export function DocsClient() {
               </button>
             ))}
           </nav>
-        </aside> 
+        </aside>
         <main ref={mainRef} className="flex-1 min-w-0 pb-32">
           <Section id="overview" title="Overview">
             <p>
@@ -257,7 +257,7 @@ anyago(date,  'en')   // "3 hours ago"`}</Code>
             >
               <span>current stable:</span>
               <code style={{ color: "var(--emerald)" }} className="font-mono">
-                v0.1.4
+                v0.1.5
               </code>
               <a
                 href="https://github.com/kirilinsky/anywhen/tags"
