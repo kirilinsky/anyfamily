@@ -12,8 +12,8 @@ importers:
         specifier: ^2.0.1
         version: 2.0.1(next@16.2.1(@babel/core@7.29.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)
       anywhen:
-        specifier: ^0.1.5
-        version: 0.1.5
+        specifier: ^0.1.7
+        version: 0.1.7
       next:
         specifier: 16.2.1
         version: 16.2.1(@babel/core@7.29.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -763,8 +763,8 @@ packages:
     resolution: {integrity: sha512-zbB9rCJAT1rbjiVDb2hqKFHNYLxgtk8NURxZ3IZwD3F6NtxbXZQCnnSi1Lkx+IDohdPlFp222wVALIheZJQSEg==}
     engines: {node: '>=8'}
 
-  anywhen@0.1.5:
-    resolution: {integrity: sha512-K1Rn4xhP0dC3CaD/x1/LuobXEIgJr3WvjrBakIema0uv3KMnj6FE2TxpAcWmev4BLW0oE5nqDjAk+eW8gCOltQ==}
+  anywhen@0.1.7:
+    resolution: {integrity: sha512-3C1PsF5KczShq0scD31PewYlYPypwYBB4cjY+QYihijF16Jfb/ZRMeulU7xkhMtUh7FHXtGne5CDBfBXJaKVTg==}
 
   argparse@2.0.1:
     resolution: {integrity: sha512-8+9WqebbFzpX9OR+Wa6O29asIogeRMzcGtAINdpMHHyAg10f05aSFVBbcEqGf/PXw1EjAZ+q2/bEBg3DvurK3Q==}
@@ -2617,7 +2617,7 @@ snapshots:
     dependencies:
       color-convert: 2.0.1
 
-  anywhen@0.1.5: {}
+  anywhen@0.1.7: {}
 
   argparse@2.0.1: {}
 
