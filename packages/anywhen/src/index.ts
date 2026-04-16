@@ -29,23 +29,31 @@ const TIME_OPTS: Intl.DateTimeFormatOptions = {
   minute: "2-digit",
 };
 
+const CACHE_LIMIT = 50;
+
+function cacheGet<V>(cache: Map<string, V>, k: string, create: () => V): V {
+  const hit = cache.get(k);
+  if (hit) return hit;
+  const v = create();
+  if (cache.size >= CACHE_LIMIT) cache.delete(cache.keys().next().value!);
+  cache.set(k, v);
+  return v;
+}
+
 const rtfCache = new Map<string, Intl.RelativeTimeFormat>();
 const dtfCache = new Map<string, Intl.DateTimeFormat>();
 
-const rtf = (l: string, n: "always" | "auto") => {
-  const k = l + n;
-  return (
-    rtfCache.get(k) ??
-    rtfCache.set(k, new Intl.RelativeTimeFormat(l, { numeric: n })).get(k)!
-  );
-};
+const rtf = (l: string, n: "always" | "auto") =>
+  cacheGet(rtfCache, l + n, () => new Intl.RelativeTimeFormat(l, { numeric: n }));
 
-const dtf = (l: string, o: Intl.DateTimeFormatOptions) => {
-  const k = `${l}|${o.weekday}|${o.month}|${o.year}|${o.day}|${o.hour}|${o.minute}`;
-  return dtfCache.get(k) ?? dtfCache.set(k, new Intl.DateTimeFormat(l, o)).get(k)!;
-};
+const dtf = (l: string, o: Intl.DateTimeFormatOptions) =>
+  cacheGet(dtfCache, l + JSON.stringify(o), () => new Intl.DateTimeFormat(l, o));
 
-const toDate = (i: DateInput) => (i instanceof Date ? i : new Date(i));
+const toDate = (i: DateInput): Date => {
+  const d = i instanceof Date ? i : new Date(i);
+  if (isNaN(d.getTime())) throw new RangeError(`Invalid date: ${i}`);
+  return d;
+};
 
 const sameDay = (a: Date, b: Date) =>
   a.getFullYear() === b.getFullYear() &&
