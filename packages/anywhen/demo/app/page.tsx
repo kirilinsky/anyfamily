@@ -180,11 +180,9 @@ export default function Home() {
                     }
                   }}
                   theme="carbon"
+                  showHomeButton
                   locale={locale || "en"}
-                  time
-                  gestures
-                  compactYears
-                  width="287px"
+                  width="291px"
                 />
               </div>
             )}
