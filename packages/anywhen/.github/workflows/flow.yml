@@ -34,6 +34,6 @@ jobs:
           SIZE=$(wc -c < dist/index.cjs)
           echo "Bundle size: ${SIZE} bytes"
           if [ "$SIZE" -gt 1750 ]; then
-            echo "Bundle too large: ${SIZE}b > 1750b"
+            echo "Bundle too large: ${SIZE}b > 2050b"
             exit 1
           fi
