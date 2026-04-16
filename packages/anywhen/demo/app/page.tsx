@@ -170,8 +170,8 @@ export default function Home() {
             {calendarOpen && (
               <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-50 shadow-2xl rounded-xl overflow-hidden">
                 <Calendar
-                  date={date}
-                  onChangeDate={(d) => {
+                  value={date}
+                  onChange={(d) => {
                     if (d) {
                       const pad = (n: number) => String(n).padStart(2, "0");
                       setDateStr(
