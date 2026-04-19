@@ -182,7 +182,7 @@ export default function Home() {
                   theme="carbon"
                   showHomeButton
                   locale={locale || "en"}
-                  width="291px"
+                  width="293px"
                 />
               </div>
             )}
