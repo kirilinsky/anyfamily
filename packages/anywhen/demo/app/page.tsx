@@ -2,9 +2,10 @@
 
 import { useState, useEffect, useRef } from "react";
 import { anydate, anywhen, anyago } from "anywhen";
-import { Calendar } from "react-calendar-datetime";
 import { Logo } from "@/logo/logo";
 import Link from "next/link";
+import { CalendarDays, CalendarNav } from "@dateforge/react-calendar/modules";
+import { Calendar } from "@dateforge/react-calendar";
 
 type Method = "anydate" | "anywhen" | "anyago";
 
@@ -61,9 +62,11 @@ function useTypewriter(text: string | null, speed = 38) {
 
 export default function Home() {
   const [method, setMethod] = useState<Method>("anywhen");
-  const [dateStr, setDateStr] = useState(() =>
-    new Date().toISOString().slice(0, 16),
-  );
+  const [dateStr, setDateStr] = useState(() => {
+    const d = new Date();
+    const pad = (n: number) => String(n).padStart(2, "0");
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  });
   const [locale, setLocale] = useState("en");
   const [numeric, setNumeric] = useState(false);
   const [noClock, setNoClock] = useState(false);
@@ -170,7 +173,10 @@ export default function Home() {
             {calendarOpen && (
               <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-50 shadow-2xl rounded-xl overflow-hidden">
                 <Calendar
+                  locale={locale || "en"}
+                  width="296px"
                   value={date}
+                  theme={"dark"}
                   onChange={(d) => {
                     if (d) {
                       const pad = (n: number) => String(n).padStart(2, "0");
@@ -179,11 +185,10 @@ export default function Home() {
                       );
                     }
                   }}
-                  theme="carbon"
-                  showHomeButton
-                  locale={locale || "en"}
-                  width="293px"
-                />
+                >
+                  <CalendarNav home showMonthPicker showTime compactYears />
+                  <CalendarDays />
+                </Calendar>
               </div>
             )}
 

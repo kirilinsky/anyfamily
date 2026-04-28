@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@dateforge/react-calendar':
+        specifier: ^1.0.0
+        version: 1.0.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       '@vercel/analytics':
         specifier: ^2.0.1
         version: 2.0.1(next@16.2.1(@babel/core@7.29.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)
@@ -20,9 +23,6 @@ importers:
       react:
         specifier: 19.2.4
         version: 19.2.4
-      react-calendar-datetime:
-        specifier: ^5.2.2
-        version: 5.2.2(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       react-dom:
         specifier: 19.2.4
         version: 19.2.4(react@19.2.4)
@@ -124,6 +124,13 @@ packages:
   '@babel/types@7.29.0':
     resolution: {integrity: sha512-LwdZHpScM4Qz8Xw2iKSzS+cfglZzJGvofQICy7W7v4caru4EaAmyUuO6BGrbyQ2mYV11W0U8j5mBhd14dd3B0A==}
     engines: {node: '>=6.9.0'}
+
+  '@dateforge/react-calendar@1.0.0':
+    resolution: {integrity: sha512-WTgvyZ+ECqm0dOoCUN3Qj1wxf0fipSuciqWX1feQiIOMNZ4tewWnCSzgT3egFjsMZ9/xzJGffCY0Wjtg1pGpnA==}
+    engines: {node: '>=18.0.0'}
+    peerDependencies:
+      react: ^18.0.0 || ^19.0.0
+      react-dom: ^18.0.0 || ^19.0.0
 
   '@emnapi/core@1.9.1':
     resolution: {integrity: sha512-mukuNALVsoix/w1BJwFzwXBN/dHeejQtuVzcDsfOEsdpCumXb/E9j8w11h5S54tT1xhifGfbbSm/ICrObRb3KA==}
@@ -1706,13 +1713,6 @@ packages:
   queue-microtask@1.2.3:
     resolution: {integrity: sha512-NuaNSa6flKT5JaSYQzJok04JzTL1CA6aGhv5rfLW3PgqA+M2ChpZQnAC8h8i4ZFkBS8X5RqkDBHA7r4hej3K9A==}
 
-  react-calendar-datetime@5.2.2:
-    resolution: {integrity: sha512-MmUEvKHfA5xTRYaHmDgEI48uPynOxwEt9QbyfBfJNFw4Xr3V9pLgtBmauLXgyuVX1E/skECeSt2NJy9I1L8NYw==}
-    engines: {node: '>=18.0.0'}
-    peerDependencies:
-      react: ^18.0.0 || ^19.0.0
-      react-dom: ^18.0.0 || ^19.0.0
-
   react-dom@19.2.4:
     resolution: {integrity: sha512-AXJdLo8kgMbimY95O2aKQqsz2iWi9jMgKJhRBAxECE4IFxfcazB2LmzloIoibJI3C12IlY20+KFaLv+71bUJeQ==}
     peerDependencies:
@@ -2106,6 +2106,11 @@ snapshots:
     dependencies:
       '@babel/helper-string-parser': 7.27.1
       '@babel/helper-validator-identifier': 7.28.5
+
+  '@dateforge/react-calendar@1.0.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
+    dependencies:
+      react: 19.2.4
+      react-dom: 19.2.4(react@19.2.4)
 
   '@emnapi/core@1.9.1':
     dependencies:
@@ -3708,11 +3713,6 @@ snapshots:
   punycode@2.3.1: {}
 
   queue-microtask@1.2.3: {}
-
-  react-calendar-datetime@5.2.2(react-dom@19.2.4(react@19.2.4))(react@19.2.4):
-    dependencies:
-      react: 19.2.4
-      react-dom: 19.2.4(react@19.2.4)
 
   react-dom@19.2.4(react@19.2.4):
     dependencies:
