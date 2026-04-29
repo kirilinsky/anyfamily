@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import Link from "next/link";
 
 const NAV = [
   { id: "overview", label: "Overview" },
@@ -167,13 +168,13 @@ export function DocsClient() {
       >
         <div className="max-w-6xl mx-auto px-6 h-12 flex items-center justify-between gap-3">
           <div className="flex items-center gap-6 shrink-0">
-            <a
+            <Link
               href="/"
               style={{ color: "var(--text-muted)" }}
               className="font-mono text-sm hover:opacity-80 transition-opacity cursor-pointer"
             >
               ← anywhen
-            </a>
+            </Link>
             <span
               style={{ color: "var(--text-muted)" }}
               className="hidden sm:inline text-xs tracking-widest uppercase"
@@ -257,7 +258,7 @@ anyago(date,  'en')   // "3 hours ago"`}</Code>
             >
               <span>current stable:</span>
               <code style={{ color: "var(--emerald)" }} className="font-mono">
-                v0.1.5
+                v0.1.7
               </code>
               <a
                 href="https://github.com/kirilinsky/anywhen/tags"
@@ -361,7 +362,7 @@ anywhen(date, 'en', false)  // "yesterday"  — no clock`}</Code>
                       {when}
                     </span>
                     <span style={{ color: "var(--emerald)" }}>
-                      → "{result}"
+                      → &quot;{result}&quot;
                     </span>
                   </div>
                 ))}
@@ -453,7 +454,7 @@ anydate('2016-02-05', 'en')`}</Code>
 
           <Section id="locales" title="Locales">
             <p>
-              All output is in English in the examples above. Here's the same
+              All output is in English in the examples above. Here&apos;s the same
               calls in a few other languages — no extra setup required.
             </p>
             <Code>{`anydate(date, 'de')   // "5. Feb. 2016"

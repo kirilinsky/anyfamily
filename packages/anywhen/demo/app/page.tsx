@@ -72,7 +72,13 @@ export default function Home() {
   const [noClock, setNoClock] = useState(false);
   const [localeFocused, setFocused] = useState(false);
   const [calendarOpen, setCalendarOpen] = useState(false);
+  const [now, setNow] = useState(() => new Date());
   const calendarRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const id = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(id);
+  }, []);
 
   useEffect(() => {
     if (!calendarOpen) return;
@@ -89,28 +95,23 @@ export default function Home() {
   }, [calendarOpen]);
 
   const date = new Date(dateStr);
-  const valid = !isNaN(date.getTime()) && locale.length >= 2;
-  const result = valid
-    ? getResult(method, date, locale, numeric, noClock)
-    : null;
-
-  const typed = useTypewriter(result);
-  const done = typed === result && !!result;
-
-  const ms = date.getTime() - Date.now();
+  const ms = date.getTime() - now.getTime();
   const absDays = Math.abs(ms) / 86_400_000;
   const absS = Math.abs(ms) / 1000;
 
   const showNumeric = method === "anyago" && absS >= 79200 && absDays < 25;
   const showNoClock =
     method === "anywhen" && absS >= 3600 && absDays < 7 && ms < 0;
+  const effectiveNumeric = showNumeric && numeric;
+  const effectiveNoClock = showNoClock && noClock;
 
-  useEffect(() => {
-    if (!showNumeric) setNumeric(false);
-  }, [showNumeric]);
-  useEffect(() => {
-    if (!showNoClock) setNoClock(false);
-  }, [showNoClock]);
+  const valid = !isNaN(date.getTime()) && locale.length >= 2;
+  const result = valid
+    ? getResult(method, date, locale, effectiveNumeric, effectiveNoClock)
+    : null;
+
+  const typed = useTypewriter(result);
+  const done = typed === result && !!result;
 
   return (
     <main className="relative flex flex-col items-center justify-center min-h-screen bg-[#0a0a0a] overflow-hidden">
