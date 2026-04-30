@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   },
 
   description:
-    "~1.3kb gzip. Zero dependencies. anydate(), anywhen(), anyago() — relative, absolute, SSR-safe date formatting powered by native Intl.",
+    "~1.1kb gzip. Zero dependencies. One anywhen() function — smart, absolute, relative, SSR-safe date formatting powered by native Intl.",
 
   keywords: [
     "date formatting",
@@ -39,7 +39,7 @@ export const metadata: Metadata = {
     url: "https://anywhen-kappa.vercel.app",
     title: "anywhen — date formatting for any locale",
     description:
-      "~1.3kb gzip. Zero deps. Smart date & time, SSR-safe now, time zones, 200+ locales via native Intl.",
+      "~1.1kb gzip. Zero deps. Smart date & time, SSR-safe now, time zones, 200+ locales via native Intl.",
     siteName: "anywhen",
     images: [
       {
@@ -55,7 +55,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "anywhen — date formatting for any locale",
     description:
-      "~1.3kb gzip. Zero deps. SSR-safe now, time zones, 200+ locales via native Intl.",
+      "~1.1kb gzip. Zero deps. SSR-safe now, time zones, 200+ locales via native Intl.",
     images: ["/og.jpg"],
     creator: "@kirilinsky",
   },

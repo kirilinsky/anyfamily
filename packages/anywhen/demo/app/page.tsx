@@ -108,11 +108,11 @@ export default function Home() {
         }}
       />
 
-      <div className="relative z-20 flex w-full max-w-3xl flex-col items-center gap-10">
+      <div className="relative z-20 flex w-full max-w-3xl flex-col items-center gap-8">
         <Logo className="h-auto w-36 opacity-90" />
 
         <div className="relative w-fit max-w-full rounded-xl border border-white/[0.07] bg-black/30 px-4 py-3.5 font-mono">
-          <div className="flex min-h-9 flex-nowrap items-center gap-x-1 overflow-x-auto text-sm sm:text-base">
+          <div className="flex min-h-9 flex-wrap items-center justify-center gap-x-1 gap-y-1.5 text-sm sm:flex-nowrap sm:justify-start sm:text-base">
             <span className="shrink-0 text-amber-400">anywhen</span>
             <span className="shrink-0 text-white/30">(</span>
             <button
@@ -183,10 +183,10 @@ export default function Home() {
           )}
         </div>
 
-        <div className="flex min-h-20 w-full items-center justify-center">
+        <div className="flex min-h-24 w-full items-center justify-center">
           {typed ? (
             <p
-              className="text-center text-3xl tracking-tight text-white/85"
+              className="text-center text-4xl tracking-tight text-white/90 sm:text-5xl"
               style={{ fontFamily: "'Georgia', serif" }}
             >
               {typed}

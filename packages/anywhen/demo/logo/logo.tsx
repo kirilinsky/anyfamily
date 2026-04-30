@@ -26,8 +26,7 @@ export function Logo({ className }: { className?: string }) {
           }
           .caret {
             opacity: 0;
-            animation: fadeUp 0.4s cubic-bezier(0.22, 1, 0.36, 1) 0.25s forwards,
-                       blink 1.1s step-end 0.7s infinite;
+            animation: fadeUp 0.4s cubic-bezier(0.22, 1, 0.36, 1) 0.25s forwards;
           }
           .when {
             opacity: 0;
