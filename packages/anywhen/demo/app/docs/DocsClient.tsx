@@ -10,6 +10,7 @@ const NAV = [
   { id: "anywhen", label: "anywhen()" },
   { id: "anyago", label: "anyago()" },
   { id: "anywhere", label: "anywhere()" },
+  { id: "ssr", label: "SSR" },
   { id: "input-types", label: "Input types" },
   { id: "locales", label: "Locales" },
   { id: "compatibility", label: "Compatibility" },
@@ -232,7 +233,7 @@ export function DocsClient() {
           <Section id="overview" title="Overview">
             <p>
               <strong style={{ color: "var(--text-primary)" }}>anywhen</strong>{" "}
-              is a ~800b gzip date formatting library built entirely on the
+              is a ~1.3kb gzip date formatting library built entirely on the
               native{" "}
               <code style={{ color: "var(--emerald)" }} className="font-mono">
                 Intl
@@ -246,6 +247,10 @@ export function DocsClient() {
             </p>
             <Code>{`import { anydate, anywhen, anyago, anywhere } from 'anywhen'
 
+anydate(date)         // runtime locale
+anywhen(date)         // runtime locale
+anyago(date)          // runtime locale
+
 anydate(date, 'en')   // "Feb 5, 2016"
 anywhen(date, 'en')   // "yesterday, 2:35 PM"
 anyago(date,  'en')   // "3 hours ago"`}</Code>
@@ -258,7 +263,7 @@ anyago(date,  'en')   // "3 hours ago"`}</Code>
             >
               <span>current stable:</span>
               <code style={{ color: "var(--emerald)" }} className="font-mono">
-                v0.1.7
+                v0.2.0
               </code>
               <a
                 href="https://github.com/kirilinsky/anywhen/tags"
@@ -285,10 +290,18 @@ yarn add anywhen`}</Code>
               </code>{" "}
               options to control the format.
             </p>
-            <Code>{`anydate(input, locale, options?)
+            <Code>{`anydate(input)
+anydate(input, locale, options?)
+anydate(input, { locale?, ...Intl.DateTimeFormatOptions })
+
+anydate(date)
+// runtime locale
 
 anydate(date, 'en')
 // "Feb 5, 2016"
+
+anydate(date, { locale: 'en', weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })
+// "Friday, February 5, 2016"
 
 anydate(date, 'en', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })
 // "Friday, February 5, 2016"
@@ -306,8 +319,9 @@ anydate(date, 'en', { month: 'long', year: 'numeric' })
               />
               <Prop
                 name="locale"
-                type="string"
-                desc="Any valid BCP 47 locale tag — 'en', 'en-US', 'zh-TW', 'pt-BR'."
+                type="string | string[]"
+                def="runtime locale"
+                desc="Any valid BCP 47 locale tag, or a fallback array — 'en', 'en-US', 'zh-TW', ['sr-Latn-RS', 'en']."
               />
               <Prop
                 name="options"
@@ -323,8 +337,12 @@ anydate(date, 'en', { month: 'long', year: 'numeric' })
               Smart context picker. Chooses the most readable format based on
               distance from now — covers past and future.
             </p>
-            <Code>{`anywhen(input, locale, time?)
+            <Code>{`anywhen(input)
+anywhen(input, locale, time?)
+anywhen(input, time)
+anywhen(input, { locale?, now?, time?, timeZone? })
 
+anywhen(date)               // runtime locale
 anywhen(date, 'en')         // "just now"
 anywhen(date, 'en')         // "10 minutes ago"
 anywhen(date, 'en')         // "today, 2:35 PM"
@@ -333,7 +351,10 @@ anywhen(date, 'en')         // "Wednesday, 11:20 AM"
 anywhen(date, 'en')         // "Feb 5, 2016"
 anywhen(date, 'en')         // "in 2 weeks"
 
-anywhen(date, 'en', false)  // "yesterday"  — no clock`}</Code>
+anywhen(date, 'en', false)  // "yesterday"  — no clock
+anywhen(date, { locale: 'en', time: false })
+anywhen(date, { locale: 'en', now: requestTime })
+anywhen(date, { locale: 'en', timeZone: 'Europe/Belgrade' })`}</Code>
 
             <div
               style={{ borderColor: "var(--border)" }}
@@ -377,14 +398,27 @@ anywhen(date, 'en', false)  // "yesterday"  — no clock`}</Code>
               />
               <Prop
                 name="locale"
-                type="string"
-                desc="Any valid BCP 47 locale tag."
+                type="string | string[]"
+                def="runtime locale"
+                desc="Any valid BCP 47 locale tag, or a fallback array."
+              />
+              <Prop
+                name="now"
+                type="Date | number | string"
+                def="current time"
+                desc="Reference time for relative calculations. Pass this in SSR to keep server and client output stable."
               />
               <Prop
                 name="time"
                 type="boolean"
                 def="true"
                 desc="Whether to include clock time in today/yesterday/weekday output. Pass false to omit."
+              />
+              <Prop
+                name="timeZone"
+                type="string"
+                def="runtime timezone"
+                desc="IANA time zone for the displayed clock and smart day boundaries."
               />
             </div>
           </Section>
@@ -394,14 +428,20 @@ anywhen(date, 'en', false)  // "yesterday"  — no clock`}</Code>
               Always relative. Past and future. Never switches to an absolute
               date.
             </p>
-            <Code>{`anyago(input, locale, numeric?)
+            <Code>{`anyago(input)
+anyago(input, locale, numeric?)
+anyago(input, numeric)
+anyago(input, { locale?, now?, numeric? })
 
+anyago(date)                // runtime locale
 anyago(date, 'en')          // "3 hours ago"
 anyago(date, 'en')          // "yesterday"
 anyago(date, 'en')          // "in 2 weeks"
 
 anyago(date, 'en', true)    // "1 day ago"   — numeric mode, no "yesterday"
-anyago(date, 'en', true)    // "1 week ago"  — numeric mode, no "last week"`}</Code>
+anyago(date, 'en', true)    // "1 week ago"  — numeric mode, no "last week"
+anyago(date, { locale: 'en', numeric: true })
+anyago(date, { locale: 'en', now: requestTime })`}</Code>
             <div className="mt-4">
               <Prop
                 name="input"
@@ -410,8 +450,15 @@ anyago(date, 'en', true)    // "1 week ago"  — numeric mode, no "last week"`}<
               />
               <Prop
                 name="locale"
-                type="string"
-                desc="Any valid BCP 47 locale tag."
+                type="string | string[]"
+                def="runtime locale"
+                desc="Any valid BCP 47 locale tag, or a fallback array."
+              />
+              <Prop
+                name="now"
+                type="Date | number | string"
+                def="current time"
+                desc="Reference time for relative calculations. Pass this in SSR to keep server and client output stable."
               />
               <Prop
                 name="numeric"
@@ -434,22 +481,75 @@ const t = anywhere('en')
 t.anydate(date)                                         // "Feb 5, 2016"
 t.anywhen(date)                                         // "yesterday, 2:35 PM"
 t.anyago(date)                                          // "3 hours ago"
+t.anywhen(date, { time: false })                        // "yesterday"
+t.anyago(date, { numeric: true })                       // "3 hours ago"
+t.anywhen(date, { now: requestTime,
+                  timeZone: 'Europe/Belgrade' })        // SSR-safe
 t.anydate(date, { weekday: 'long', month: 'long',
                   day: 'numeric', year: 'numeric' })    // "Friday, February 5, 2016"`}</Code>
+            <p>
+              Call{" "}
+              <code style={{ color: "var(--emerald)" }} className="font-mono">
+                anywhere()
+              </code>{" "}
+              without a locale to keep the compact instance API while using the
+              runtime locale.
+            </p>
+          </Section>
+
+          <Section id="ssr" title="SSR">
+            <p>
+              By default,{" "}
+              <code style={{ color: "var(--emerald)" }} className="font-mono">
+                anywhen()
+              </code>{" "}
+              and{" "}
+              <code style={{ color: "var(--emerald)" }} className="font-mono">
+                anyago()
+              </code>{" "}
+              use the current time. In React SSR or Next.js, pass a stable{" "}
+              <code style={{ color: "var(--emerald)" }} className="font-mono">
+                now
+              </code>{" "}
+              value to avoid hydration drift.
+            </p>
+            <Code>{`import { anywhen } from 'anywhen'
+
+export function PostMeta({ createdAt, requestTime }: {
+  createdAt: string
+  requestTime: string
+}) {
+  return (
+    <time dateTime={createdAt}>
+      {anywhen(createdAt, {
+        locale: 'en',
+        now: requestTime,
+        timeZone: 'Europe/Belgrade',
+      })}
+    </time>
+  )
+}`}</Code>
+            <p>
+              <code style={{ color: "var(--emerald)" }} className="font-mono">
+                timeZone
+              </code>{" "}
+              controls both the displayed clock and the smart calendar
+              boundaries for today, yesterday, and weekday output.
+            </p>
           </Section>
 
           <Section id="input-types" title="Input types">
             <p>All functions accept three input formats interchangeably.</p>
             <Code>{`// Date object
-anydate(new Date(), 'en')
+anydate(new Date())
 
 // Unix timestamp (milliseconds)
-anydate(Date.now(), 'en')
-anydate(1704499200000, 'en')
+anydate(Date.now())
+anydate(1704499200000)
 
 // ISO string
-anydate('2016-02-05T14:00:00Z', 'en')
-anydate('2016-02-05', 'en')`}</Code>
+anydate('2016-02-05T14:00:00Z')
+anydate('2016-02-05')`}</Code>
           </Section>
 
           <Section id="locales" title="Locales">
@@ -495,6 +595,14 @@ anywhen(date, 'fr')   // "hier, 14:35"`}</Code>
               , or{" "}
               <code style={{ color: "var(--emerald)" }} className="font-mono">
                 pt-BR
+              </code>
+              . Locale is optional; when omitted, native{" "}
+              <code style={{ color: "var(--emerald)" }} className="font-mono">
+                Intl
+              </code>{" "}
+              uses the runtime locale. You can also pass a fallback array like{" "}
+              <code style={{ color: "var(--emerald)" }} className="font-mono">
+                [&apos;sr-Latn-RS&apos;, &apos;en&apos;]
               </code>
               .
             </p>

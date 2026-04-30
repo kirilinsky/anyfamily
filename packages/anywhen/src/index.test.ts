@@ -78,6 +78,19 @@ describe("anyago — numeric option", () => {
   it("numeric works in russian", () => {
     expect(anyago(NOW + 86_400_000, "ru", true)).toBe("через 1 день");
   });
+  it("supports options object", () => {
+    expect(anyago(NOW + 86_400_000, { locale: "en", numeric: true })).toBe(
+      "in 1 day",
+    );
+  });
+  it("supports shorthand boolean without locale", () => {
+    expect(() => anyago(NOW + 86_400_000, true)).not.toThrow();
+  });
+  it("uses explicit now from options", () => {
+    expect(anyago(NOW - 60_000, { locale: "en", now: NOW })).toBe(
+      "1 minute ago",
+    );
+  });
 });
 
 describe("anyago — input types", () => {
@@ -136,6 +149,15 @@ describe("anydate", () => {
   it("arabic runs without throwing", () => {
     expect(() => anydate(date, "ar")).not.toThrow();
   });
+  it("uses runtime locale when omitted", () => {
+    expect(anydate(date)).toMatch(/2016/);
+  });
+  it("supports options object with locale", () => {
+    expect(anydate(date, { locale: "en", year: "numeric" })).toBe("2016");
+  });
+  it("supports locale fallback arrays", () => {
+    expect(anydate(date, ["de-DE", "en"], { year: "numeric" })).toBe("2016");
+  });
 });
 
 describe("anywhen — mode switching", () => {
@@ -191,6 +213,9 @@ describe("anywhen — time option", () => {
       /\d{1,2}:\d{2}/,
     );
   });
+  it("time:false on same day keeps smart relative wording", () => {
+    expect(anywhen(NOW - 2 * 3_600_000, "en", false)).toBe("today");
+  });
   it("time:false on yesterday omits clock", () => {
     expect(anywhen(NOW - 24 * 3_600_000, "en", false)).not.toMatch(
       /\d{1,2}:\d{2}/,
@@ -200,6 +225,42 @@ describe("anywhen — time option", () => {
     expect(anywhen(NOW - 3 * 86_400_000, "en", false)).not.toMatch(
       /\d{1,2}:\d{2}/,
     );
+  });
+  it("supports shorthand boolean without locale", () => {
+    expect(() => anywhen(NOW - 2 * 3_600_000, false)).not.toThrow();
+  });
+  it("supports options object", () => {
+    expect(anywhen(NOW - 2 * 3_600_000, { locale: "en", time: false })).toBe(
+      "today",
+    );
+  });
+  it("uses explicit now from options", () => {
+    expect(
+      anywhen(NOW - 2 * 3_600_000, {
+        locale: "en",
+        now: NOW,
+        time: false,
+      }),
+    ).toBe("today");
+  });
+  it("uses timeZone for same-day boundaries", () => {
+    expect(
+      anywhen("2023-12-31T23:30:00.000Z", {
+        locale: "en",
+        now: "2024-01-01T00:30:00.000Z",
+        time: false,
+        timeZone: "Europe/Belgrade",
+      }),
+    ).toBe("today");
+  });
+  it("uses timeZone for the clock", () => {
+    expect(
+      anywhen("2024-01-01T12:00:00.000Z", {
+        locale: "en-US",
+        now: "2024-01-01T14:00:00.000Z",
+        timeZone: "Europe/Belgrade",
+      }),
+    ).toMatch(/today, 0?1:00/);
   });
 });
 
@@ -250,5 +311,25 @@ describe("anywhere", () => {
     expect(
       t.anydate(new Date("2016-02-05"), { month: "long", year: "numeric" }),
     ).toMatch(/February 2016/);
+  });
+  it("supports options objects through anywhere", () => {
+    const t = anywhere("en");
+    expect(t.anyago(NOW + 86_400_000, { numeric: true })).toBe("in 1 day");
+    expect(t.anywhen(NOW - 2 * 3_600_000, { time: false })).toBe("today");
+  });
+  it("passes now and timeZone through anywhere", () => {
+    const t = anywhere("en");
+    expect(t.anyago(NOW - 60_000, { now: NOW })).toBe("1 minute ago");
+    expect(
+      t.anywhen("2023-12-31T23:30:00.000Z", {
+        now: "2024-01-01T00:30:00.000Z",
+        time: false,
+        timeZone: "Europe/Belgrade",
+      }),
+    ).toBe("today");
+  });
+  it("can use the runtime locale when not bound", () => {
+    const t = anywhere();
+    expect(() => t.anydate(new Date("2016-02-05"))).not.toThrow();
   });
 });

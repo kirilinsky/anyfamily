@@ -1,36 +1,55 @@
 {
     "name": "anywhen",
-    "version": "0.1.7",
-    "description": "Lightweight human date formatting for any locale. Zero deps, native Intl.",
+    "version": "0.2.0",
+    "description": "Tiny smart date formatter for relative, absolute, and contextual time in any Intl locale.",
     "type": "module",
     "main": "./dist/index.cjs",
     "module": "./dist/index.mjs",
     "types": "./dist/index.d.ts",
     "exports": {
         ".": {
-            "types": "./dist/index.d.ts",
-            "import": "./dist/index.mjs",
-            "require": "./dist/index.cjs"
+            "import": {
+                "types": "./dist/index.d.ts",
+                "default": "./dist/index.mjs"
+            },
+            "require": {
+                "types": "./dist/index.d.cts",
+                "default": "./dist/index.cjs"
+            }
         }
     },
     "files": [
         "dist"
     ],
     "scripts": {
-        "build": "tsdown",
+        "build": "tsdown && node scripts/cjs-types.mjs",
+        "lint": "oxlint src",
+        "publint": "publint",
         "test": "vitest run",
         "test:coverage": "npx vitest run --coverage",
         "typecheck": "tsc --noEmit",
         "release": "npm version patch && git push --follow-tags"
     },
     "keywords": [
-        "intl",
         "date",
+        "datetime",
         "time",
+        "relative-time",
+        "date-formatting",
+        "human-readable",
+        "ssr",
+        "nextjs",
         "i18n",
+        "l10n",
+        "localization",
+        "intl",
+        "intl-datetimeformat",
+        "intl-relative-time-format",
         "relative",
         "format",
+        "formatter",
         "lightweight",
+        "zero-dependency",
         "when",
         "ago"
     ],
@@ -38,6 +57,8 @@
     "devDependencies": {
         "@types/node": "^22.19.15",
         "@vitest/coverage-v8": "^3.2.4",
+        "oxlint": "^1.62.0",
+        "publint": "^0.3.18",
         "tsdown": "^0.21.4",
         "typescript": "^5.9.3",
         "vitest": "^3.2.4"

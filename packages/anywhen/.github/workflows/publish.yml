@@ -6,6 +6,7 @@ on:
       - "v*"
 
 permissions:
+  contents: write
   id-token: write
 
 jobs:
@@ -31,3 +32,17 @@ jobs:
       - run: pnpm publish --no-git-checks --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          VERSION="${TAG#v}"
+          NOTES="$(awk "/^## ${VERSION}$/{flag=1; next} /^## /{flag=0} flag" CHANGELOG.md)"
+
+          if [ -n "$NOTES" ]; then
+            gh release create "$TAG" --title "$TAG" --notes "$NOTES"
+          else
+            gh release create "$TAG" --title "$TAG" --generate-notes
+          fi
