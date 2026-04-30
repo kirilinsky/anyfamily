@@ -1,80 +1,91 @@
 # Changelog
 
-## 0.2.0
+## 0.3.0
 
 ### Breaking changes
 
-- `anywhen(input, locale, false)` now removes only the clock from same-day
-  output. For same-day dates it returns the smart relative word, such as
-  `"today"`, instead of a short absolute date like `"Feb 5"`.
+- Replaced the multi-function API with one function and three modes.
 
   ```ts
-  // 0.1.x
-  anywhen(todayAtNoon, "en", false); // "Feb 5"
+  // before
+  anydate(date, "en");
+  anywhen(date, "en");
+  anyago(date, "en");
 
-  // 0.2.0
-  anywhen(todayAtNoon, "en", false); // "today"
+  // now
+  anywhen(date, { mode: "absolute", locale: "en" });
+  anywhen(date, { locale: "en" }); // smart mode by default
+  anywhen(date, { mode: "relative", locale: "en" });
   ```
 
-  This matches the documented meaning of `time: false`: no clock, not no smart
-  context. If you need the old same-day absolute date, call `anydate()` directly:
+- Removed `anydate()`, `anyago()`, and `anywhere()` exports. Use
+  `anywhen(input, { mode })` instead.
+
+- Replaced positional locale/boolean arguments with a single options object.
 
   ```ts
-  anydate(todayAtNoon, "en", { day: "numeric", month: "short" });
+  // before
+  anywhen(date, "en", false);
+
+  // now
+  anywhen(date, { locale: "en", time: false });
   ```
+
+- Renamed exported locale/options types around the new API:
+  `Locale`, `Mode`, and `AnywhenOptions` are now the public option types.
 
 ### Added
 
-- `locale` is now optional for `anydate()`, `anywhen()`, `anyago()`, and
-  `anywhere()`. When omitted, native `Intl` uses the runtime locale.
+- Added `mode`:
 
   ```ts
-  anydate(date);
-  anywhen(date);
-  anyago(date);
+  anywhen(date); // smart
+  anywhen(date, { mode: "absolute" });
+  anywhen(date, { mode: "relative" });
   ```
 
-- Added object options for clearer call sites:
+- Added `format` for absolute mode. It accepts any
+  `Intl.DateTimeFormatOptions`.
 
   ```ts
-  anydate(date, { locale: "en", weekday: "long", month: "long", day: "numeric" });
-  anywhen(date, { locale: "en", time: false });
-  anyago(date, { locale: "en", numeric: true });
+  anywhen(date, {
+    mode: "absolute",
+    locale: "en",
+    format: { weekday: "long", month: "long", day: "numeric" },
+  });
   ```
 
-- Added explicit `now` for SSR-safe relative formatting:
+- Added explicit `now` for SSR-safe smart and relative formatting.
 
   ```ts
   anywhen(date, { now: requestTime });
-  anyago(date, { now: requestTime });
+  anywhen(date, { mode: "relative", now: requestTime });
   ```
 
-- Added `timeZone` for `anywhen()`. It controls the displayed clock and the
-  smart day boundaries used for today, yesterday, and weekday output.
+- Added `timeZone` for smart and absolute mode. In smart mode it controls both
+  the displayed clock and the calendar boundaries for today, yesterday, and
+  weekday output.
 
   ```ts
   anywhen(date, { locale: "en", timeZone: "Europe/Belgrade" });
   ```
 
-- Added a dedicated SSR Ready GitHub Actions workflow and badge.
-
-- Added shorthand boolean calls when using the runtime locale:
+- Added locale fallback arrays.
 
   ```ts
-  anywhen(date, false);
-  anyago(date, true);
+  anywhen(date, { locale: ["sr-Latn-RS", "en"] });
   ```
 
-- Added locale fallback arrays:
-
-  ```ts
-  anydate(date, ["sr-Latn-RS", "en"]);
-  ```
-
-- Exported `DateInput`, `LocaleInput`, `AnydateOptions`, `AnywhenOptions`, and
-  `AnyagoOptions` TypeScript types.
+- Added dedicated `SSR Ready` GitHub Actions workflow and badge.
 
 ### Fixed
 
-- Formatter cache keys now include separators and stable locale-array handling,
-  avoiding theoretical key collisions between locale and option values.
+- `time: false` in smart mode now removes only the clock. Same-day output stays
+  smart and returns words like `"today"` instead of falling back to a short
+  absolute date.
+
+- Package exports now include separate ESM and CJS declaration conditions, so
+  `publint` passes without warnings.
+
+- Formatter cache keys now separate locale, numeric mode, and format options to
+  avoid theoretical key collisions.

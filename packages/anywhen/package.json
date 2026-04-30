@@ -1,7 +1,7 @@
 {
     "name": "anywhen",
-    "version": "0.2.0",
-    "description": "Tiny smart date formatter for relative, absolute, and contextual time in any Intl locale.",
+    "version": "0.3.0",
+    "description": "Tiny smart date formatter — one function, three modes (smart, absolute, relative), any Intl locale.",
     "type": "module",
     "main": "./dist/index.cjs",
     "module": "./dist/index.mjs",

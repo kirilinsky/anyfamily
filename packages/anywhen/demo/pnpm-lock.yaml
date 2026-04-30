@@ -9,14 +9,14 @@ importers:
   .:
     dependencies:
       '@dateforge/react-calendar':
-        specifier: ^1.1.0
-        version: 1.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+        specifier: ^1.2.0
+        version: 1.2.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       '@vercel/analytics':
         specifier: ^2.0.1
         version: 2.0.1(next@16.2.1(@babel/core@7.29.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)
       anywhen:
-        specifier: ^0.1.7
-        version: 0.1.7
+        specifier: file:..
+        version: file:..
       next:
         specifier: 16.2.1
         version: 16.2.1(@babel/core@7.29.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -125,8 +125,8 @@ packages:
     resolution: {integrity: sha512-LwdZHpScM4Qz8Xw2iKSzS+cfglZzJGvofQICy7W7v4caru4EaAmyUuO6BGrbyQ2mYV11W0U8j5mBhd14dd3B0A==}
     engines: {node: '>=6.9.0'}
 
-  '@dateforge/react-calendar@1.1.0':
-    resolution: {integrity: sha512-8YlWy7nMmtY3VQriCgc0ImjIeK3yRfrwOJsYai9NgFbTi84Y2Ii7qiBRePfIMAO6JvepLLMOTxoEnQ9XJTFeNg==}
+  '@dateforge/react-calendar@1.2.0':
+    resolution: {integrity: sha512-+j7AVj8EjOjvqUgDq2BCix3cx1lbzSJ8+h0MQpvw19oGxngxYuadwJtkMY0YdGXQ02k9zvEQMJmmv/YPBSwE9Q==}
     engines: {node: '>=20.12.0'}
     peerDependencies:
       react: ^18.0.0 || ^19.0.0
@@ -770,8 +770,8 @@ packages:
     resolution: {integrity: sha512-zbB9rCJAT1rbjiVDb2hqKFHNYLxgtk8NURxZ3IZwD3F6NtxbXZQCnnSi1Lkx+IDohdPlFp222wVALIheZJQSEg==}
     engines: {node: '>=8'}
 
-  anywhen@0.1.7:
-    resolution: {integrity: sha512-3C1PsF5KczShq0scD31PewYlYPypwYBB4cjY+QYihijF16Jfb/ZRMeulU7xkhMtUh7FHXtGne5CDBfBXJaKVTg==}
+  anywhen@file:..:
+    resolution: {directory: .., type: directory}
 
   argparse@2.0.1:
     resolution: {integrity: sha512-8+9WqebbFzpX9OR+Wa6O29asIogeRMzcGtAINdpMHHyAg10f05aSFVBbcEqGf/PXw1EjAZ+q2/bEBg3DvurK3Q==}
@@ -2107,7 +2107,7 @@ snapshots:
       '@babel/helper-string-parser': 7.27.1
       '@babel/helper-validator-identifier': 7.28.5
 
-  '@dateforge/react-calendar@1.1.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
+  '@dateforge/react-calendar@1.2.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
     dependencies:
       react: 19.2.4
       react-dom: 19.2.4(react@19.2.4)
@@ -2622,7 +2622,7 @@ snapshots:
     dependencies:
       color-convert: 2.0.1
 
-  anywhen@0.1.7: {}
+  anywhen@file:..: {}
 
   argparse@2.0.1: {}
 

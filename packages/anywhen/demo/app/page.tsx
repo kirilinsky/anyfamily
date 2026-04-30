@@ -1,47 +1,37 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { anydate, anywhen, anyago } from "anywhen";
-import { Logo } from "@/logo/logo";
-import Link from "next/link";
-import { CalendarDays, CalendarNav } from "@dateforge/react-calendar/modules";
+import { useEffect, useRef, useState } from "react";
+import { anywhen } from "anywhen";
 import { Calendar } from "@dateforge/react-calendar";
+import { CalendarDays, CalendarNav } from "@dateforge/react-calendar/modules";
+import Link from "next/link";
+import { Logo } from "@/logo/logo";
 
-type Method = "anydate" | "anywhen" | "anyago";
+type Mode = "smart" | "absolute" | "relative";
 
-const LOCALES = ["en", "ru", "de", "fr", "ja", "ar", "sr", "zh", "es", "it"];
-const MAX_LOCALE_LENGTH = 50;
+const LOCALES = ["en", "en-GB", "ru", "de", "fr", "ja", "sr-Latn-RS"];
 
-const METHOD_DESC: Record<Method, string> = {
-  anydate: "always absolute — what date exactly",
-  anywhen:
-    "smart context — relative when recent, absolute when old, future when ahead",
-  anyago: "always relative — how long ago or how far ahead",
+const MODE_HINTS: Record<Mode, string> = {
+  smart: "context-aware — relative if near, absolute if far",
+  absolute: "locale-aware date formatting",
+  relative: "human-readable relative time",
 };
 
-function getResult(
-  method: Method,
-  date: Date,
-  locale: string,
-  numeric: boolean,
-  noClock: boolean,
-): string {
-  try {
-    if (method === "anydate") return anydate(date, locale);
-    if (method === "anywhen") return anywhen(date, locale, !noClock);
-    if (method === "anyago") return anyago(date, locale, numeric);
-    return "";
-  } catch {
-    return "invalid locale";
-  }
+function localValue(date: Date) {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
 
-function useTypewriter(text: string | null, speed = 38) {
+function q(value: string) {
+  return JSON.stringify(value);
+}
+
+function useTypewriter(text: string | null) {
   const [displayed, setDisplayed] = useState("");
   const prev = useRef<string | null>(null);
 
   useEffect(() => {
-    if (text === null) {
+    if (!text) {
       setDisplayed("");
       prev.current = null;
       return;
@@ -51,71 +41,64 @@ function useTypewriter(text: string | null, speed = 38) {
     setDisplayed("");
     let i = 0;
     const id = setInterval(() => {
-      i++;
+      i += 1;
       setDisplayed(text.slice(0, i));
       if (i >= text.length) clearInterval(id);
-    }, speed);
+    }, 28);
     return () => clearInterval(id);
-  }, [text, speed]);
+  }, [text]);
 
   return displayed;
 }
 
 export default function Home() {
-  const [method, setMethod] = useState<Method>("anywhen");
-  const [dateStr, setDateStr] = useState(() => {
-    const d = new Date();
-    const pad = (n: number) => String(n).padStart(2, "0");
-    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
-  });
+  const [mode, setMode] = useState<Mode>("smart");
+  const [dateStr, setDateStr] = useState(() => localValue(new Date()));
   const [locale, setLocale] = useState("en");
-  const [numeric, setNumeric] = useState(false);
-  const [noClock, setNoClock] = useState(false);
-  const [localeFocused, setFocused] = useState(false);
   const [calendarOpen, setCalendarOpen] = useState(false);
-  const [now, setNow] = useState(() => new Date());
-  const calendarRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const id = setInterval(() => setNow(new Date()), 1000);
-    return () => clearInterval(id);
-  }, []);
+  const dateBtnRef = useRef<HTMLButtonElement>(null);
+  const dateCalRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!calendarOpen) return;
-    const handler = (e: MouseEvent) => {
+    const close = (event: MouseEvent) => {
+      const target = event.target as Node;
       if (
-        calendarRef.current &&
-        !calendarRef.current.contains(e.target as Node)
+        !dateBtnRef.current?.contains(target) &&
+        !dateCalRef.current?.contains(target)
       ) {
         setCalendarOpen(false);
       }
     };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
+    document.addEventListener("mousedown", close);
+    return () => document.removeEventListener("mousedown", close);
   }, [calendarOpen]);
 
   const date = new Date(dateStr);
-  const ms = date.getTime() - now.getTime();
-  const absDays = Math.abs(ms) / 86_400_000;
-  const absS = Math.abs(ms) / 1000;
 
-  const showNumeric = method === "anyago" && absS >= 79200 && absDays < 25;
-  const showNoClock =
-    method === "anywhen" && absS >= 3600 && absDays < 7 && ms < 0;
-  const effectiveNumeric = showNumeric && numeric;
-  const effectiveNoClock = showNoClock && noClock;
+  const calendarLocale = (() => {
+    try {
+      new Intl.DateTimeFormat(locale);
+      return locale;
+    } catch {
+      return "en";
+    }
+  })();
 
-  const valid = !isNaN(date.getTime()) && locale.length >= 2;
-  const result = valid
-    ? getResult(method, date, locale, effectiveNumeric, effectiveNoClock)
-    : null;
+  const result = (() => {
+    if (Number.isNaN(date.getTime())) return null;
+    try {
+      return anywhen(dateStr, { mode, locale });
+    } catch {
+      return null;
+    }
+  })();
 
   const typed = useTypewriter(result);
   const done = typed === result && !!result;
 
   return (
-    <main className="relative flex flex-col items-center justify-center min-h-screen bg-[#0a0a0a] overflow-hidden">
+    <main className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-[#0a0a0a] px-4 py-20">
       <div
         className="pointer-events-none fixed inset-0 z-10 opacity-[0.035]"
         style={{
@@ -125,194 +108,125 @@ export default function Home() {
         }}
       />
 
-      <div className="pointer-events-none fixed inset-0 z-0">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-white/[0.015] blur-[120px]" />
-      </div>
+      <div className="relative z-20 flex w-full max-w-3xl flex-col items-center gap-10">
+        <Logo className="h-auto w-36 opacity-90" />
 
-      <div
-        ref={calendarRef}
-        className="relative z-20 flex flex-col items-center gap-6 w-full max-w-3xl px-4"
-      >
-        <Logo className="w-48 h-auto -mb-2" />
-
-        <div className="  w-full rounded-2xl border border-white/[0.08] bg-white/[0.03] backdrop-blur-sm p-5 shadow-[0_0_0_1px_rgba(255,255,255,0.03),0_32px_64px_-12px_rgba(0,0,0,0.8)]">
-          <div className="flex items-center justify-center flex-wrap gap-1 font-mono text-base">
-            <div className="relative group">
-              <select
-                value={method}
-                onChange={(e) => {
-                  setMethod(e.target.value as Method);
-                  setNumeric(false);
-                  setNoClock(false);
-                }}
-                className="appearance-none bg-transparent text-amber-400 font-mono text-base pr-5 cursor-pointer outline-none rounded-md px-2 py-1 hover:bg-white/[0.06] transition-colors border border-transparent hover:border-white/[0.1]"
-              >
-                <option value="anywhen">anywhen</option>
-                <option value="anydate">anydate</option>
-                <option value="anyago">anyago</option>
-              </select>
-              <span className="pointer-events-none absolute right-1 top-1/2 -translate-y-1/2 text-amber-400/40 text-[10px]">
-                ▾
-              </span>
-            </div>
-
-            <span className="text-white/30">(</span>
-
+        <div className="relative w-fit max-w-full rounded-xl border border-white/[0.07] bg-black/30 px-4 py-3.5 font-mono">
+          <div className="flex min-h-9 flex-nowrap items-center gap-x-1 overflow-x-auto text-sm sm:text-base">
+            <span className="shrink-0 text-amber-400">anywhen</span>
+            <span className="shrink-0 text-white/30">(</span>
             <button
-              onClick={() => setCalendarOpen((o) => !o)}
-              className={`bg-transparent text-sky-300 font-mono text-base outline-none cursor-pointer rounded-md px-2 py-1 transition-colors border ${calendarOpen ? "bg-white/[0.06] border-white/[0.15]" : "border-transparent hover:bg-white/[0.06] hover:border-white/[0.1]"}`}
+              ref={dateBtnRef}
+              type="button"
+              onClick={() => setCalendarOpen((v) => !v)}
+              className="flex h-8 min-w-0 shrink items-center rounded-md border border-transparent px-1.5 text-left text-sky-300 transition-colors hover:border-white/10 hover:bg-white/[0.05]"
             >
-              {date && !isNaN(date.getTime())
-                ? date.toLocaleString(locale || "en", {
-                    month: "short",
-                    day: "numeric",
-                    year: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })
-                : "pick date"}
+              <span className="block truncate">{q(dateStr)}</span>
             </button>
-            {calendarOpen && (
-              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-50 shadow-2xl rounded-xl overflow-hidden">
-                <Calendar
-                  locale={locale || "en"}
-                  width="296px"
-                  value={date}
-                  theme={"dark"}
-                  onChange={(d) => {
-                    if (d) {
-                      const pad = (n: number) => String(n).padStart(2, "0");
-                      setDateStr(
-                        `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`,
-                      );
-                    }
-                  }}
-                >
-                  <CalendarNav home showMonthPicker showTime compactYears />
-                  <CalendarDays />
-                </Calendar>
-              </div>
-            )}
-
-            <span className="text-white/30">,</span>
-
-            <div className="relative">
-              <input
-                type="text"
-                value={locale}
-                onChange={(e) =>
-                  setLocale(e.target.value.slice(0, MAX_LOCALE_LENGTH))
-                }
-                onFocus={() => setFocused(true)}
-                onBlur={() => setTimeout(() => setFocused(false), 150)}
-                placeholder="en"
-                className="bg-transparent text-emerald-400 font-mono text-base outline-none w-[16ch] max-w-[50vw] placeholder-white/20 rounded-md px-2 py-1 hover:bg-white/[0.06] transition-colors border border-transparent hover:border-white/[0.1] focus:border-white/[0.15] focus:bg-white/[0.06]"
-              />
-              {localeFocused && (
-                <div className="absolute top-full left-0 mt-2 flex flex-wrap gap-1 bg-[#141414] border border-white/[0.08] rounded-xl p-2 z-30 min-w-[200px] shadow-2xl">
-                  {LOCALES.map((l) => (
-                    <button
-                      key={l}
-                      onClick={() => setLocale(l)}
-                      className="px-2 py-0.5 rounded-md text-xs font-mono text-white/40 hover:text-white/80 hover:bg-white/[0.06] transition-colors"
-                    >
-                      {l}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {showNumeric && (
-              <>
-                <span className="text-white/30">,</span>
-                <button
-                  onClick={() => setNumeric((n) => !n)}
-                  className={`font-mono cursor-pointer text-base rounded-md px-2 py-1 border transition-colors ${numeric ? "text-violet-400 border-violet-400/30 bg-violet-400/10" : "text-white/25 border-transparent hover:border-white/[0.1] hover:bg-white/[0.06] hover:text-white/50"}`}
-                >
-                  {numeric ? "numeric" : "no numeric"}
-                </button>
-              </>
-            )}
-
-            {showNoClock && (
-              <>
-                <span className="text-white/30">,</span>
-                <button
-                  onClick={() => setNoClock((n) => !n)}
-                  className={`font-mono cursor-pointer text-base rounded-md px-2 py-1 border transition-colors ${noClock ? "text-rose-400 border-rose-400/30 bg-rose-400/10" : "text-white/25 border-transparent hover:border-white/[0.1] hover:bg-white/[0.06] hover:text-white/50"}`}
-                >
-                  {noClock ? "no clock" : "clock"}
-                </button>
-              </>
-            )}
-
-            <span className="text-white/30">)</span>
-          </div>
-
-          <div className="mt-3 flex justify-center">
-            <p
-              className="text-white/20 text-xs tracking-wide transition-all duration-300"
-              style={{ fontFamily: "'Georgia', serif", fontStyle: "italic" }}
+            <span className="shrink-0 text-white/30">, {"{"}</span>
+            <span className="shrink-0 text-white/55">mode:</span>
+            <select
+              value={mode}
+              onChange={(e) => setMode(e.target.value as Mode)}
+              style={{
+                backgroundImage:
+                  "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath fill='none' stroke='%23c4b5fd' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' d='M1.5 1.5l4.5 4.5 4.5-4.5'/%3E%3C/svg%3E\")",
+                backgroundPosition: "right 0.5rem center",
+                backgroundRepeat: "no-repeat",
+                backgroundSize: "0.6rem",
+              }}
+              className="h-8 shrink-0 cursor-pointer appearance-none rounded-md border border-violet-300/30 bg-violet-300/[0.06] pl-2 pr-6 font-mono text-violet-300 outline-none transition-colors hover:border-violet-300/60 hover:bg-violet-300/[0.12]"
             >
-              {METHOD_DESC[method]}
-            </p>
+              <option value="smart">&quot;smart&quot;</option>
+              <option value="absolute">&quot;absolute&quot;</option>
+              <option value="relative">&quot;relative&quot;</option>
+            </select>
+            <span className="shrink-0 text-white/30">,</span>
+            <span className="shrink-0 text-white/55">locale:</span>
+            <select
+              value={locale}
+              onChange={(e) => setLocale(e.target.value)}
+              style={{ width: `calc(${locale.length + 2}ch + 0.75rem)` }}
+              className="h-8 shrink-0 cursor-pointer appearance-none rounded-md border border-transparent bg-transparent px-1.5 font-mono text-emerald-300 outline-none hover:border-white/10 hover:bg-white/[0.05]"
+            >
+              {LOCALES.map((l) => (
+                <option key={l} value={l}>
+                  &quot;{l}&quot;
+                </option>
+              ))}
+            </select>
+            <span className="shrink-0 text-white/30">{"})"}</span>
           </div>
 
-          <div className="mt-3 pt-4 border-t border-white/[0.06] min-h-[3.5rem] flex items-center justify-center">
-            {typed ? (
-              <p
-                className="text-white/85 text-2xl tracking-tight text-center"
-                style={{ fontFamily: "'Georgia', serif" }}
+          <p className="mt-2 text-center font-sans text-xs italic text-white/35">
+            {MODE_HINTS[mode]}
+          </p>
+
+          {calendarOpen && (
+            <div
+              ref={dateCalRef}
+              className="absolute bottom-full left-1/2 z-50 mb-2 -translate-x-1/2 overflow-hidden rounded-xl shadow-2xl"
+            >
+              <Calendar
+                locale={calendarLocale}
+                width="296px"
+                value={Number.isNaN(date.getTime()) ? undefined : date}
+                theme="dark"
+                onChange={(value) => {
+                  if (value) setDateStr(localValue(value));
+                }}
               >
-                {typed}
-                <span
-                  className="inline-block w-[2px] h-[1.2em] bg-white/60 ml-[2px] align-middle"
-                  style={{
-                    animation: done ? "blink 1s step-end infinite" : "none",
-                    opacity: done ? undefined : 1,
-                  }}
-                />
-                <style>{`@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }`}</style>
-              </p>
-            ) : (
-              <p
-                className="text-white/15 text-sm italic text-center"
-                style={{ fontFamily: "'Georgia', serif" }}
-              >
-                result
-              </p>
-            )}
-          </div>
+                <CalendarNav home showMonthPicker showTime compactYears />
+                <CalendarDays />
+              </Calendar>
+            </div>
+          )}
+        </div>
+
+        <div className="flex min-h-20 w-full items-center justify-center">
+          {typed ? (
+            <p
+              className="text-center text-3xl tracking-tight text-white/85"
+              style={{ fontFamily: "'Georgia', serif" }}
+            >
+              {typed}
+              <span
+                className="ml-[2px] inline-block h-[1.2em] w-[2px] align-middle bg-white/60"
+                style={{
+                  animation: done ? "blink 1s step-end infinite" : "none",
+                  opacity: done ? undefined : 1,
+                }}
+              />
+              <style>{`@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }`}</style>
+            </p>
+          ) : (
+            <p className="font-serif text-sm italic text-white/15">result</p>
+          )}
         </div>
       </div>
 
       <footer className="fixed bottom-0 left-0 right-0 z-20 border-t border-white/[0.05] bg-[#0a0a0a]/80 backdrop-blur-sm">
-        <div className="max-w-2xl mx-auto px-6 h-12 flex items-center justify-between">
-          <div className="flex items-center gap-1">
+        <div className="mx-auto flex h-12 max-w-2xl items-center px-6">
+          {[
+            ["github", "https://github.com/kirilinsky/anywhen"],
+            ["npm", "https://www.npmjs.com/package/anywhen"],
+          ].map(([label, href]) => (
             <a
-              href="https://github.com/kirilinsky/anywhen"
+              key={label}
+              href={href}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-white/25 hover:text-white/60 text-xs tracking-widest uppercase transition-colors duration-300 px-3 py-3"
+              className="px-3 py-3 text-xs uppercase tracking-widest text-white/25 transition-colors hover:text-white/60"
             >
-              github
+              {label}
             </a>
-            <a
-              href="https://www.npmjs.com/package/anywhen"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-white/25 hover:text-white/60 text-xs tracking-widest uppercase transition-colors duration-300 px-3 py-3"
-            >
-              npm
-            </a>
-            <Link
-              className="text-white/25 hover:text-white/60 text-xs tracking-widest uppercase transition-colors duration-300 px-3 py-3"
-              href={"/docs"}
-            >
-              docs
-            </Link>
-          </div>
+          ))}
+          <Link
+            href="/docs"
+            className="px-3 py-3 text-xs uppercase tracking-widest text-white/25 transition-colors hover:text-white/60"
+          >
+            docs
+          </Link>
         </div>
       </footer>
     </main>

@@ -1,80 +1,87 @@
 export function Logo({ className }: { className?: string }) {
   return (
     <svg
-      viewBox="0 0 470 250"
+      viewBox="0 0 480 130"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
       aria-label="anywhen"
     >
       <defs>
         <style>{`
-          @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@1,800&family=Barlow:wght@700&display=swap');
+          @import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,800;1,400&family=JetBrains+Mono:wght@700&display=swap');
 
-          @keyframes fadeInRight {
-            from { opacity: 0; transform: translateX(18px); }
-            to   { opacity: 1; transform: translateX(0); }
+          @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(8px); }
+            to   { opacity: 1; transform: translateY(0); }
+          }
+          @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50%      { opacity: 0; }
           }
 
-          .word {
+          .any {
             opacity: 0;
-            animation: fadeInRight 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+            transform-box: fill-box;
+            animation: fadeUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.05s forwards;
           }
-          .w1 { animation-delay: 0.1s; }
-          .w2 { animation-delay: 0.25s; }
-          .w3 { animation-delay: 0.4s; }
+          .caret {
+            opacity: 0;
+            animation: fadeUp 0.4s cubic-bezier(0.22, 1, 0.36, 1) 0.25s forwards,
+                       blink 1.1s step-end 0.7s infinite;
+          }
+          .when {
+            opacity: 0;
+            transform-box: fill-box;
+            animation: fadeUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.4s forwards;
+          }
+          .accent {
+            opacity: 0;
+            transform-box: fill-box;
+            transform-origin: left center;
+            animation: fadeUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.6s forwards;
+          }
         `}</style>
       </defs>
-      <text
-        x="0"
-        y="196"
-        fontFamily="'Barlow Condensed', sans-serif"
-        fontWeight="800"
-        fontStyle="italic"
-        fontSize="200"
-        fill="#c7e8ff"
-        letterSpacing="-8"
-      >
-        ANY
-      </text>
 
       <text
-        x="285"
-        y="75"
-        fontFamily="'Barlow', sans-serif"
+        x="10"
+        y="92"
+        fontFamily="'Inter', sans-serif"
+        fontWeight="400"
+        fontStyle="italic"
+        fontSize="100"
+        fill="#e9e4d4"
+        textLength="180"
+        lengthAdjust="spacingAndGlyphs"
+        className="any"
+      >
+        any
+      </text>
+
+      <rect
+        x="208"
+        y="32"
+        width="4"
+        height="60"
+        rx="1"
+        fill="#f5b66b"
+        className="caret"
+      />
+
+      <text
+        x="230"
+        y="92"
+        fontFamily="'JetBrains Mono', monospace"
         fontWeight="700"
-        fontSize="81"
-        fill="#4fffb0"
-        letterSpacing="-2"
-        className="word w1"
+        fontSize="100"
+        fill="#f5b66b"
+        textLength="240"
+        lengthAdjust="spacingAndGlyphs"
+        className="when"
       >
         when
       </text>
 
-      <text
-        x="260"
-        y="155"
-        fontFamily="'Barlow', sans-serif"
-        fontWeight="700"
-        fontSize="81"
-        fill="#4fffb0"
-        letterSpacing="-2"
-        className="word w2"
-      >
-        date
-      </text>
-
-      <text
-        x="250"
-        y="230"
-        fontFamily="'Barlow', sans-serif"
-        fontWeight="700"
-        fontSize="81"
-        fill="#4fffb0"
-        letterSpacing="-2"
-        className="word w3"
-      >
-        ago
-      </text>
     </svg>
   );
 }

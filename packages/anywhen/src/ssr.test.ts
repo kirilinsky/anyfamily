@@ -1,12 +1,12 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { anyago, anywhen } from "./index";
+import { anywhen } from "./index";
 
 afterEach(() => {
   vi.useRealTimers();
 });
 
 describe("SSR-safe formatting", () => {
-  it("keeps anywhen stable when render time is passed explicitly", () => {
+  it("keeps smart mode stable when render time is passed explicitly", () => {
     const renderNow = new Date("2024-01-01T12:00:00.000Z");
     const input = new Date("2024-01-01T11:59:30.000Z");
 
@@ -20,22 +20,22 @@ describe("SSR-safe formatting", () => {
     expect(anywhen(input, { locale: "en", now: renderNow })).toBe("now");
   });
 
-  it("keeps anyago stable when render time is passed explicitly", () => {
+  it("keeps relative mode stable when render time is passed explicitly", () => {
     const renderNow = new Date("2024-01-01T12:00:00.000Z");
     const input = new Date("2024-01-01T11:59:00.000Z");
 
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2024-01-01T12:05:00.000Z"));
 
-    expect(anyago(input, { locale: "en", now: renderNow })).toBe(
-      "1 minute ago",
-    );
+    expect(
+      anywhen(input, { mode: "relative", locale: "en", now: renderNow }),
+    ).toBe("1 minute ago");
 
     vi.setSystemTime(new Date("2024-01-01T12:30:00.000Z"));
 
-    expect(anyago(input, { locale: "en", now: renderNow })).toBe(
-      "1 minute ago",
-    );
+    expect(
+      anywhen(input, { mode: "relative", locale: "en", now: renderNow }),
+    ).toBe("1 minute ago");
   });
 
   it("uses the requested timeZone for smart day boundaries", () => {

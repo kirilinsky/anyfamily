@@ -6,10 +6,9 @@ import Link from "next/link";
 const NAV = [
   { id: "overview", label: "Overview" },
   { id: "install", label: "Install" },
-  { id: "anydate", label: "anydate()" },
   { id: "anywhen", label: "anywhen()" },
-  { id: "anyago", label: "anyago()" },
-  { id: "anywhere", label: "anywhere()" },
+  { id: "modes", label: "Modes" },
+  { id: "options", label: "Options" },
   { id: "ssr", label: "SSR" },
   { id: "input-types", label: "Input types" },
   { id: "locales", label: "Locales" },
@@ -233,48 +232,29 @@ export function DocsClient() {
           <Section id="overview" title="Overview">
             <p>
               <strong style={{ color: "var(--text-primary)" }}>anywhen</strong>{" "}
-              is a ~1.3kb gzip date formatting library built entirely on the
-              native{" "}
+              is a tiny date formatter built entirely on the native{" "}
               <code style={{ color: "var(--emerald)" }} className="font-mono">
                 Intl
               </code>{" "}
-              browser API. No locale files, no plugins, no config — just three
-              functions that cover the most common date formatting needs.
+              browser API. One function, one options object, three modes.
             </p>
             <p>
               The browser already knows how to format dates in 200+ languages.
               anywhen just makes that API pleasant to use.
             </p>
-            <Code>{`import { anydate, anywhen, anyago, anywhere } from 'anywhen'
+            <Code>{`import { anywhen } from 'anywhen'
 
-anydate(date)         // runtime locale
-anywhen(date)         // runtime locale
-anyago(date)          // runtime locale
+anywhen(date)
+// "yesterday, 2:35 PM"  — smart mode (default)
 
-anydate(date, 'en')   // "Feb 5, 2016"
-anywhen(date, 'en')   // "yesterday, 2:35 PM"
-anyago(date,  'en')   // "3 hours ago"`}</Code>
+anywhen(date, { mode: 'absolute', locale: 'en' })
+// "Feb 5, 2016"
+
+anywhen(date, { mode: 'relative', locale: 'en' })
+// "3 hours ago"`}</Code>
           </Section>
 
           <Section id="install" title="Install">
-            <div
-              style={{ color: "var(--text-secondary)" }}
-              className="flex items-center gap-3 text-sm mb-2"
-            >
-              <span>current stable:</span>
-              <code style={{ color: "var(--emerald)" }} className="font-mono">
-                v0.2.0
-              </code>
-              <a
-                href="https://github.com/kirilinsky/anywhen/tags"
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ color: "var(--sky)" }}
-                className="font-mono text-xs hover:opacity-70 transition-opacity cursor-pointer"
-              >
-                → all releases
-              </a>
-            </div>
             <Code>{`npm install anywhen
 # or
 pnpm add anywhen
@@ -282,232 +262,217 @@ pnpm add anywhen
 yarn add anywhen`}</Code>
           </Section>
 
-          <Section id="anydate" title="anydate()">
-            <p>
-              Always returns an absolute date string. Pass any{" "}
-              <code style={{ color: "var(--emerald)" }} className="font-mono">
-                Intl.DateTimeFormat
-              </code>{" "}
-              options to control the format.
-            </p>
-            <Code>{`anydate(input)
-anydate(input, locale, options?)
-anydate(input, { locale?, ...Intl.DateTimeFormatOptions })
-
-anydate(date)
-// runtime locale
-
-anydate(date, 'en')
-// "Feb 5, 2016"
-
-anydate(date, { locale: 'en', weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })
-// "Friday, February 5, 2016"
-
-anydate(date, 'en', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })
-// "Friday, February 5, 2016"
-
-anydate(date, 'en', { hour: '2-digit', minute: '2-digit' })
-// "2:35 PM"
-
-anydate(date, 'en', { month: 'long', year: 'numeric' })
-// "February 2016"`}</Code>
-            <div className="mt-4">
-              <Prop
-                name="input"
-                type="Date | number | string"
-                desc="The date to format. Accepts a Date object, unix timestamp in ms, or ISO string."
-              />
-              <Prop
-                name="locale"
-                type="string | string[]"
-                def="runtime locale"
-                desc="Any valid BCP 47 locale tag, or a fallback array — 'en', 'en-US', 'zh-TW', ['sr-Latn-RS', 'en']."
-              />
-              <Prop
-                name="options"
-                type="Intl.DateTimeFormatOptions"
-                def="{ day, month, year }"
-                desc="Any options accepted by Intl.DateTimeFormat. Defaults to a short date."
-              />
-            </div>
-          </Section>
-
           <Section id="anywhen" title="anywhen()">
             <p>
-              Smart context picker. Chooses the most readable format based on
-              distance from now — covers past and future.
+              The single entry point. Pass a date, optionally pass options.
             </p>
             <Code>{`anywhen(input)
-anywhen(input, locale, time?)
-anywhen(input, time)
-anywhen(input, { locale?, now?, time?, timeZone? })
+anywhen(input, options?)
 
-anywhen(date)               // runtime locale
-anywhen(date, 'en')         // "just now"
-anywhen(date, 'en')         // "10 minutes ago"
-anywhen(date, 'en')         // "today, 2:35 PM"
-anywhen(date, 'en')         // "yesterday, 9:00 AM"
-anywhen(date, 'en')         // "Wednesday, 11:20 AM"
-anywhen(date, 'en')         // "Feb 5, 2016"
-anywhen(date, 'en')         // "in 2 weeks"
+anywhen(date)
+// runtime locale, smart mode
 
-anywhen(date, 'en', false)  // "yesterday"  — no clock
-anywhen(date, { locale: 'en', time: false })
-anywhen(date, { locale: 'en', now: requestTime })
-anywhen(date, { locale: 'en', timeZone: 'Europe/Belgrade' })`}</Code>
+anywhen(date, { locale: 'en' })
+// "yesterday, 2:35 PM"
 
-            <div
-              style={{ borderColor: "var(--border)" }}
-              className="rounded-xl border p-4"
-            >
+anywhen(date, { mode: 'relative', locale: 'en', numeric: true })
+// "1 day ago"
+
+anywhen(date, {
+  mode: 'absolute',
+  locale: 'en',
+  format: { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' },
+})
+// "Friday, February 5, 2016"`}</Code>
+          </Section>
+
+          <Section id="modes" title="Modes">
+            <p>
+              The{" "}
+              <code style={{ color: "var(--emerald)" }} className="font-mono">
+                mode
+              </code>{" "}
+              option picks the rendering strategy. Each mode reads only the
+              options that apply to it — the rest are ignored.
+            </p>
+
+            <div>
+              <h3
+                style={{ color: "var(--text-primary)" }}
+                className="font-mono text-base mb-3"
+              >
+                smart (default)
+              </h3>
+              <p className="mb-3">
+                Context-aware. Picks the most readable format based on distance
+                from now — covers past and future.
+              </p>
+              <div
+                style={{ borderColor: "var(--border)" }}
+                className="rounded-xl border p-4 mb-3"
+              >
+                <div className="space-y-2 text-xs font-mono">
+                  {[
+                    ["< 45s", "now"],
+                    ["< 1 hour", "10 minutes ago"],
+                    ["future > 1h", "in 2 weeks"],
+                    ["same day", "today, 14:35"],
+                    ["yesterday", "yesterday, 09:00"],
+                    ["< 7 days", "Wednesday, 11:20"],
+                    ["older", "Feb 5, 2016"],
+                  ].map(([when, output]) => (
+                    <div key={when} className="flex gap-4">
+                      <span
+                        style={{ color: "var(--text-muted)", minWidth: "7rem" }}
+                      >
+                        {when}
+                      </span>
+                      <span style={{ color: "var(--emerald)" }}>
+                        → &quot;{output}&quot;
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
               <p
                 style={{ color: "var(--text-muted)" }}
-                className="text-xs font-mono uppercase tracking-widest mb-3"
+                className="text-xs mb-2"
               >
-                switching logic
+                reads:{" "}
+                <code className="font-mono">
+                  locale, now, time, timeZone
+                </code>
               </p>
-              <div className="space-y-2 text-xs font-mono">
-                {[
-                  ["< 45s", "just now"],
-                  ["< 1 hour", "10 minutes ago"],
-                  ["future > 1h", "in 2 weeks"],
-                  ["same day", "today, 14:35"],
-                  ["yesterday", "yesterday, 09:00"],
-                  ["< 7 days", "Wednesday, 11:20"],
-                  ["older", "Feb 5, 2016"],
-                ].map(([when, result]) => (
-                  <div key={when} className="flex gap-4">
-                    <span
-                      style={{ color: "var(--text-muted)", minWidth: "7rem" }}
-                    >
-                      {when}
-                    </span>
-                    <span style={{ color: "var(--emerald)" }}>
-                      → &quot;{result}&quot;
-                    </span>
-                  </div>
-                ))}
-              </div>
             </div>
 
-            <div className="mt-4">
-              <Prop
-                name="input"
-                type="Date | number | string"
-                desc="The date to format."
-              />
-              <Prop
-                name="locale"
-                type="string | string[]"
-                def="runtime locale"
-                desc="Any valid BCP 47 locale tag, or a fallback array."
-              />
-              <Prop
-                name="now"
-                type="Date | number | string"
-                def="current time"
-                desc="Reference time for relative calculations. Pass this in SSR to keep server and client output stable."
-              />
-              <Prop
-                name="time"
-                type="boolean"
-                def="true"
-                desc="Whether to include clock time in today/yesterday/weekday output. Pass false to omit."
-              />
-              <Prop
-                name="timeZone"
-                type="string"
-                def="runtime timezone"
-                desc="IANA time zone for the displayed clock and smart day boundaries."
-              />
+            <div>
+              <h3
+                style={{ color: "var(--text-primary)" }}
+                className="font-mono text-base mb-3"
+              >
+                absolute
+              </h3>
+              <p className="mb-3">
+                Plain date formatting via{" "}
+                <code
+                  style={{ color: "var(--emerald)" }}
+                  className="font-mono"
+                >
+                  Intl.DateTimeFormat
+                </code>
+                . Pass{" "}
+                <code
+                  style={{ color: "var(--emerald)" }}
+                  className="font-mono"
+                >
+                  format
+                </code>{" "}
+                to control the output shape.
+              </p>
+              <Code>{`anywhen(date, { mode: 'absolute', locale: 'en' })
+// "Feb 5, 2016"
+
+anywhen(date, {
+  mode: 'absolute',
+  locale: 'en',
+  format: { hour: '2-digit', minute: '2-digit' },
+})
+// "2:35 PM"
+
+anywhen(date, {
+  mode: 'absolute',
+  locale: 'en',
+  format: { month: 'long', year: 'numeric' },
+  timeZone: 'Europe/Belgrade',
+})
+// "February 2016"`}</Code>
+              <p
+                style={{ color: "var(--text-muted)" }}
+                className="text-xs mb-2"
+              >
+                reads:{" "}
+                <code className="font-mono">locale, format, timeZone</code>
+              </p>
             </div>
-          </Section>
 
-          <Section id="anyago" title="anyago()">
-            <p>
-              Always relative. Past and future. Never switches to an absolute
-              date.
-            </p>
-            <Code>{`anyago(input)
-anyago(input, locale, numeric?)
-anyago(input, numeric)
-anyago(input, { locale?, now?, numeric? })
+            <div>
+              <h3
+                style={{ color: "var(--text-primary)" }}
+                className="font-mono text-base mb-3"
+              >
+                relative
+              </h3>
+              <p className="mb-3">
+                Always relative. Past and future. Never falls back to an
+                absolute date.
+              </p>
+              <Code>{`anywhen(date, { mode: 'relative', locale: 'en' })
+// "3 hours ago"
+// "yesterday"
+// "in 2 weeks"
 
-anyago(date)                // runtime locale
-anyago(date, 'en')          // "3 hours ago"
-anyago(date, 'en')          // "yesterday"
-anyago(date, 'en')          // "in 2 weeks"
-
-anyago(date, 'en', true)    // "1 day ago"   — numeric mode, no "yesterday"
-anyago(date, 'en', true)    // "1 week ago"  — numeric mode, no "last week"
-anyago(date, { locale: 'en', numeric: true })
-anyago(date, { locale: 'en', now: requestTime })`}</Code>
-            <div className="mt-4">
-              <Prop
-                name="input"
-                type="Date | number | string"
-                desc="The date to format."
-              />
-              <Prop
-                name="locale"
-                type="string | string[]"
-                def="runtime locale"
-                desc="Any valid BCP 47 locale tag, or a fallback array."
-              />
-              <Prop
-                name="now"
-                type="Date | number | string"
-                def="current time"
-                desc="Reference time for relative calculations. Pass this in SSR to keep server and client output stable."
-              />
-              <Prop
-                name="numeric"
-                type="boolean"
-                def="false"
-                desc="Force numeric output — disables auto-phrases like 'yesterday' or 'last week'."
-              />
+anywhen(date, { mode: 'relative', locale: 'en', numeric: true })
+// "1 day ago"   — disables auto-phrases
+// "1 week ago"`}</Code>
+              <p
+                style={{ color: "var(--text-muted)" }}
+                className="text-xs mb-2"
+              >
+                reads:{" "}
+                <code className="font-mono">locale, now, numeric</code>
+              </p>
             </div>
           </Section>
 
-          <Section id="anywhere" title="anywhere()">
-            <p>
-              Returns a locale-bound instance — useful when formatting many
-              dates in the same locale.
-            </p>
-            <Code>{`import { anywhere } from 'anywhen'
-
-const t = anywhere('en')
-
-t.anydate(date)                                         // "Feb 5, 2016"
-t.anywhen(date)                                         // "yesterday, 2:35 PM"
-t.anyago(date)                                          // "3 hours ago"
-t.anywhen(date, { time: false })                        // "yesterday"
-t.anyago(date, { numeric: true })                       // "3 hours ago"
-t.anywhen(date, { now: requestTime,
-                  timeZone: 'Europe/Belgrade' })        // SSR-safe
-t.anydate(date, { weekday: 'long', month: 'long',
-                  day: 'numeric', year: 'numeric' })    // "Friday, February 5, 2016"`}</Code>
-            <p>
-              Call{" "}
-              <code style={{ color: "var(--emerald)" }} className="font-mono">
-                anywhere()
-              </code>{" "}
-              without a locale to keep the compact instance API while using the
-              runtime locale.
-            </p>
+          <Section id="options" title="Options">
+            <Prop
+              name="mode"
+              type="'smart' | 'absolute' | 'relative'"
+              def="'smart'"
+              desc="Rendering strategy. Each mode reads only the options that apply to it."
+            />
+            <Prop
+              name="locale"
+              type="string | string[]"
+              def="runtime locale"
+              desc="Any valid BCP 47 locale tag, or a fallback array — 'en', 'en-US', 'zh-TW', ['sr-Latn-RS', 'en']."
+            />
+            <Prop
+              name="now"
+              type="Date | number | string"
+              def="current time"
+              desc="Reference time for smart and relative modes. Pass this in SSR to keep server and client output stable."
+            />
+            <Prop
+              name="timeZone"
+              type="string"
+              def="runtime timezone"
+              desc="IANA time zone for the displayed clock and smart day boundaries (today, yesterday, weekday). Used by smart and absolute modes."
+            />
+            <Prop
+              name="time"
+              type="boolean"
+              def="true"
+              desc="Smart mode only. Whether to include clock time in today/yesterday/weekday output."
+            />
+            <Prop
+              name="numeric"
+              type="boolean"
+              def="false"
+              desc="Relative mode only. Force numeric output — disables auto-phrases like 'yesterday' or 'last week'."
+            />
+            <Prop
+              name="format"
+              type="Intl.DateTimeFormatOptions"
+              def="{ day, month, year }"
+              desc="Absolute mode only. Any options accepted by Intl.DateTimeFormat. Defaults to a short date."
+            />
           </Section>
 
           <Section id="ssr" title="SSR">
             <p>
-              By default,{" "}
-              <code style={{ color: "var(--emerald)" }} className="font-mono">
-                anywhen()
-              </code>{" "}
-              and{" "}
-              <code style={{ color: "var(--emerald)" }} className="font-mono">
-                anyago()
-              </code>{" "}
-              use the current time. In React SSR or Next.js, pass a stable{" "}
+              By default, smart and relative modes use the current time. In
+              React SSR or Next.js, pass a stable{" "}
               <code style={{ color: "var(--emerald)" }} className="font-mono">
                 now
               </code>{" "}
@@ -539,40 +504,37 @@ export function PostMeta({ createdAt, requestTime }: {
           </Section>
 
           <Section id="input-types" title="Input types">
-            <p>All functions accept three input formats interchangeably.</p>
+            <p>All inputs accept three formats interchangeably.</p>
             <Code>{`// Date object
-anydate(new Date())
+anywhen(new Date())
 
 // Unix timestamp (milliseconds)
-anydate(Date.now())
-anydate(1704499200000)
+anywhen(Date.now())
+anywhen(1704499200000)
 
 // ISO string
-anydate('2016-02-05T14:00:00Z')
-anydate('2016-02-05')`}</Code>
+anywhen('2016-02-05T14:00:00Z')
+anywhen('2016-02-05')`}</Code>
           </Section>
 
           <Section id="locales" title="Locales">
             <p>
-              All output is in English in the examples above. Here&apos;s the same
-              calls in a few other languages — no extra setup required.
+              Same calls in a few languages — no extra setup, no locale files.
             </p>
-            <Code>{`anydate(date, 'de')   // "5. Feb. 2016"
-anydate(date, 'ja')   // "2016年2月5日"
-anydate(date, 'ar')   // "٥ فبراير ٢٠١٦"
-anydate(date, 'ru')   // "5 февр. 2016 г."
-anydate(date, 'fr')   // "5 févr. 2016"
-anydate(date, 'zh')   // "2016年2月5日"
+            <Code>{`// smart mode
+anywhen(date, { locale: 'de' })   // "gestern, 14:35"
+anywhen(date, { locale: 'ru' })   // "вчера, 14:35"
+anywhen(date, { locale: 'fr' })   // "hier, 14:35"
 
-anyago(date, 'de')    // "vor 3 Stunden"
-anyago(date, 'fr')    // "il y a 3 heures"
-anyago(date, 'tr')    // "3 saat önce"
-anyago(date, 'ru')    // "3 часа назад"
-anyago(date, 'ar')    // "منذ 3 ساعات"
+// absolute mode
+anywhen(date, { mode: 'absolute', locale: 'ja' })   // "2016年2月5日"
+anywhen(date, { mode: 'absolute', locale: 'ar' })   // "٥ فبراير ٢٠١٦"
+anywhen(date, { mode: 'absolute', locale: 'ru' })   // "5 февр. 2016 г."
 
-anywhen(date, 'de')   // "gestern, 14:35"
-anywhen(date, 'ru')   // "вчера, 14:35"
-anywhen(date, 'fr')   // "hier, 14:35"`}</Code>
+// relative mode
+anywhen(date, { mode: 'relative', locale: 'de' })   // "vor 3 Stunden"
+anywhen(date, { mode: 'relative', locale: 'fr' })   // "il y a 3 heures"
+anywhen(date, { mode: 'relative', locale: 'tr' })   // "3 saat önce"`}</Code>
             <p>
               Pass any valid{" "}
               <a
@@ -600,11 +562,11 @@ anywhen(date, 'fr')   // "hier, 14:35"`}</Code>
               <code style={{ color: "var(--emerald)" }} className="font-mono">
                 Intl
               </code>{" "}
-              uses the runtime locale. You can also pass a fallback array like{" "}
+              uses the runtime locale. Fallback arrays like{" "}
               <code style={{ color: "var(--emerald)" }} className="font-mono">
                 [&apos;sr-Latn-RS&apos;, &apos;en&apos;]
-              </code>
-              .
+              </code>{" "}
+              also work.
             </p>
           </Section>
 
@@ -676,11 +638,11 @@ anywhen(date, 'fr')   // "hier, 14:35"`}</Code>
                 },
                 {
                   title: "No custom format strings",
-                  body: "anydate() accepts Intl.DateTimeFormat options, so you control the pieces. But if you need 'DD/MM/YYYY' with literal slashes — use a formatting library with explicit pattern strings instead.",
+                  body: "Absolute mode accepts Intl.DateTimeFormat options, so you control the pieces. But if you need 'DD/MM/YYYY' with literal slashes — use a formatting library with explicit pattern strings instead.",
                 },
                 {
-                  title: "anywhen cutoff is fixed at 7 days",
-                  body: "The switch from weekday ('Wednesday, 11:20') to absolute date happens at 7 days and is not configurable. Need a custom cutoff? Use anyago() and anydate() directly.",
+                  title: "Smart mode cutoff is fixed at 7 days",
+                  body: "The switch from weekday ('Wednesday, 11:20') to absolute date happens at 7 days and is not configurable. Need a custom cutoff? Use mode: 'relative' or mode: 'absolute' directly.",
                 },
                 {
                   title: "Node.js < 13",
