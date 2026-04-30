@@ -10,6 +10,7 @@ import { Calendar } from "@dateforge/react-calendar";
 type Method = "anydate" | "anywhen" | "anyago";
 
 const LOCALES = ["en", "ru", "de", "fr", "ja", "ar", "sr", "zh", "es", "it"];
+const MAX_LOCALE_LENGTH = 50;
 
 const METHOD_DESC: Record<Method, string> = {
   anydate: "always absolute — what date exactly",
@@ -199,11 +200,13 @@ export default function Home() {
               <input
                 type="text"
                 value={locale}
-                onChange={(e) => setLocale(e.target.value.slice(0, 10))}
+                onChange={(e) =>
+                  setLocale(e.target.value.slice(0, MAX_LOCALE_LENGTH))
+                }
                 onFocus={() => setFocused(true)}
                 onBlur={() => setTimeout(() => setFocused(false), 150)}
                 placeholder="en"
-                className="bg-transparent text-emerald-400 font-mono text-base outline-none w-[4ch] placeholder-white/20 rounded-md px-2 py-1 hover:bg-white/[0.06] transition-colors border border-transparent hover:border-white/[0.1] focus:border-white/[0.15] focus:bg-white/[0.06]"
+                className="bg-transparent text-emerald-400 font-mono text-base outline-none w-[16ch] max-w-[50vw] placeholder-white/20 rounded-md px-2 py-1 hover:bg-white/[0.06] transition-colors border border-transparent hover:border-white/[0.1] focus:border-white/[0.15] focus:bg-white/[0.06]"
               />
               {localeFocused && (
                 <div className="absolute top-full left-0 mt-2 flex flex-wrap gap-1 bg-[#141414] border border-white/[0.08] rounded-xl p-2 z-30 min-w-[200px] shadow-2xl">
