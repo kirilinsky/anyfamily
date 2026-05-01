@@ -169,7 +169,7 @@ export default function Home() {
             >
               <Calendar
                 locale={calendarLocale}
-                width="296px"
+                width="305px"
                 value={Number.isNaN(date.getTime()) ? undefined : date}
                 theme="dark"
                 onChange={(value) => {
