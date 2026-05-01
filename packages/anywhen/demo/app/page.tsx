@@ -165,11 +165,11 @@ export default function Home() {
           {calendarOpen && (
             <div
               ref={dateCalRef}
-              className="absolute bottom-full left-1/2 z-50 mb-2 -translate-x-1/2 overflow-hidden rounded-xl shadow-2xl"
+              className="absolute bottom-full left-1/2 z-50 mb-1 -translate-x-1/2 overflow-hidden rounded-xl shadow-2xl"
             >
               <Calendar
                 locale={calendarLocale}
-                width="305px"
+                width="300px"
                 value={Number.isNaN(date.getTime()) ? undefined : date}
                 theme="dark"
                 onChange={(value) => {
