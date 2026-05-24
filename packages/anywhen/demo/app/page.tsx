@@ -102,6 +102,9 @@ export default function Home() {
       />
 
       <div className="relative z-20 flex w-full max-w-3xl flex-col items-center gap-8">
+        <h1 className="sr-only">
+          anywhen - tiny Intl date formatter for any locale
+        </h1>
         <Logo className="h-auto w-36 opacity-90" />
 
         <div className="relative w-fit max-w-full rounded-xl border border-white/[0.07] bg-black/30 px-4 py-3.5 font-mono">

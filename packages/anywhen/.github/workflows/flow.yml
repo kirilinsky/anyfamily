@@ -3,8 +3,12 @@ name: CI
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - "demo/**"
   pull_request:
     branches: [main]
+    paths-ignore:
+      - "demo/**"
   workflow_dispatch:
 
 permissions:

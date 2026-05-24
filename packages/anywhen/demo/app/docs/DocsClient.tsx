@@ -229,6 +229,7 @@ export function DocsClient() {
           </nav>
         </aside>
         <main ref={mainRef} className="flex-1 min-w-0 pb-32">
+          <h1 className="sr-only">anywhen API reference</h1>
           <Section id="overview" title="Overview">
             <p>
               <strong style={{ color: "var(--text-primary)" }}>anywhen</strong>{" "}

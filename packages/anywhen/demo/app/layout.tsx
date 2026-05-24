@@ -7,12 +7,12 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://anywhen-kappa.vercel.app"),
 
   title: {
-    default: "Anywhen | Any locale date formatting",
+    default: "anywhen | Tiny Intl date formatter",
     template: "%s | anywhen",
   },
 
   description:
-    "~1.1kb gzip. Zero dependencies. One anywhen() function — smart, absolute, relative, SSR-safe date formatting powered by native Intl.",
+    "Tiny zero-dependency date formatter for JavaScript and TypeScript. Format smart, absolute, and relative dates in any locale with native Intl.",
 
   keywords: [
     "date formatting",
@@ -33,14 +33,18 @@ export const metadata: Metadata = {
   authors: [{ name: "kirilinsky", url: "https://github.com/kirilinsky" }],
 
   creator: "kirilinsky",
+  publisher: "kirilinsky",
+  applicationName: "anywhen",
+  category: "Developer Tools",
 
   openGraph: {
     type: "website",
     url: "https://anywhen-kappa.vercel.app",
     title: "anywhen — date formatting for any locale",
     description:
-      "~1.1kb gzip. Zero deps. Smart date & time, SSR-safe now, time zones, 200+ locales via native Intl.",
+      "Tiny zero-dependency date formatter. Smart, absolute, and relative dates with SSR-safe now, time zones, and 200+ locales via native Intl.",
     siteName: "anywhen",
+    locale: "en_US",
     images: [
       {
         url: "/og.jpg",
@@ -55,7 +59,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "anywhen — date formatting for any locale",
     description:
-      "~1.1kb gzip. Zero deps. SSR-safe now, time zones, 200+ locales via native Intl.",
+      "Tiny zero-dependency date formatter. SSR-safe now, time zones, and 200+ locales via native Intl.",
     images: ["/og.jpg"],
     creator: "@kirilinsky",
   },
