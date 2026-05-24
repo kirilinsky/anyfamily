@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="https://i.ibb.co/hRbGtqjM/gt.png" alt="anywhen logo" width="230" />
+</p>
+
 <h1 align="center">anywhen</h1>
 
 <p align="center">
@@ -9,7 +13,9 @@
 </p>
 
 <p align="center">
-  One function. Three modes. Any locale.
+  <strong>Tiny human-readable date formatter built on native <code>Intl</code>.</strong>
+  <br />
+  Turn dates into <code>"now"</code>, <code>"yesterday, 2:35 PM"</code>, <code>"через 3 часа"</code>, or <code>"2016年2月5日"</code>.
 </p>
 
 <p align="center">
@@ -18,9 +24,13 @@
 
 ---
 
-**~1.1kb gzip. zero dependencies. 200+ locales — for free.**
+**One function. Smart defaults. Any locale. ~1.1kb gzip. Zero dependencies.**
 
-Built entirely on native `Intl`. No locale files. No plugins. No config.
+`Intl` is powerful. anywhen makes it usable.
+
+Built for feeds, chats, notifications, dashboards, and docs — anywhere a raw
+timestamp should read like a person wrote it. No locale files. No plugins. No
+config.
 
 ```ts
 import { anywhen } from "anywhen";
@@ -33,6 +43,12 @@ anywhen(date, { mode: "absolute", locale: "en" });
 
 anywhen(date, { mode: "relative", locale: "en" });
 // "3 hours ago"
+
+anywhen(date, { mode: "relative", locale: "ru" });
+// "3 часа назад"
+
+anywhen(date, { mode: "absolute", locale: "ja" });
+// "2016年2月5日"
 ```
 
 ---
@@ -58,6 +74,43 @@ anywhen(input, options);
 anywhen(new Date());
 anywhen(Date.now());
 anywhen("2016-02-05T14:00:00Z");
+```
+
+---
+
+## recipes
+
+Copy, paste, move on.
+
+```tsx
+// Blog post date
+<time dateTime={post.createdAt}>
+  {anywhen(post.createdAt, { locale: "en", time: false })}
+</time>
+
+// Chat message
+<time dateTime={message.sentAt}>
+  {anywhen(message.sentAt, { locale: "en" })}
+</time>
+
+// Notification
+anywhen(notification.createdAt, { mode: "relative", locale: "en" });
+// "3 minutes ago"
+
+// Settings screen / invoice date
+anywhen(invoice.date, {
+  mode: "absolute",
+  locale: "en",
+  format: { month: "long", day: "numeric", year: "numeric" },
+});
+// "February 5, 2016"
+
+// SSR-safe Next.js / React Server Components
+anywhen(createdAt, {
+  locale: "en",
+  now: requestTime,
+  timeZone: "Europe/Belgrade",
+});
 ```
 
 ---
@@ -89,6 +142,11 @@ anywhen(date, { locale: "en", now: requestTime, timeZone: "Europe/Belgrade" });
 ```
 
 Reads: `locale`, `now`, `time`, `timeZone`.
+
+By default, `smart` mode uses `time: true`, so nearby past dates stay useful in
+feeds, chats, and activity logs: `"today, 2:35 PM"`,
+`"yesterday, 09:00"`, `"Wednesday, 11:20"`. Use `time: false` for compact UI
+where the label is enough: `"today"`, `"yesterday"`, `"Wednesday"`.
 
 ### absolute
 

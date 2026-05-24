@@ -1,6 +1,9 @@
 name: CI
 
-on: [push, pull_request]
+on: [push, pull_request, workflow_dispatch]
+
+permissions:
+  contents: read
 
 jobs:
   test:
@@ -10,11 +13,11 @@ jobs:
 
       - uses: pnpm/action-setup@v4
         with:
-          version: 9
+          version: 10.32.1
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
           cache: pnpm
 
       - run: pnpm install --frozen-lockfile
@@ -23,7 +26,7 @@ jobs:
 
       - run: pnpm lint
 
-      - run: pnpm test -- --coverage
+      - run: pnpm test:coverage
 
       - uses: codecov/codecov-action@v5
         with:
@@ -31,13 +34,18 @@ jobs:
 
       - run: pnpm build
 
+      - name: Smoke test package outputs
+        run: |
+          node --input-type=module -e "import { anywhen } from './dist/index.mjs'; if (typeof anywhen !== 'function') throw new Error('ESM export failed')"
+          node -e "const { anywhen } = require('./dist/index.cjs'); if (typeof anywhen !== 'function') throw new Error('CJS export failed')"
+
       - run: pnpm publint
 
       - name: Check bundle size
         run: |
-          SIZE=$(wc -c < dist/index.cjs)
-          echo "Bundle size: ${SIZE} bytes"
-          if [ "$SIZE" -gt 3100 ]; then
-            echo "Bundle too large: ${SIZE}b > 3100b"
+          SIZE=$(gzip -c dist/index.mjs | wc -c | tr -d ' ')
+          echo "Bundle size: ${SIZE} bytes gzip"
+          if [ "$SIZE" -gt 1750 ]; then
+            echo "Bundle too large: ${SIZE}b gzip > 1750b"
             exit 1
           fi

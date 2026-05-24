@@ -131,7 +131,6 @@ function renderSmart(
 ): string {
   const ms = date.getTime() - now.getTime();
   const abs = Math.abs(ms) / 1000;
-  const calendarDiff = dayDiff(date, now, timeZone);
   const timeStr = () => dtf(locale, { ...TIME_OPTS, timeZone }).format(date);
 
   if (abs < 45) return rtf(locale, "auto").format(0, "second");
@@ -142,6 +141,8 @@ function renderSmart(
     const [v, u] = unit(ms);
     return rtf(locale, "auto").format(v, u);
   }
+
+  const calendarDiff = dayDiff(date, now, timeZone);
 
   if (calendarDiff === 0) {
     const s = rtf(locale, "auto").format(0, "day");

@@ -17,7 +17,7 @@ jobs:
 
       - uses: pnpm/action-setup@v4
         with:
-          version: 9
+          version: 10.32.1
 
       - uses: actions/setup-node@v5
         with:
@@ -29,7 +29,12 @@ jobs:
 
       - run: pnpm build
 
-      - run: pnpm publish --no-git-checks --access public
+      - name: Smoke test package outputs
+        run: |
+          node --input-type=module -e "import { anywhen } from './dist/index.mjs'; if (typeof anywhen !== 'function') throw new Error('ESM export failed')"
+          node -e "const { anywhen } = require('./dist/index.cjs'); if (typeof anywhen !== 'function') throw new Error('CJS export failed')"
+
+      - run: npm publish --access public --provenance
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 

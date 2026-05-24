@@ -5,6 +5,8 @@ minimal, no dependencies, native `Intl` only.
 
 ## Setup
 
+Development tooling requires Node.js 20+.
+
 ```bash
 git clone https://github.com/kirilinsky/anywhen.git
 cd anywhen
