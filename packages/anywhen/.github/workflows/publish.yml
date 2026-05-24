@@ -34,7 +34,7 @@ jobs:
           node --input-type=module -e "import { anywhen } from './dist/index.mjs'; if (typeof anywhen !== 'function') throw new Error('ESM export failed')"
           node -e "const { anywhen } = require('./dist/index.cjs'); if (typeof anywhen !== 'function') throw new Error('CJS export failed')"
 
-      - run: npm publish --access public --provenance
+      - run: pnpm publish --no-git-checks --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
