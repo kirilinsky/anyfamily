@@ -9,7 +9,7 @@ import { Logo } from "@/logo/logo";
 
 type Mode = "smart" | "absolute" | "relative";
 
-const LOCALES = ["en", "en-GB", "ru", "de", "fr", "ja", "sr-Latn-RS"];
+const LOCALES = ["en", "ru", "ja", "ar", "hi", "pt-BR", "sr-Latn-RS"];
 
 const MODE_HINTS: Record<Mode, string> = {
   smart: "context-aware — relative if near, absolute if far",
@@ -27,28 +27,21 @@ function q(value: string) {
 }
 
 function useTypewriter(text: string | null) {
-  const [displayed, setDisplayed] = useState("");
-  const prev = useRef<string | null>(null);
+  const [state, setState] = useState({ displayed: "", source: text });
 
   useEffect(() => {
-    if (!text) {
-      setDisplayed("");
-      prev.current = null;
-      return;
-    }
-    if (text === prev.current) return;
-    prev.current = text;
-    setDisplayed("");
+    if (!text) return;
     let i = 0;
     const id = setInterval(() => {
       i += 1;
-      setDisplayed(text.slice(0, i));
+      setState({ displayed: text.slice(0, i), source: text });
       if (i >= text.length) clearInterval(id);
     }, 28);
     return () => clearInterval(id);
   }, [text]);
 
-  return displayed;
+  if (!text || state.source !== text) return "";
+  return state.displayed;
 }
 
 export default function Home() {
@@ -98,7 +91,7 @@ export default function Home() {
   const done = typed === result && !!result;
 
   return (
-    <main className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-[#0a0a0a] px-4 py-20">
+    <main className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-[#0a0a0a] px-4 pb-28 pt-20 sm:py-20">
       <div
         className="pointer-events-none fixed inset-0 z-10 opacity-[0.035]"
         style={{
@@ -183,50 +176,67 @@ export default function Home() {
           )}
         </div>
 
-        <div className="flex min-h-24 w-full items-center justify-center">
-          {typed ? (
-            <p
-              className="text-center text-4xl tracking-tight text-white/90 sm:text-5xl"
-              style={{ fontFamily: "'Georgia', serif" }}
-            >
-              {typed}
-              <span
-                className="ml-[2px] inline-block h-[1.2em] w-[2px] align-middle bg-white/60"
-                style={{
-                  animation: done ? "blink 1s step-end infinite" : "none",
-                  opacity: done ? undefined : 1,
-                }}
-              />
-              <style>{`@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }`}</style>
+        <div className="flex min-h-28 w-full flex-col items-center justify-center gap-3">
+          <div className="text-center">
+            <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-white/25">
+              output
             </p>
-          ) : (
-            <p className="font-serif text-sm italic text-white/15">result</p>
-          )}
+            <p className="mt-1 text-sm italic text-white/35">
+              what your users see
+            </p>
+          </div>
+
+          <div className="flex min-w-0 items-center justify-center">
+            {typed ? (
+              <p
+                className="min-w-0 break-words text-center text-4xl tracking-tight text-white/90 sm:text-5xl"
+                style={{ fontFamily: "'Georgia', serif" }}
+              >
+                {typed}
+                <span
+                  className="ml-[2px] inline-block h-[1.2em] w-[2px] align-middle bg-white/60"
+                  style={{
+                    animation: done ? "blink 1s step-end infinite" : "none",
+                    opacity: done ? undefined : 1,
+                  }}
+                />
+                <style>{`@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }`}</style>
+              </p>
+            ) : (
+              <p className="font-serif text-sm italic text-white/15">result</p>
+            )}
+          </div>
         </div>
       </div>
 
       <footer className="fixed bottom-0 left-0 right-0 z-20 border-t border-white/[0.05] bg-[#0a0a0a]/80 backdrop-blur-sm">
-        <div className="mx-auto flex h-12 max-w-2xl items-center px-6">
-          {[
-            ["github", "https://github.com/kirilinsky/anywhen"],
-            ["npm", "https://www.npmjs.com/package/anywhen"],
-          ].map(([label, href]) => (
-            <a
-              key={label}
-              href={href}
-              target="_blank"
-              rel="noopener noreferrer"
+        <div className="mx-auto flex min-h-14 max-w-3xl flex-col items-center justify-center gap-1 px-6 py-2 sm:min-h-12 sm:flex-row sm:justify-between sm:py-0">
+          <p className="text-center font-mono text-[11px] text-white/30">
+            Intl is powerful. anywhen makes it usable.
+          </p>
+
+          <div className="flex items-center">
+            {[
+              ["github", "https://github.com/kirilinsky/anywhen"],
+              ["npm", "https://www.npmjs.com/package/anywhen"],
+            ].map(([label, href]) => (
+              <a
+                key={label}
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-3 py-2 text-xs uppercase tracking-widest text-white/25 transition-colors hover:text-white/60 sm:py-3"
+              >
+                {label}
+              </a>
+            ))}
+            <Link
+              href="/docs"
               className="px-3 py-3 text-xs uppercase tracking-widest text-white/25 transition-colors hover:text-white/60"
             >
-              {label}
-            </a>
-          ))}
-          <Link
-            href="/docs"
-            className="px-3 py-3 text-xs uppercase tracking-widest text-white/25 transition-colors hover:text-white/60"
-          >
-            docs
-          </Link>
+              docs
+            </Link>
+          </div>
         </div>
       </footer>
     </main>
