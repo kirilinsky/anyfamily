@@ -1,6 +1,6 @@
 {
     "name": "anywhen",
-    "version": "0.3.0",
+    "version": "0.3.1",
     "description": "Tiny smart date formatter — one function, three modes (smart, absolute, relative), any Intl locale.",
     "type": "module",
     "sideEffects": false,
