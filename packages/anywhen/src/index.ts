@@ -94,11 +94,13 @@ const dayIndex = (date: Date, timeZone?: string) => {
 const dayDiff = (date: Date, now: Date, timeZone?: string) =>
   dayIndex(date, timeZone) - dayIndex(now, timeZone);
 
+const round = (n: number) => Math.sign(n) * Math.round(Math.abs(n));
+
 function unit(ms: number): [number, RelativeUnit] {
   const s = Math.abs(ms) / 1000;
   for (const [th, u, div] of THRESHOLDS)
-    if (s < th) return [Math.round(ms / div), u];
-  return [Math.round(ms / MS_YEAR), "year"];
+    if (s < th) return [round(ms / div), u];
+  return [round(ms / MS_YEAR), "year"];
 }
 
 function renderRelative(
@@ -134,8 +136,10 @@ function renderSmart(
   const timeStr = () => dtf(locale, { ...TIME_OPTS, timeZone }).format(date);
 
   if (abs < 45) return rtf(locale, "auto").format(0, "second");
-  if (abs < 3600)
-    return rtf(locale, "auto").format(Math.round(ms / 6e4), "minute");
+  if (abs < 3600) {
+    const m = round(ms / 6e4);
+    if (Math.abs(m) < 60) return rtf(locale, "auto").format(m, "minute");
+  }
 
   if (ms > 0) {
     const [v, u] = unit(ms);

@@ -47,6 +47,20 @@ describe("relative mode — unit selection thresholds", () => {
   });
 });
 
+describe("relative mode — symmetric rounding (past vs future)", () => {
+  const rel = (input: number) =>
+    anywhen(input, { mode: "relative", locale: "en" });
+
+  it("1.5h rounds to 2 in both directions", () => {
+    expect(rel(NOW - 5_400_000)).toBe("2 hours ago");
+    expect(rel(NOW + 5_400_000)).toBe("in 2 hours");
+  });
+  it("2.5 days rounds to 3 in both directions", () => {
+    expect(rel(NOW - 2.5 * 86_400_000)).toBe("3 days ago");
+    expect(rel(NOW + 2.5 * 86_400_000)).toBe("in 3 days");
+  });
+});
+
 describe("relative mode — future dates", () => {
   it("returns future relative string", () => {
     expect(
@@ -236,6 +250,20 @@ describe("smart mode (default)", () => {
     expect(anywhen(NOW + 14 * 86_400_000, { locale: "ru" })).toBe(
       "через 2 недели",
     );
+  });
+});
+
+describe("smart mode — minute/hour rollover", () => {
+  it("3599s ago never renders as 60 minutes", () => {
+    expect(anywhen(NOW - 3_599_000, { locale: "en" })).not.toMatch(/60 min/);
+  });
+  it("3599s ago rolls over to today", () => {
+    expect(anywhen(NOW - 3_599_000, { locale: "en", time: false })).toBe(
+      "today",
+    );
+  });
+  it("3599s future rolls over to in 1 hour", () => {
+    expect(anywhen(NOW + 3_599_000, { locale: "en" })).toBe("in 1 hour");
   });
 });
 
