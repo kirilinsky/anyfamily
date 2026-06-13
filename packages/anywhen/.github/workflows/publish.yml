@@ -27,12 +27,20 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
+      - run: pnpm typecheck
+
+      - run: pnpm lint
+
+      - run: pnpm test
+
       - run: pnpm build
 
       - name: Smoke test package outputs
         run: |
           node --input-type=module -e "import { anywhen } from './dist/index.mjs'; if (typeof anywhen !== 'function') throw new Error('ESM export failed')"
           node -e "const { anywhen } = require('./dist/index.cjs'); if (typeof anywhen !== 'function') throw new Error('CJS export failed')"
+
+      - run: pnpm publint
 
       - run: pnpm publish --no-git-checks --access public
         env:

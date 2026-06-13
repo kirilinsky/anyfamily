@@ -1,5 +1,26 @@
 # Changelog
 
+## 0.3.2
+
+### Fixed
+
+- Relative durations now round symmetrically for past and future. Previously
+  `Math.round` on negative values rendered `1.5h ago` as `"1 hour ago"` while
+  `1.5h` ahead rendered as `"in 2 hours"`.
+
+- Smart mode no longer renders `"60 minutes ago"` at the top of the minute
+  range. It rolls over to `"today"` (past) or `"in 1 hour"` (future).
+
+## 0.3.1
+
+### Changed
+
+- Smart mode defers the calendar-day calculation until it is needed, skipping
+  the timezone lookup for `now`, sub-hour, and future dates.
+
+- Added `sideEffects: false` and `packageManager` to `package.json`, and dropped
+  the stray `npx` from the `test:coverage` script.
+
 ## 0.3.0
 
 ### Breaking changes
