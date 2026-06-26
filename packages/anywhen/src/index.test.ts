@@ -358,3 +358,54 @@ describe("smart mode — locales", () => {
     ).not.toThrow();
   });
 });
+
+describe("relative mode — style option", () => {
+  const rel = (input: number, style?: "long" | "short" | "narrow") =>
+    anywhen(input, { mode: "relative", locale: "en", style });
+
+  it("defaults to long", () => {
+    expect(rel(NOW - 3 * 3_600_000)).toBe("3 hours ago");
+  });
+  it("short → abbreviated unit", () => {
+    expect(rel(NOW - 3 * 3_600_000, "short")).toBe("3 hr. ago");
+  });
+  it("narrow → tightest unit", () => {
+    expect(rel(NOW - 3 * 3_600_000, "narrow")).toBe("3h ago");
+  });
+  it("short keeps auto phrases like yesterday", () => {
+    expect(rel(NOW - 86_400_000, "short")).toBe("yesterday");
+  });
+  it("composes with numeric", () => {
+    expect(
+      anywhen(NOW - 86_400_000, {
+        mode: "relative",
+        locale: "en",
+        style: "short",
+        numeric: true,
+      }),
+    ).toBe("1 day ago");
+  });
+});
+
+describe("smart mode — style option", () => {
+  it("short shortens sub-hour relative wording", () => {
+    expect(anywhen(NOW - 600_000, { locale: "en", style: "short" })).toBe(
+      "10 min. ago",
+    );
+  });
+  it("narrow shortens sub-hour relative wording", () => {
+    expect(anywhen(NOW - 600_000, { locale: "en", style: "narrow" })).toBe(
+      "10m ago",
+    );
+  });
+  it("short shortens future relative wording", () => {
+    expect(anywhen(NOW + 3 * 3_600_000, { locale: "en", style: "short" })).toBe(
+      "in 3 hr.",
+    );
+  });
+  it("style leaves clock-bearing same-day label intact", () => {
+    expect(anywhen(NOW - 2 * 3_600_000, { locale: "en", style: "short" })).toMatch(
+      /today/i,
+    );
+  });
+});

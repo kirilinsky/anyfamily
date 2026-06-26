@@ -1,5 +1,28 @@
 # Changelog
 
+## 0.4.0
+
+### Added
+
+- Added `style` for smart and relative modes. Maps to
+  `Intl.RelativeTimeFormat` and shortens the relative phrasing.
+
+  ```ts
+  anywhen(date, { mode: "relative", locale: "en", style: "short" });
+  // "3 hr. ago"
+
+  anywhen(date, { mode: "relative", locale: "en", style: "narrow" });
+  // "3h ago"
+  ```
+
+  In smart mode it affects only the relative wording (`"10 min. ago"`,
+  `"in 3 hr."`). Calendar labels (`today`, `yesterday`, weekday) and the
+  absolute fallback are unchanged. Exposed as the public `Style` type.
+
+### Internal
+
+- Bumped dev dependencies: `oxlint` 1.71, `publint` 0.3.21, `tsdown` 0.22.3.
+
 ## 0.3.2
 
 ### Fixed

@@ -139,9 +139,16 @@ anywhen(date, { locale: "en", time: false });
 
 anywhen(date, { locale: "en", now: requestTime, timeZone: "Europe/Belgrade" });
 // SSR-safe with stable anchor + timezone
+
+anywhen(date, { locale: "en", style: "short" });
+// "10 min. ago"  — shortens relative wording, calendar labels keep their clock
 ```
 
-Reads: `locale`, `now`, `time`, `timeZone`.
+Reads: `locale`, `now`, `time`, `timeZone`, `style`.
+
+`style` maps to `Intl.RelativeTimeFormat` and only changes the relative
+phrasing (`"now"`, `"10 min. ago"`, `"in 3 hr."`). Calendar labels
+(`today`, `yesterday`, weekday) and the absolute fallback are unaffected.
 
 By default, `smart` mode uses `time: true`, so nearby past dates stay useful in
 feeds, chats, and activity logs: `"today, 2:35 PM"`,
@@ -187,9 +194,15 @@ anywhen(date, { mode: "relative", locale: "en" });
 anywhen(date, { mode: "relative", locale: "en", numeric: true });
 // "1 day ago"   — disables auto-phrases like "yesterday"
 // "1 week ago"
+
+anywhen(date, { mode: "relative", locale: "en", style: "short" });
+// "3 hr. ago"
+
+anywhen(date, { mode: "relative", locale: "en", style: "narrow" });
+// "3h ago"
 ```
 
-Reads: `locale`, `now`, `numeric`.
+Reads: `locale`, `now`, `numeric`, `style`.
 
 ---
 
@@ -203,6 +216,7 @@ Reads: `locale`, `now`, `numeric`.
 | `timeZone` | `string`                        | runtime timezone | smart, absolute      |
 | `time`     | `boolean`                       | `true`           | smart                |
 | `numeric`  | `boolean`                       | `false`          | relative             |
+| `style`    | `"long" \| "short" \| "narrow"` | `"long"`         | smart, relative      |
 | `format`   | `Intl.DateTimeFormatOptions`    | `{ day, month, year }` | absolute       |
 
 Each mode reads only the options that apply to it. The rest are ignored.

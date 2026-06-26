@@ -3,6 +3,7 @@ type RelativeUnit = Intl.RelativeTimeFormatUnit;
 export type DateInput = Date | number | string;
 export type Locale = string | readonly string[];
 export type Mode = "smart" | "absolute" | "relative";
+export type Style = Intl.RelativeTimeFormatStyle;
 
 export interface AnywhenOptions {
   mode?: Mode;
@@ -11,6 +12,7 @@ export interface AnywhenOptions {
   timeZone?: string;
   time?: boolean;
   numeric?: boolean;
+  style?: Style;
   format?: Intl.DateTimeFormatOptions;
 }
 
@@ -53,9 +55,12 @@ const dtfCache = new Map<string, Intl.DateTimeFormat>();
 const localeKey = (locale?: Locale) =>
   Array.isArray(locale) ? locale.join("\0") : (locale ?? "");
 
-const rtf = (l: Locale | undefined, n: "always" | "auto") =>
-  cacheGet(rtfCache, `${localeKey(l)}|${n}`, () =>
-    new Intl.RelativeTimeFormat(l as Intl.LocalesArgument, { numeric: n }),
+const rtf = (l: Locale | undefined, n: "always" | "auto", s: Style) =>
+  cacheGet(rtfCache, `${localeKey(l)}|${n}|${s}`, () =>
+    new Intl.RelativeTimeFormat(l as Intl.LocalesArgument, {
+      numeric: n,
+      style: s,
+    }),
   );
 
 const dtf = (l: Locale | undefined, o: Intl.DateTimeFormatOptions) =>
@@ -108,10 +113,11 @@ function renderRelative(
   now: Date,
   locale: Locale | undefined,
   numeric: boolean,
+  style: Style,
 ): string {
   const ms = date.getTime() - now.getTime();
   const [v, u] = unit(ms);
-  return rtf(locale, numeric ? "always" : "auto").format(v, u);
+  return rtf(locale, numeric ? "always" : "auto", style).format(v, u);
 }
 
 function renderAbsolute(
@@ -130,31 +136,32 @@ function renderSmart(
   locale: Locale | undefined,
   time: boolean,
   timeZone: string | undefined,
+  style: Style,
 ): string {
   const ms = date.getTime() - now.getTime();
   const abs = Math.abs(ms) / 1000;
   const timeStr = () => dtf(locale, { ...TIME_OPTS, timeZone }).format(date);
 
-  if (abs < 45) return rtf(locale, "auto").format(0, "second");
+  if (abs < 45) return rtf(locale, "auto", style).format(0, "second");
   if (abs < 3600) {
     const m = round(ms / 6e4);
-    if (Math.abs(m) < 60) return rtf(locale, "auto").format(m, "minute");
+    if (Math.abs(m) < 60) return rtf(locale, "auto", style).format(m, "minute");
   }
 
   if (ms > 0) {
     const [v, u] = unit(ms);
-    return rtf(locale, "auto").format(v, u);
+    return rtf(locale, "auto", style).format(v, u);
   }
 
   const calendarDiff = dayDiff(date, now, timeZone);
 
   if (calendarDiff === 0) {
-    const s = rtf(locale, "auto").format(0, "day");
+    const s = rtf(locale, "auto", style).format(0, "day");
     return time ? `${s}, ${timeStr()}` : s;
   }
 
   if (calendarDiff === -1) {
-    const s = rtf(locale, "auto").format(-1, "day");
+    const s = rtf(locale, "auto", style).format(-1, "day");
     return time ? `${s}, ${timeStr()}` : s;
   }
 
@@ -174,15 +181,18 @@ export function anywhen(input: DateInput, options: AnywhenOptions = {}): string 
     timeZone,
     time = true,
     numeric = false,
+    style = "long",
     format,
   } = options;
 
   const date = toDate(input);
   const anchor = now === undefined ? new Date() : toDate(now);
 
-  if (mode === "relative") return renderRelative(date, anchor, locale, numeric);
+  if (mode === "relative")
+    return renderRelative(date, anchor, locale, numeric, style);
   if (mode === "absolute") return renderAbsolute(date, locale, format, timeZone);
-  if (mode === "smart") return renderSmart(date, anchor, locale, time, timeZone);
+  if (mode === "smart")
+    return renderSmart(date, anchor, locale, time, timeZone, style);
 
   throw new RangeError(`Invalid mode: ${String(mode)}`);
 }
