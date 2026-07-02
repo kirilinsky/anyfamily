@@ -24,7 +24,7 @@
 
 ---
 
-**One function. Smart defaults. Any locale. ~1.1kb gzip. Zero dependencies.**
+**One function. Smart defaults. Any locale. ~1.3kb gzip. Zero dependencies.**
 
 `Intl` is powerful. anywhen makes it usable.
 
@@ -331,7 +331,7 @@ When omitted, native `Intl` uses the runtime locale.
 
 |                     |  anywhen  | dayjs | date-fns |
 | ------------------- | :-------: | :---: | :------: |
-| gzip                | **~1.1kb** | ~7kb  |  ~20kb   |
+| gzip                | **~1.3kb** | ~7kb  |  ~20kb   |
 | locale data bundled |  **no**   |  yes  |   yes    |
 | locales             | **200+**  |  140  |   100    |
 | dependencies        |   **0**   |   0   |    0     |

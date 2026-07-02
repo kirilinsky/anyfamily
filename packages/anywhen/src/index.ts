@@ -1,9 +1,24 @@
 type RelativeUnit = Intl.RelativeTimeFormatUnit;
 
+/** Accepted date input: a `Date`, a unix timestamp in milliseconds, or an ISO 8601 string. */
 export type DateInput = Date | number | string;
+
+/** A BCP 47 locale tag (`"en"`, `"pt-BR"`), or an array of tags used as a fallback chain. */
 export type Locale = string | readonly string[];
+
+/**
+ * Rendering strategy.
+ *
+ * - `"smart"` — context-aware: relative when near, calendar labels for recent days, absolute when far (default)
+ * - `"absolute"` — plain `Intl.DateTimeFormat` output
+ * - `"relative"` — always relative, past and future
+ */
 export type Mode = "smart" | "absolute" | "relative";
+
+/** Relative-time wording length, mapped to `Intl.RelativeTimeFormat`: `"3 hours ago"` / `"3 hr. ago"` / `"3h ago"`. */
 export type Style = Intl.RelativeTimeFormatStyle;
+
+/** Units whose selection cutoff can be overridden via {@linkcode Thresholds}. */
 export type ThresholdUnit =
   | "second"
   | "minute"
@@ -11,23 +26,50 @@ export type ThresholdUnit =
   | "day"
   | "week"
   | "month";
+
+/**
+ * Per-unit cutoffs, in seconds, for picking the display unit in smart and
+ * relative modes. Each unit is shown while the distance from `now` is below
+ * its cutoff. Override any subset — the rest keep their defaults:
+ * `{ second: 45, minute: 2700, hour: 79200, day: 518400, week: 2160000, month: 28512000 }`.
+ *
+ * @example
+ * ```ts
+ * anywhen(date, { mode: "relative", thresholds: { minute: 5400 } });
+ * // 50 minutes ago → "50 minutes ago" instead of "1 hour ago"
+ * ```
+ */
 export type Thresholds = Partial<Record<ThresholdUnit, number>>;
 
+/** One piece of formatted output returned by {@linkcode anywhenParts}. */
 export interface AnywhenPart {
+  /** Part kind as reported by `Intl` — `"integer"`, `"literal"`, `"month"`, `"hour"`, … */
   type: string;
+  /** The text of this part. Joining all part values reproduces the full string. */
   value: string;
+  /** For relative numeric parts: the unit the number refers to (`"minute"`, `"hour"`, …). */
   unit?: string;
 }
 
+/** Options for {@linkcode anywhen} and {@linkcode anywhenParts}. Each mode reads only the options that apply to it. */
 export interface AnywhenOptions {
+  /** Rendering strategy. Defaults to `"smart"`. */
   mode?: Mode;
+  /** Output locale. Defaults to the runtime locale. */
   locale?: Locale;
+  /** Reference time for smart and relative modes. Pass a fixed value in SSR to keep server and client output stable. Defaults to the current time. */
   now?: DateInput;
+  /** IANA time zone for the displayed clock and smart calendar boundaries (today, yesterday, weekday). Smart and absolute modes. Defaults to the runtime time zone. */
   timeZone?: string;
+  /** Smart mode: include the clock in today/yesterday/weekday output. Defaults to `true`. */
   time?: boolean;
+  /** Relative mode: force numeric output, disabling auto-phrases like `"yesterday"`. Defaults to `false`. */
   numeric?: boolean;
+  /** Relative wording length for smart and relative modes. Defaults to `"long"`. */
   style?: Style;
+  /** Absolute mode: any `Intl.DateTimeFormatOptions`. Defaults to a short date (`{ day, month, year }`). */
   format?: Intl.DateTimeFormatOptions;
+  /** Smart and relative modes: per-unit cutoff overrides in seconds. */
   thresholds?: Thresholds;
 }
 
@@ -220,12 +262,46 @@ function plan(input: DateInput, options: AnywhenOptions): Seg[] {
   throw new RangeError(`Invalid mode: ${String(mode)}`);
 }
 
+/**
+ * Formats a date as a human-readable, localized string using native `Intl`.
+ *
+ * @example
+ * ```ts
+ * anywhen(date);                                    // "yesterday, 2:35 PM"
+ * anywhen(date, { mode: "absolute", locale: "ja" }); // "2016年2月5日"
+ * anywhen(date, { mode: "relative", locale: "en" }); // "3 hours ago"
+ * ```
+ *
+ * @param input A `Date`, unix timestamp in milliseconds, or ISO 8601 string.
+ * @param options See {@linkcode AnywhenOptions}.
+ * @returns The formatted string.
+ * @throws {RangeError} If `input` or `options.now` is not a valid date, or `options.mode` is unknown.
+ */
 export function anywhen(input: DateInput, options: AnywhenOptions = {}): string {
   return plan(input, options)
     .map((s) => ("t" in s ? s.t : "d" in s ? s.f.format(s.d) : s.f.format(s.v, s.u)))
     .join("");
 }
 
+/**
+ * Like {@linkcode anywhen}, but returns the output as `{ type, value, unit? }`
+ * parts instead of a string — style the number apart from the unit, or
+ * rebuild the output your own way.
+ *
+ * @example
+ * ```ts
+ * anywhenParts(date, { mode: "relative", locale: "en" });
+ * // [
+ * //   { type: "integer", value: "3", unit: "hour" },
+ * //   { type: "literal", value: " hours ago" },
+ * // ]
+ * ```
+ *
+ * @param input A `Date`, unix timestamp in milliseconds, or ISO 8601 string.
+ * @param options See {@linkcode AnywhenOptions} — same options as {@linkcode anywhen}.
+ * @returns The formatted output as an array of parts.
+ * @throws {RangeError} If `input` or `options.now` is not a valid date, or `options.mode` is unknown.
+ */
 export function anywhenParts(
   input: DateInput,
   options: AnywhenOptions = {},

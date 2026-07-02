@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.0.1
+
+### Docs
+
+- Added JSDoc to every exported symbol — hover docs in editors, symbol
+  documentation on JSR. No runtime changes; the minified bundle is unchanged.
+- Corrected the stated bundle size (~1.3kb gzip after 1.0.0's `thresholds`
+  and `anywhenParts`).
+
 ## 1.0.0
 
 First stable release. The public API — `anywhen`, `anywhenParts`,
