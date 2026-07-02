@@ -7,8 +7,10 @@ const NAV = [
   { id: "overview", label: "Overview" },
   { id: "install", label: "Install" },
   { id: "anywhen", label: "anywhen()" },
+  { id: "parts", label: "anywhenParts()" },
   { id: "modes", label: "Modes" },
   { id: "options", label: "Options" },
+  { id: "thresholds", label: "Thresholds" },
   { id: "ssr", label: "SSR" },
   { id: "input-types", label: "Input types" },
   { id: "locales", label: "Locales" },
@@ -238,6 +240,7 @@ export function DocsClient() {
                 Intl
               </code>{" "}
               browser API. One function, one options object, three modes.
+              Stable since 1.0 — the public API follows semver.
             </p>
             <p>
               The browser already knows how to format dates in 200+ languages.
@@ -285,6 +288,38 @@ anywhen(date, {
   format: { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' },
 })
 // "Friday, February 5, 2016"`}</Code>
+          </Section>
+
+          <Section id="parts" title="anywhenParts()">
+            <p>
+              Same arguments as{" "}
+              <code style={{ color: "var(--emerald)" }} className="font-mono">
+                anywhen()
+              </code>
+              , but returns the output as{" "}
+              <code style={{ color: "var(--emerald)" }} className="font-mono">
+                {"{ type, value, unit? }"}
+              </code>{" "}
+              parts instead of a string — style the number apart from the unit,
+              or rebuild the output your own way. New in 1.0.
+            </p>
+            <Code>{`import { anywhenParts } from 'anywhen'
+
+anywhenParts(date, { mode: 'relative', locale: 'en' })
+// [
+//   { type: 'integer', value: '3', unit: 'hour' },
+//   { type: 'literal', value: ' hours ago' },
+// ]
+
+// React: bold the number
+anywhenParts(date, { mode: 'relative' }).map((p, i) =>
+  p.type === 'integer' ? <b key={i}>{p.value}</b> : p.value,
+)`}</Code>
+            <p style={{ color: "var(--text-muted)" }} className="text-xs">
+              Note: part values keep the original Intl characters — the space
+              before AM/PM can be U+202F (narrow no-break space), which some
+              engines replace with a regular space in the joined string.
+            </p>
           </Section>
 
           <Section id="modes" title="Modes">
@@ -341,7 +376,7 @@ anywhen(date, {
               >
                 reads:{" "}
                 <code className="font-mono">
-                  locale, now, time, timeZone
+                  locale, now, time, timeZone, style, thresholds
                 </code>
               </p>
             </div>
@@ -414,13 +449,21 @@ anywhen(date, {
 
 anywhen(date, { mode: 'relative', locale: 'en', numeric: true })
 // "1 day ago"   — disables auto-phrases
-// "1 week ago"`}</Code>
+// "1 week ago"
+
+anywhen(date, { mode: 'relative', locale: 'en', style: 'short' })
+// "3 hr. ago"
+
+anywhen(date, { mode: 'relative', locale: 'en', style: 'narrow' })
+// "3h ago"`}</Code>
               <p
                 style={{ color: "var(--text-muted)" }}
                 className="text-xs mb-2"
               >
                 reads:{" "}
-                <code className="font-mono">locale, now, numeric</code>
+                <code className="font-mono">
+                  locale, now, numeric, style, thresholds
+                </code>
               </p>
             </div>
           </Section>
@@ -463,11 +506,52 @@ anywhen(date, { mode: 'relative', locale: 'en', numeric: true })
               desc="Relative mode only. Force numeric output — disables auto-phrases like 'yesterday' or 'last week'."
             />
             <Prop
+              name="style"
+              type="'long' | 'short' | 'narrow'"
+              def="'long'"
+              desc="Smart and relative modes. Maps to Intl.RelativeTimeFormat and shortens the relative phrasing — '10 min. ago', '3h ago'. Calendar labels keep their clock."
+            />
+            <Prop
               name="format"
               type="Intl.DateTimeFormatOptions"
               def="{ day, month, year }"
               desc="Absolute mode only. Any options accepted by Intl.DateTimeFormat. Defaults to a short date."
             />
+            <Prop
+              name="thresholds"
+              type="Partial<Record<unit, number>>"
+              def="built-in table"
+              desc="Smart and relative modes. Per-unit cutoffs (in seconds) for picking the display unit. Override any subset; the rest keep their defaults."
+            />
+          </Section>
+
+          <Section id="thresholds" title="Thresholds">
+            <p>
+              Each unit is shown while the distance from{" "}
+              <code style={{ color: "var(--emerald)" }} className="font-mono">
+                now
+              </code>{" "}
+              is below its cutoff, in seconds. Defaults:{" "}
+              <code style={{ color: "var(--emerald)" }} className="font-mono">
+                second: 45, minute: 2700, hour: 79200, day: 518400, week:
+                2160000, month: 28512000
+              </code>
+              . New in 1.0.
+            </p>
+            <Code>{`anywhen(date, { mode: 'relative', locale: 'en', thresholds: { minute: 5400 } })
+// 50 minutes ago → "50 minutes ago" instead of "1 hour ago"
+
+anywhen(date, { locale: 'en', thresholds: { second: 120 } })
+// smart mode: "now" covers the first 2 minutes`}</Code>
+            <p>
+              In smart mode{" "}
+              <code style={{ color: "var(--emerald)" }} className="font-mono">
+                thresholds.second
+              </code>{" "}
+              widens the &quot;now&quot; window, and the full table applies to
+              future dates. Calendar labels (today, yesterday, weekday) are not
+              affected.
+            </p>
           </Section>
 
           <Section id="ssr" title="SSR">
@@ -588,7 +672,7 @@ anywhen(date, { mode: 'relative', locale: 'tr' })   // "3 saat önce"`}</Code>
               className="rounded-xl border overflow-hidden mt-2"
             >
               {[
-                ["Node.js", "13+", "full ICU included by default"],
+                ["Node.js", "18+", "CI runs the suite on Node 20, 22, 24"],
                 ["Chrome", "71+", ""],
                 ["Firefox", "65+", ""],
                 ["Safari", "14+", ""],
@@ -642,12 +726,12 @@ anywhen(date, { mode: 'relative', locale: 'tr' })   // "3 saat önce"`}</Code>
                   body: "Absolute mode accepts Intl.DateTimeFormat options, so you control the pieces. But if you need 'DD/MM/YYYY' with literal slashes — use a formatting library with explicit pattern strings instead.",
                 },
                 {
-                  title: "Smart mode cutoff is fixed at 7 days",
-                  body: "The switch from weekday ('Wednesday, 11:20') to absolute date happens at 7 days and is not configurable. Need a custom cutoff? Use mode: 'relative' or mode: 'absolute' directly.",
+                  title: "Smart calendar cutoff is fixed at 7 days",
+                  body: "Unit cutoffs (seconds → minutes → hours…) are configurable via the thresholds option since 1.0. The calendar switch from weekday ('Wednesday, 11:20') to absolute date still happens at 7 days and is not configurable.",
                 },
                 {
-                  title: "Node.js < 13",
-                  body: "Older Node versions shipped with small-icu — only the 'en' locale was guaranteed. Node 13+ includes full ICU. On older versions, install the full-icu package separately.",
+                  title: "Node.js < 18",
+                  body: "The package declares engines.node >= 18 and CI tests Node 20/22/24. Older versions down to 13 will usually work — the required Intl APIs are there — but they are unsupported and untested.",
                 },
               ].map(({ title, body }) => (
                 <div

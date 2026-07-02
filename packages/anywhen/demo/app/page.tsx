@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { anywhen } from "anywhen";
+import { anywhen, anywhenParts } from "anywhen";
 import { Calendar } from "@dateforge/react-calendar";
 import { CalendarDays, CalendarNav } from "@dateforge/react-calendar/modules";
 import Link from "next/link";
@@ -82,6 +82,15 @@ export default function Home() {
     if (Number.isNaN(date.getTime())) return null;
     try {
       return anywhen(dateStr, { mode, locale });
+    } catch {
+      return null;
+    }
+  })();
+
+  const parts = (() => {
+    if (Number.isNaN(date.getTime())) return null;
+    try {
+      return anywhenParts(dateStr, { mode, locale });
     } catch {
       return null;
     }
@@ -209,6 +218,24 @@ export default function Home() {
               <p className="font-serif text-sm italic text-white/15">result</p>
             )}
           </div>
+
+          {done && parts && (
+            <div className="flex max-w-full flex-wrap items-center justify-center gap-x-1.5 gap-y-1 px-2 font-mono text-[11px]">
+              <span className="text-white/25">anywhenParts →</span>
+              {parts.map((p, i) => (
+                <span
+                  key={i}
+                  className="inline-flex items-baseline gap-1 rounded-md border border-white/[0.07] bg-white/[0.03] px-1.5 py-0.5"
+                >
+                  <span className="text-white/65">{JSON.stringify(p.value)}</span>
+                  <span className="text-[9px] uppercase tracking-wider text-white/25">
+                    {p.type}
+                    {p.unit ? ` · ${p.unit}` : ""}
+                  </span>
+                </span>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
