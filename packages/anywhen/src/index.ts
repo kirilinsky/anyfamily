@@ -4,6 +4,20 @@ export type DateInput = Date | number | string;
 export type Locale = string | readonly string[];
 export type Mode = "smart" | "absolute" | "relative";
 export type Style = Intl.RelativeTimeFormatStyle;
+export type ThresholdUnit =
+  | "second"
+  | "minute"
+  | "hour"
+  | "day"
+  | "week"
+  | "month";
+export type Thresholds = Partial<Record<ThresholdUnit, number>>;
+
+export interface AnywhenPart {
+  type: string;
+  value: string;
+  unit?: string;
+}
 
 export interface AnywhenOptions {
   mode?: Mode;
@@ -14,12 +28,13 @@ export interface AnywhenOptions {
   numeric?: boolean;
   style?: Style;
   format?: Intl.DateTimeFormatOptions;
+  thresholds?: Thresholds;
 }
 
 const MS_DAY = 864e5;
 const MS_YEAR = 315360e5;
 
-const THRESHOLDS: [number, RelativeUnit, number][] = [
+const THRESHOLDS: [number, ThresholdUnit, number][] = [
   [45, "second", 1e3],
   [2700, "minute", 6e4],
   [79200, "hour", 36e5],
@@ -101,79 +116,86 @@ const dayDiff = (date: Date, now: Date, timeZone?: string) =>
 
 const round = (n: number) => Math.sign(n) * Math.round(Math.abs(n));
 
-function unit(ms: number): [number, RelativeUnit] {
+function unit(ms: number, t?: Thresholds): [number, RelativeUnit] {
   const s = Math.abs(ms) / 1000;
   for (const [th, u, div] of THRESHOLDS)
-    if (s < th) return [round(ms / div), u];
+    if (s < (t?.[u] ?? th)) return [round(ms / div), u];
   return [round(ms / MS_YEAR), "year"];
 }
 
-function renderRelative(
+type Seg =
+  | { f: Intl.RelativeTimeFormat; v: number; u: RelativeUnit }
+  | { f: Intl.DateTimeFormat; d: Date }
+  | { t: string };
+
+function relativeSegs(
   date: Date,
   now: Date,
   locale: Locale | undefined,
   numeric: boolean,
   style: Style,
-): string {
+  t?: Thresholds,
+): Seg[] {
   const ms = date.getTime() - now.getTime();
-  const [v, u] = unit(ms);
-  return rtf(locale, numeric ? "always" : "auto", style).format(v, u);
+  const [v, u] = unit(ms, t);
+  return [{ f: rtf(locale, numeric ? "always" : "auto", style), v, u }];
 }
 
-function renderAbsolute(
+function absoluteSegs(
   date: Date,
   locale: Locale | undefined,
   format: Intl.DateTimeFormatOptions | undefined,
   timeZone: string | undefined,
-): string {
+): Seg[] {
   const opts = format ?? DATE_OPTS;
-  return dtf(locale, timeZone ? { ...opts, timeZone } : opts).format(date);
+  return [{ f: dtf(locale, timeZone ? { ...opts, timeZone } : opts), d: date }];
 }
 
-function renderSmart(
+function smartSegs(
   date: Date,
   now: Date,
   locale: Locale | undefined,
   time: boolean,
   timeZone: string | undefined,
   style: Style,
-): string {
+  t?: Thresholds,
+): Seg[] {
   const ms = date.getTime() - now.getTime();
   const abs = Math.abs(ms) / 1000;
-  const timeStr = () => dtf(locale, { ...TIME_OPTS, timeZone }).format(date);
+  const rel = (v: number, u: RelativeUnit): Seg[] => [
+    { f: rtf(locale, "auto", style), v, u },
+  ];
+  const withTime = (segs: Seg[]): Seg[] =>
+    time
+      ? [
+          ...segs,
+          { t: ", " },
+          { f: dtf(locale, { ...TIME_OPTS, timeZone }), d: date },
+        ]
+      : segs;
 
-  if (abs < 45) return rtf(locale, "auto", style).format(0, "second");
+  if (abs < (t?.second ?? 45)) return rel(0, "second");
   if (abs < 3600) {
     const m = round(ms / 6e4);
-    if (Math.abs(m) < 60) return rtf(locale, "auto", style).format(m, "minute");
+    if (Math.abs(m) < 60) return rel(m, "minute");
   }
 
   if (ms > 0) {
-    const [v, u] = unit(ms);
-    return rtf(locale, "auto", style).format(v, u);
+    const [v, u] = unit(ms, t);
+    return rel(v, u);
   }
 
   const calendarDiff = dayDiff(date, now, timeZone);
 
-  if (calendarDiff === 0) {
-    const s = rtf(locale, "auto", style).format(0, "day");
-    return time ? `${s}, ${timeStr()}` : s;
-  }
+  if (calendarDiff === 0) return withTime(rel(0, "day"));
+  if (calendarDiff === -1) return withTime(rel(-1, "day"));
+  if (calendarDiff < -1 && calendarDiff > -7)
+    return withTime([{ f: dtf(locale, { timeZone, weekday: "long" }), d: date }]);
 
-  if (calendarDiff === -1) {
-    const s = rtf(locale, "auto", style).format(-1, "day");
-    return time ? `${s}, ${timeStr()}` : s;
-  }
-
-  if (calendarDiff < -1 && calendarDiff > -7) {
-    const w = dtf(locale, { timeZone, weekday: "long" }).format(date);
-    return time ? `${w}, ${timeStr()}` : w;
-  }
-
-  return dtf(locale, { ...DATE_OPTS, timeZone }).format(date);
+  return [{ f: dtf(locale, { ...DATE_OPTS, timeZone }), d: date }];
 }
 
-export function anywhen(input: DateInput, options: AnywhenOptions = {}): string {
+function plan(input: DateInput, options: AnywhenOptions): Seg[] {
   const {
     mode = "smart",
     locale,
@@ -183,16 +205,36 @@ export function anywhen(input: DateInput, options: AnywhenOptions = {}): string 
     numeric = false,
     style = "long",
     format,
+    thresholds,
   } = options;
 
   const date = toDate(input);
   const anchor = now === undefined ? new Date() : toDate(now);
 
   if (mode === "relative")
-    return renderRelative(date, anchor, locale, numeric, style);
-  if (mode === "absolute") return renderAbsolute(date, locale, format, timeZone);
+    return relativeSegs(date, anchor, locale, numeric, style, thresholds);
+  if (mode === "absolute") return absoluteSegs(date, locale, format, timeZone);
   if (mode === "smart")
-    return renderSmart(date, anchor, locale, time, timeZone, style);
+    return smartSegs(date, anchor, locale, time, timeZone, style, thresholds);
 
   throw new RangeError(`Invalid mode: ${String(mode)}`);
+}
+
+export function anywhen(input: DateInput, options: AnywhenOptions = {}): string {
+  return plan(input, options)
+    .map((s) => ("t" in s ? s.t : "d" in s ? s.f.format(s.d) : s.f.format(s.v, s.u)))
+    .join("");
+}
+
+export function anywhenParts(
+  input: DateInput,
+  options: AnywhenOptions = {},
+): AnywhenPart[] {
+  return plan(input, options).flatMap((s) =>
+    "t" in s
+      ? { type: "literal", value: s.t }
+      : "d" in s
+        ? s.f.formatToParts(s.d)
+        : s.f.formatToParts(s.v, s.u),
+  );
 }

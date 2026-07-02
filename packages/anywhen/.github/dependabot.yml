@@ -1,0 +1,11 @@
+version: 2
+updates:
+  # Keep the demo on the latest published anywhen.
+  - package-ecosystem: npm
+    directory: /demo
+    schedule:
+      interval: weekly
+    allow:
+      - dependency-name: anywhen
+    commit-message:
+      prefix: "demo"

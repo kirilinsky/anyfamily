@@ -144,7 +144,7 @@ anywhen(date, { locale: "en", style: "short" });
 // "10 min. ago"  — shortens relative wording, calendar labels keep their clock
 ```
 
-Reads: `locale`, `now`, `time`, `timeZone`, `style`.
+Reads: `locale`, `now`, `time`, `timeZone`, `style`, `thresholds`.
 
 `style` maps to `Intl.RelativeTimeFormat` and only changes the relative
 phrasing (`"now"`, `"10 min. ago"`, `"in 3 hr."`). Calendar labels
@@ -202,7 +202,7 @@ anywhen(date, { mode: "relative", locale: "en", style: "narrow" });
 // "3h ago"
 ```
 
-Reads: `locale`, `now`, `numeric`, `style`.
+Reads: `locale`, `now`, `numeric`, `style`, `thresholds`.
 
 ---
 
@@ -218,8 +218,51 @@ Reads: `locale`, `now`, `numeric`, `style`.
 | `numeric`  | `boolean`                       | `false`          | relative             |
 | `style`    | `"long" \| "short" \| "narrow"` | `"long"`         | smart, relative      |
 | `format`   | `Intl.DateTimeFormatOptions`    | `{ day, month, year }` | absolute       |
+| `thresholds` | `Partial<Record<unit, number>>` | built-in table   | smart, relative      |
 
 Each mode reads only the options that apply to it. The rest are ignored.
+
+### thresholds
+
+Each unit (`second`, `minute`, `hour`, `day`, `week`, `month`) is shown while
+the distance from `now` is below its cutoff, in seconds. Override any subset —
+the rest keep their defaults (`second: 45`, `minute: 2700`, `hour: 79200`,
+`day: 518400`, `week: 2160000`, `month: 28512000`).
+
+```ts
+anywhen(date, { mode: "relative", locale: "en", thresholds: { minute: 5400 } });
+// 50 minutes ago → "50 minutes ago" instead of "1 hour ago"
+
+anywhen(date, { locale: "en", thresholds: { second: 120 } });
+// smart mode: "now" covers the first 2 minutes
+```
+
+In smart mode `thresholds.second` widens the `"now"` window, and the full
+table applies to future dates. Calendar labels (`today`, `yesterday`,
+weekday) are not affected.
+
+---
+
+## parts
+
+`anywhenParts()` accepts the same arguments as `anywhen()` and returns the
+output as `{ type, value, unit? }` parts — style the number apart from the
+unit, or rebuild the string your own way.
+
+```tsx
+import { anywhenParts } from "anywhen";
+
+anywhenParts(date, { mode: "relative", locale: "en" });
+// [
+//   { type: "integer", value: "3", unit: "hour" },
+//   { type: "literal", value: " hours ago" },
+// ]
+
+// React: bold the number
+anywhenParts(date, { mode: "relative" }).map((p, i) =>
+  p.type === "integer" ? <b key={i}>{p.value}</b> : p.value,
+);
+```
 
 ---
 
@@ -295,7 +338,20 @@ When omitted, native `Intl` uses the runtime locale.
 
 ---
 
+## stability
+
+anywhen follows [semver](https://semver.org/). Since 1.0.0 the public API —
+`anywhen`, `anywhenParts`, `AnywhenOptions`, and the exported types — only
+changes shape in a major release. New options arrive in minors; exact
+formatted strings come from `Intl` and may vary between ICU versions, so
+never assert on them across environments.
+
+---
+
 ## compatibility
 
-Node.js 13+ · Chrome 71+ · Firefox 65+ · Safari 14+ · Edge Runtime · Cloudflare
+Node.js 18+ · Chrome 71+ · Firefox 65+ · Safari 14+ · Edge Runtime · Cloudflare
 Workers · Deno
+
+CI runs the full suite on Node 20, 22, and 24. Older runtimes down to
+Node 18 work but are not tested on every release.

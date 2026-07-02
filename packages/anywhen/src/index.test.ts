@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { anywhen } from "./index";
+import { anywhen, anywhenParts } from "./index";
 
 const NOW = new Date("2016-02-05T14:00:00.000Z").getTime();
 
@@ -407,5 +407,203 @@ describe("smart mode — style option", () => {
     expect(anywhen(NOW - 2 * 3_600_000, { locale: "en", style: "short" })).toMatch(
       /today/i,
     );
+  });
+});
+
+describe("invalid input", () => {
+  it("throws RangeError on unparseable string", () => {
+    expect(() => anywhen("not a date")).toThrow(RangeError);
+    expect(() => anywhen("not a date")).toThrow("Invalid date: not a date");
+  });
+  it("throws RangeError on invalid Date object", () => {
+    expect(() => anywhen(new Date("nope"))).toThrow(RangeError);
+  });
+  it("throws RangeError on NaN timestamp", () => {
+    expect(() => anywhen(NaN)).toThrow(RangeError);
+  });
+  it("throws RangeError on invalid `now`", () => {
+    expect(() => anywhen(NOW, { now: "garbage" })).toThrow(RangeError);
+  });
+});
+
+describe("formatter cache — eviction", () => {
+  // 60 syntactically valid locales (> CACHE_LIMIT of 50); unknown regions
+  // fall back to plain "en" so output stays assertable.
+  const locales = Array.from(
+    { length: 60 },
+    (_, i) =>
+      `en-${String.fromCharCode(65 + Math.floor(i / 26))}${String.fromCharCode(
+        65 + (i % 26),
+      )}`,
+  );
+
+  it("relative output stays correct past the cache limit", () => {
+    for (const locale of locales) {
+      expect(anywhen(NOW - 30_000, { mode: "relative", locale })).toBe(
+        "30 seconds ago",
+      );
+    }
+    // first locale was evicted by now — must recreate, not corrupt
+    expect(anywhen(NOW - 30_000, { mode: "relative", locale: locales[0] })).toBe(
+      "30 seconds ago",
+    );
+  });
+
+  it("absolute output stays correct past the cache limit", () => {
+    // reference: a fresh, uncached formatter per locale
+    const expected = (locale: string) =>
+      new Intl.DateTimeFormat(locale, {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      }).format(NOW);
+
+    for (const locale of locales) {
+      expect(anywhen(NOW, { mode: "absolute", locale })).toBe(expected(locale));
+    }
+    // first locale was evicted by now — must recreate, not corrupt
+    expect(anywhen(NOW, { mode: "absolute", locale: locales[0] })).toBe(
+      expected(locales[0]),
+    );
+  });
+});
+
+describe("absolute mode — format + timeZone combined", () => {
+  it("applies timeZone to a custom format", () => {
+    expect(
+      anywhen(NOW, {
+        mode: "absolute",
+        locale: "en",
+        timeZone: "Asia/Tokyo",
+        format: { hour: "2-digit", minute: "2-digit", hour12: false },
+      }),
+    ).toBe("23:00");
+  });
+  it("timeZone option wins over format.timeZone", () => {
+    expect(
+      anywhen(NOW, {
+        mode: "absolute",
+        locale: "en",
+        timeZone: "Asia/Tokyo",
+        format: {
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: false,
+          timeZone: "America/New_York",
+        },
+      }),
+    ).toBe("23:00");
+  });
+});
+
+describe("thresholds option", () => {
+  it("widens the seconds window in relative mode", () => {
+    expect(
+      anywhen(NOW - 60_000, {
+        mode: "relative",
+        locale: "en",
+        thresholds: { second: 90 },
+      }),
+    ).toBe("60 seconds ago");
+  });
+  it("widens the minutes window in relative mode", () => {
+    expect(
+      anywhen(NOW - 3_000_000, {
+        mode: "relative",
+        locale: "en",
+        thresholds: { minute: 5400 },
+      }),
+    ).toBe("50 minutes ago");
+  });
+  it("partial override keeps other thresholds at defaults", () => {
+    const opts = { mode: "relative", locale: "en", thresholds: { minute: 5400 } } as const;
+    expect(anywhen(NOW - 44_000, opts)).toBe("44 seconds ago");
+    expect(anywhen(NOW - 2 * 3_600_000, opts)).toBe("2 hours ago");
+  });
+  it("widens the smart-mode 'now' window via thresholds.second", () => {
+    expect(
+      anywhen(NOW - 60_000, { locale: "en", thresholds: { second: 90 } }),
+    ).toBe("now");
+  });
+  it("applies to future dates in smart mode", () => {
+    expect(
+      anywhen(NOW + 7_200_000, { locale: "en", thresholds: { minute: 7500 } }),
+    ).toBe("in 120 minutes");
+  });
+  it("does not change default behavior when omitted", () => {
+    expect(anywhen(NOW - 60_000, { mode: "relative", locale: "en" })).toBe(
+      "1 minute ago",
+    );
+  });
+});
+
+describe("anywhenParts", () => {
+  it("joined parts equal the anywhen string in every mode", () => {
+    const cases: Parameters<typeof anywhen>[] = [
+      [NOW - 3_600_000, { mode: "relative", locale: "en" }],
+      [NOW - 30_000, { mode: "relative", locale: "ru", numeric: true }],
+      [NOW, { mode: "absolute", locale: "en" }],
+      [NOW, { mode: "absolute", locale: "ja", timeZone: "Asia/Tokyo" }],
+      [NOW - 20_000, { locale: "en" }],
+      [NOW - 2 * 3_600_000, { locale: "en", timeZone: "UTC" }],
+      [NOW - 86_400_000, { locale: "de", timeZone: "UTC" }],
+      [NOW - 3 * 86_400_000, { locale: "en", timeZone: "UTC" }],
+      [NOW - 30 * 86_400_000, { locale: "en", timeZone: "UTC" }],
+      [NOW + 14 * 86_400_000, { locale: "en" }],
+    ];
+    // V8 quirk: format() maps U+202F/U+00A0 to ASCII space, formatToParts()
+    // keeps the originals — normalize both sides before comparing.
+    const norm = (s: string) => s.replace(/[  ]/g, " ");
+    for (const [input, options] of cases) {
+      const parts = anywhenParts(input, options);
+      expect(norm(parts.map((p) => p.value).join(""))).toBe(
+        norm(anywhen(input, options)),
+      );
+    }
+  });
+
+  it("exposes the unit on relative numeric parts", () => {
+    const parts = anywhenParts(NOW - 3_600_000, {
+      mode: "relative",
+      locale: "en",
+    });
+    const integer = parts.find((p) => p.type === "integer");
+    expect(integer?.value).toBe("1");
+    expect(integer?.unit).toBe("hour");
+  });
+
+  it("returns typed date parts in absolute mode", () => {
+    const parts = anywhenParts(NOW, { mode: "absolute", locale: "en" });
+    expect(parts.map((p) => p.type)).toEqual([
+      "month",
+      "literal",
+      "day",
+      "literal",
+      "year",
+    ]);
+  });
+
+  it("splits smart calendar labels into label, separator, and clock", () => {
+    const parts = anywhenParts(NOW - 2 * 3_600_000, {
+      locale: "en",
+      timeZone: "UTC",
+    });
+    expect(parts.some((p) => p.type === "literal" && p.value === ", ")).toBe(
+      true,
+    );
+    expect(parts.some((p) => p.type === "hour")).toBe(true);
+  });
+
+  it("drops the clock parts with time: false", () => {
+    const parts = anywhenParts(NOW - 2 * 3_600_000, {
+      locale: "en",
+      timeZone: "UTC",
+      time: false,
+    });
+    expect(parts.some((p) => p.type === "hour")).toBe(false);
+  });
+
+  it("throws the same RangeError as anywhen on invalid input", () => {
+    expect(() => anywhenParts("not a date")).toThrow(RangeError);
   });
 });

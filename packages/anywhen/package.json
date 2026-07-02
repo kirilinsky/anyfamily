@@ -1,6 +1,6 @@
 {
     "name": "anywhen",
-    "version": "0.4.0",
+    "version": "1.0.0",
     "description": "Tiny smart date formatter — one function, three modes (smart, absolute, relative), any Intl locale.",
     "type": "module",
     "sideEffects": false,
@@ -8,6 +8,9 @@
     "module": "./dist/index.mjs",
     "types": "./dist/index.d.ts",
     "packageManager": "pnpm@10.32.1",
+    "engines": {
+        "node": ">=18"
+    },
     "exports": {
         ".": {
             "import": {
@@ -30,6 +33,7 @@
         "test": "vitest run",
         "test:coverage": "vitest run --coverage",
         "typecheck": "tsc --noEmit",
+        "version": "node scripts/sync-jsr.mjs && git add jsr.json",
         "release": "npm version patch && git push --follow-tags"
     },
     "keywords": [

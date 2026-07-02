@@ -1,5 +1,49 @@
 # Changelog
 
+## 1.0.0
+
+First stable release. The public API — `anywhen`, `anywhenParts`,
+`AnywhenOptions`, and the exported types — now follows semver: breaking
+changes only in majors.
+
+### Added
+
+- Added `anywhenParts()`. Same arguments as `anywhen()`, returns
+  `{ type, value, unit? }` parts for custom rendering. Exposed as the public
+  `AnywhenPart` type.
+
+  ```ts
+  anywhenParts(date, { mode: "relative", locale: "en" });
+  // [
+  //   { type: "integer", value: "3", unit: "hour" },
+  //   { type: "literal", value: " hours ago" },
+  // ]
+  ```
+
+- Added `thresholds` for smart and relative modes. Overrides any subset of
+  the unit-selection cutoffs (seconds); the rest keep their defaults. Exposed
+  as the public `Thresholds` and `ThresholdUnit` types.
+
+  ```ts
+  anywhen(date, { mode: "relative", thresholds: { minute: 5400 } });
+  // "50 minutes ago" instead of "1 hour ago"
+  ```
+
+- Published to JSR as `@kirilinsky/anywhen`.
+
+### Changed
+
+- Declared `engines.node >= 18`. CI now runs the test suite on Node 20, 22,
+  and 24 instead of 24 only.
+
+### Internal
+
+- One shared render plan now backs both `anywhen()` and `anywhenParts()`,
+  so the smart cascade logic exists once.
+- Added tests for invalid input, formatter-cache eviction past 50 locales,
+  `format` + `timeZone` combined, `thresholds`, and parts/string parity.
+- The demo tracks the latest published anywhen via Dependabot.
+
 ## 0.4.0
 
 ### Added
