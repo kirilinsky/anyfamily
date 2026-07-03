@@ -249,6 +249,7 @@ export default function Home() {
             {[
               ["github", "https://github.com/kirilinsky/anywhen"],
               ["npm", "https://www.npmjs.com/package/anywhen"],
+              ["anyamount", "https://anyamount.vercel.app/"],
             ].map(([label, href]) => (
               <a
                 key={label}
