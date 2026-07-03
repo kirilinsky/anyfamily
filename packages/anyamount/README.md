@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://placehold.co/230x230?text=anyamount" alt="anyamount logo" width="230" />
+  <img src="https://raw.githubusercontent.com/kirilinsky/anyamount/main/logo.png" alt="anyamount logo" width="420" />
 </p>
 
 <h1 align="center">anyamount</h1>
