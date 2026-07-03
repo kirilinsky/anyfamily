@@ -17,6 +17,10 @@
   Turn numbers into <code>"1.2M"</code>, <code>"€1,999.00"</code>, <code>"3.2 GB"</code>, or <code>"120 km/h"</code>.
 </p>
 
+<p align="center">
+  <a href="https://anyamount.vercel.app/">▸ live demo</a>
+</p>
+
 ---
 
 **One function. Smart defaults. Any locale. ~0.7kb gzip. Zero dependencies.**
