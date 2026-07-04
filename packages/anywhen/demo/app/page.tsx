@@ -198,7 +198,7 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="flex min-w-0 items-center justify-center">
+          <div className="flex min-h-10 min-w-0 items-center justify-center sm:min-h-12">
             {typed ? (
               <p
                 className="min-w-0 break-words text-center text-4xl tracking-tight text-white/90 sm:text-5xl"
@@ -227,7 +227,9 @@ export default function Home() {
                   key={i}
                   className="inline-flex items-baseline gap-1 rounded-md border border-white/[0.07] bg-white/[0.03] px-1.5 py-0.5"
                 >
-                  <span className="text-white/65">{JSON.stringify(p.value)}</span>
+                  <span className="text-white/65">
+                    {JSON.stringify(p.value)}
+                  </span>
                   <span className="text-[9px] uppercase tracking-wider text-white/25">
                     {p.type}
                     {p.unit ? ` · ${p.unit}` : ""}
