@@ -1,0 +1,65 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - "demo/**"
+  pull_request:
+    branches: [main]
+    paths-ignore:
+      - "demo/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [20, 22, 24]
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.32.1
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: ${{ matrix.node }}
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm typecheck
+
+      - run: pnpm lint
+
+      - run: pnpm test:coverage
+
+      - uses: codecov/codecov-action@v5
+        if: matrix.node == 24
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+
+      - run: pnpm build
+
+      - name: Smoke test package outputs
+        run: |
+          node --input-type=module -e "import { anymany } from './dist/index.mjs'; if (typeof anymany !== 'function') throw new Error('ESM export failed')"
+          node -e "const { anymany } = require('./dist/index.cjs'); if (typeof anymany !== 'function') throw new Error('CJS export failed')"
+
+      - run: pnpm publint
+
+      - name: Check bundle size
+        run: |
+          SIZE=$(gzip -c dist/index.mjs | wc -c | tr -d ' ')
+          echo "Bundle size: ${SIZE} bytes gzip"
+          if [ "$SIZE" -gt 1250 ]; then
+            echo "Bundle too large: ${SIZE}b gzip > 1250b"
+            exit 1
+          fi
