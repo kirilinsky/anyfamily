@@ -41,6 +41,13 @@ jobs:
 
       - run: pnpm test:coverage
 
+      - name: Upload coverage to Codecov
+        if: matrix.node == 24
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage/lcov.info
+
       - run: pnpm build
 
       - name: Smoke test package outputs

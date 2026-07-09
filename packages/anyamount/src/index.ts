@@ -70,21 +70,53 @@ export type Unit = SingleUnit | `${SingleUnit}-per-${SingleUnit}`;
 /** One piece of formatted output returned by {@linkcode anyamountParts} — `Intl.NumberFormat.formatToParts` output, unchanged. */
 export type AnyamountPart = Intl.NumberFormatPart;
 
-/** Options for {@linkcode anyamount} and {@linkcode anyamountParts}. Each mode reads only the options that apply to it. */
-export interface AnyamountOptions {
-  /** Rendering strategy. Defaults to `"smart"`. */
-  mode?: Mode;
+/** Options every mode understands. */
+interface BaseOptions {
   /** Output locale. Defaults to the runtime locale. */
   locale?: Locale;
-  /** ISO 4217 currency code (`"EUR"`, `"JPY"`). Required by currency mode. */
-  currency?: string;
-  /** Sanctioned unit identifier (`"gigabyte"`, `"kilometer-per-hour"`). Required by unit mode. */
-  unit?: Unit;
-  /** Wording length for unit names and compact suffixes. Smart and unit modes. Defaults to `"short"`. */
-  style?: Style;
   /** Maximum fraction digits. Defaults per mode: smart — 2 plain / 1 compact, unit — 2, currency — the currency's own. */
   digits?: number;
 }
+
+/** Options for smart mode (the default). */
+export interface SmartOptions extends BaseOptions {
+  /** Rendering strategy. Defaults to `"smart"`. */
+  mode?: "smart";
+  /** Wording length for compact suffixes (`"1.2M"` / `"1.2 million"`). Defaults to `"short"`. */
+  style?: Style;
+}
+
+/** Options for currency mode. */
+export interface CurrencyOptions extends BaseOptions {
+  mode: "currency";
+  /** ISO 4217 currency code (`"EUR"`, `"JPY"`). */
+  currency: string;
+}
+
+/** Options for unit mode. */
+export interface UnitOptions extends BaseOptions {
+  mode: "unit";
+  /** Sanctioned unit identifier (`"gigabyte"`, `"kilometer-per-hour"`). */
+  unit: Unit;
+  /** Wording length for unit names (`"3.2 gigabytes"` / `"3.2 GB"` / `"3.2GB"`). Defaults to `"short"`. */
+  style?: Style;
+}
+
+/**
+ * Options for {@linkcode anyamount} and {@linkcode anyamountParts} — a
+ * discriminated union on `mode`. TypeScript requires `currency` in currency
+ * mode and `unit` in unit mode at compile time; plain JavaScript callers get
+ * the same guarantees as runtime `TypeError`s.
+ */
+export type AnyamountOptions = SmartOptions | CurrencyOptions | UnitOptions;
+
+/** The union flattened for internal destructuring; {@linkcode plan} re-enforces at runtime what the union promises at compile time. */
+type ResolvedOptions = BaseOptions & {
+  mode?: Mode;
+  currency?: string;
+  unit?: Unit;
+  style?: Style;
+};
 
 /** Compact notation kicks in at this absolute value in smart mode. */
 const COMPACT_MIN = 1e4;
@@ -110,14 +142,16 @@ const nf = (l: Locale | undefined, o: Intl.NumberFormatOptions) =>
     new Intl.NumberFormat(l as Intl.LocalesArgument, o),
   );
 
-function plan(value: number, options: AnyamountOptions): Intl.NumberFormat {
-  const { mode = "smart", locale, currency, unit, style = "short", digits } = options;
+function plan(value: number | bigint, options: AnyamountOptions): Intl.NumberFormat {
+  const { mode = "smart", locale, currency, unit, style = "short", digits } =
+    options as ResolvedOptions;
 
-  if (typeof value !== "number" || Number.isNaN(value))
+  if (!(typeof value === "bigint" || (typeof value === "number" && !Number.isNaN(value))))
     throw new TypeError(`Invalid amount: ${String(value)}`);
 
   if (mode === "smart") {
-    const compact = Math.abs(value) >= COMPACT_MIN;
+    const abs = typeof value === "bigint" ? (value < 0 ? -value : value) : Math.abs(value);
+    const compact = abs >= COMPACT_MIN;
     return nf(
       locale,
       compact
@@ -158,20 +192,24 @@ function plan(value: number, options: AnyamountOptions): Intl.NumberFormat {
 /**
  * Formats a number as a human-readable, localized string using native `Intl`.
  *
+ * `bigint` values work in every mode. `±Infinity` formats as the locale's
+ * infinity symbol (`"∞"`); `NaN` throws.
+ *
  * @example
  * ```ts
- * anyamount(1234567);                                          // "1.2M"
- * anyamount(1999, { mode: "currency", currency: "EUR" });      // "€1,999.00"
- * anyamount(3.2, { mode: "unit", unit: "gigabyte" });          // "3.2 GB"
+ * anyamount(1234567, { locale: "en" });                                     // "1.2M"
+ * anyamount(1999, { mode: "currency", currency: "EUR", locale: "en" });     // "€1,999.00"
+ * anyamount(3.2, { mode: "unit", unit: "gigabyte", locale: "en" });         // "3.2 GB"
+ * anyamount(9_007_199_254_740_993n, { locale: "en" });                      // "9007.2T"
  * ```
  *
- * @param value The number to format.
+ * @param value The number (or bigint) to format.
  * @param options See {@linkcode AnyamountOptions}.
  * @returns The formatted string.
- * @throws {TypeError} If `value` is not a number, currency mode is missing `currency`, or unit mode is missing `unit`.
+ * @throws {TypeError} If `value` is not a number or bigint, is `NaN`, currency mode is missing `currency`, or unit mode is missing `unit`.
  * @throws {RangeError} If `options.mode` is unknown.
  */
-export function anyamount(value: number, options: AnyamountOptions = {}): string {
+export function anyamount(value: number | bigint, options: AnyamountOptions = {}): string {
   return plan(value, options).format(value);
 }
 
@@ -194,14 +232,14 @@ export function anyamount(value: number, options: AnyamountOptions = {}): string
  * // ]
  * ```
  *
- * @param value The number to format.
+ * @param value The number (or bigint) to format.
  * @param options See {@linkcode AnyamountOptions} — same options as {@linkcode anyamount}.
  * @returns The formatted output as an array of parts.
- * @throws {TypeError} If `value` is not a number, currency mode is missing `currency`, or unit mode is missing `unit`.
+ * @throws {TypeError} If `value` is not a number or bigint, is `NaN`, currency mode is missing `currency`, or unit mode is missing `unit`.
  * @throws {RangeError} If `options.mode` is unknown.
  */
 export function anyamountParts(
-  value: number,
+  value: number | bigint,
   options: AnyamountOptions = {},
 ): AnyamountPart[] {
   return plan(value, options).formatToParts(value);

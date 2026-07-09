@@ -23,7 +23,6 @@ jobs:
         with:
           node-version: 24
           cache: pnpm
-          registry-url: "https://registry.npmjs.org"
 
       - run: pnpm install --frozen-lockfile
 
@@ -42,9 +41,10 @@ jobs:
 
       - run: pnpm publint
 
+      # Auth via npm Trusted Publishing (OIDC, id-token: write) — no token secret.
       - run: pnpm publish --no-git-checks --access public
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_CONFIG_PROVENANCE: "false"
 
       - name: Create GitHub release
         env:

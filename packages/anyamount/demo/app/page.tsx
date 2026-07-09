@@ -8,7 +8,7 @@ import { Logo } from "@/logo/logo";
 
 type Mode = "smart" | "currency" | "unit";
 
-const LOCALES = ["en", "ru", "ja", "ar", "hi", "pt-BR", "sr-Latn-RS"];
+const LOCALES = ["en", "de", "ru", "ja", "ar", "hi", "pt-BR", "sr-Latn-RS"];
 
 const CURRENCIES = ["EUR", "USD", "JPY", "RSD", "GBP", "INR"];
 
@@ -17,13 +17,16 @@ const UNITS: Unit[] = [
   "megabyte",
   "kilometer-per-hour",
   "kilometer",
+  "mile",
+  "mile-per-gallon",
   "celsius",
   "liter",
+  "gallon",
   "kilogram",
   "percent",
 ];
 
-const PRESETS = [1234567, 10000, 9999, 42, 0.1234, -3.5];
+const PRESETS = [1234567, 10000, 9999, 42, 1, 0.1234, -3.5];
 
 const MODE_HINTS: Record<Mode, string> = {
   smart: "compact for big numbers, plain for small",
@@ -112,7 +115,9 @@ export default function Home() {
               onChange={(e) => setValueStr(e.target.value)}
               inputMode="decimal"
               spellCheck={false}
-              style={{ width: `calc(${Math.max(valueStr.length, 1)}ch + 1rem)` }}
+              style={{
+                width: `calc(${Math.max(valueStr.length, 1)}ch + 1rem)`,
+              }}
               className="h-8 min-w-0 shrink rounded-md border border-transparent px-1.5 text-left text-sky-300 outline-none transition-colors hover:border-white/10 hover:bg-white/[0.05] focus:border-sky-300/40"
             />
             <span className="shrink-0 text-white/30">, {"{"}</span>
@@ -218,29 +223,44 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="flex min-h-10 min-w-0 items-center justify-center sm:min-h-12">
-            {typed ? (
-              <p
-                className="min-w-0 break-words text-center text-4xl tracking-tight text-white/90 sm:text-5xl"
-                style={{ fontFamily: "'Georgia', serif" }}
-              >
-                {typed}
-                <span
-                  className="ml-[2px] inline-block h-[1.2em] w-[2px] align-middle bg-white/60"
-                  style={{
-                    animation: done ? "blink 1s step-end infinite" : "none",
-                    opacity: done ? undefined : 1,
-                  }}
-                />
-                <style>{`@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }`}</style>
-              </p>
+          <div className="flex min-h-10 w-full min-w-0 items-center justify-center sm:min-h-12">
+            {result ? (
+              <div className="relative w-full">
+                {/* invisible sizer with the final text reserves the exact end height */}
+                <p
+                  aria-hidden
+                  className="invisible w-full break-words text-center text-4xl tracking-tight sm:text-5xl"
+                  style={{ fontFamily: "'Georgia', serif" }}
+                >
+                  {result}
+                  <span className="ml-[2px] inline-block h-[1.2em] w-[2px] align-middle bg-white/60" />
+                </p>
+                <p
+                  className="absolute inset-x-0 top-0 w-full break-words text-center text-4xl tracking-tight text-white/90 sm:text-5xl"
+                  style={{ fontFamily: "'Georgia', serif" }}
+                >
+                  {typed}
+                  <span
+                    className="ml-[2px] inline-block h-[1.2em] w-[2px] align-middle bg-white/60"
+                    style={{
+                      animation: done ? "blink 1s step-end infinite" : "none",
+                      opacity: done ? undefined : 1,
+                    }}
+                  />
+                  <style>{`@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }`}</style>
+                </p>
+              </div>
             ) : (
               <p className="font-serif text-sm italic text-white/15">result</p>
             )}
           </div>
 
-          <div className="flex min-h-6 max-w-full flex-wrap items-center justify-center gap-x-1.5 gap-y-1 px-2 font-mono text-[11px]">
-            {done && parts && (
+          <div
+            className={`flex min-h-6 max-w-full flex-wrap items-center justify-center gap-x-1.5 gap-y-1 px-2 font-mono text-[11px] transition-opacity duration-200 ${
+              done ? "opacity-100" : "opacity-0"
+            }`}
+          >
+            {parts && (
               <>
                 <span className="text-white/25">anyamountParts →</span>
                 {parts.map((p, i) => (

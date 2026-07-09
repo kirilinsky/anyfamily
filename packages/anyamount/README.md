@@ -8,6 +8,7 @@
   <a href="https://www.npmjs.com/package/anyamount"><img src="https://img.shields.io/npm/v/anyamount?style=flat-square&color=black" alt="npm" /></a>
   <a href="https://bundlephobia.com/package/anyamount"><img src="https://img.shields.io/bundlephobia/minzip/anyamount?style=flat-square&color=black&label=gzip" /></a>
   <a href="https://github.com/kirilinsky/anyamount/actions/workflows/flow.yml"><img src="https://github.com/kirilinsky/anyamount/actions/workflows/flow.yml/badge.svg" alt="CI" /></a>
+  <a href="https://codecov.io/gh/kirilinsky/anyamount"><img src="https://img.shields.io/codecov/c/github/kirilinsky/anyamount?style=flat-square&color=black" alt="coverage" /></a>
   <a href="./LICENSE"><img src="https://img.shields.io/npm/l/anyamount?style=flat-square&color=black" alt="license" /></a>
 </p>
 
@@ -67,12 +68,14 @@ anyamount(value);
 anyamount(value, options);
 ```
 
-`value` is a number.
+`value` is a number or a bigint — every mode accepts both. `±Infinity`
+formats as the locale's infinity symbol (`"∞"`); `NaN` throws.
 
 ```ts
 anyamount(1234567);
 anyamount(0.1234);
 anyamount(-42.5);
+anyamount(123456789012345678901n);   // beyond MAX_SAFE_INTEGER, no precision loss
 ```
 
 ---
@@ -164,9 +167,11 @@ Reads: `locale`, `unit`, `style`, `digits`.
 | `style`    | `"long" \| "short" \| "narrow"`   | `"short"`      | smart, unit   |
 | `digits`   | `number` (max fraction digits)    | smart default  | all           |
 
-Each mode reads only the options that apply to it. The rest are ignored.
-`currency` mode without `currency`, or `unit` mode without `unit`, throws a
-clear `TypeError`.
+The options type is a discriminated union on `mode` — TypeScript requires
+`currency` in currency mode and `unit` in unit mode at compile time, and
+rejects options that don't belong to the mode. From plain JavaScript, the
+same rules hold at runtime: a missing `currency` or `unit` throws a clear
+`TypeError`, and stray options are ignored.
 
 ---
 
@@ -237,9 +242,9 @@ Honest ones:
 
 - **No byte auto-scaling yet.** `anyamount(3200000000, { mode: "unit", unit: "byte" })`
   will not pick `GB` for you — pass the unit you want. Auto-scaling is planned
-  for v0.2.
-- **No percent mode, no ranges, no parsing.** v0.1 is deliberately one
-  function, three modes.
+  for a future minor.
+- **No percent mode, no ranges, no parsing.** Deliberately one function,
+  three modes.
 - **Exact output strings come from `Intl`** and may vary between ICU versions —
   don't snapshot them across environments.
 - **Sanctioned units only.** `Intl` supports a fixed list of unit identifiers
@@ -249,10 +254,10 @@ Honest ones:
 
 ## stability
 
-anyamount follows [semver](https://semver.org/). This is a `0.x` trial
-release: the API is small and may still move before 1.0. New options arrive
-in minors; exact formatted strings come from `Intl` and may vary between ICU
-versions, so never assert on them across environments.
+anyamount follows [semver](https://semver.org/). The `1.x` API is stable:
+new options arrive in minors, breaking changes only in majors. Exact
+formatted strings come from `Intl` and may vary between ICU versions, so
+never assert on them across environments.
 
 ---
 
