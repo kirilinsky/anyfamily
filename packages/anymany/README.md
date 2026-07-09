@@ -13,13 +13,12 @@
 </p>
 
 <p align="center">
-  <strong>Tiny smart list formatter built on native <code>Intl</code>.</strong>
+  <strong>Smart list formatter built on native <code>Intl</code>.</strong>
   <br />
   Turn arrays into <code>"banana, apple, and cherry"</code>, <code>"a, b или c"</code>, or <code>"a、b、c"</code> — sorted right, joined right.
 </p>
 
 <p align="center">
-  <!-- TODO: confirm the Vercel URL after the first deploy -->
   <a href="https://anymany.vercel.app/">▸ live demo</a>
 </p>
 
@@ -39,11 +38,11 @@ import { anymany } from "anymany";
 anymany(["banana", "apple", "cherry"]);
 // "banana, apple, and cherry"
 
-anymany(["a", "b", "c"], { type: "disjunction", locale: "ru" });
-// "a, b или c"
+anymany(["S", "M", "L"], { type: "disjunction" });
+// "S, M, or L"
 
-anymany(["Öl", "Zebra", "Apfel"], { sort: true, locale: "de" });
-// "Apfel, Öl und Zebra"
+anymany(["cherry", "apple", "Banana"], { sort: true });
+// "apple, Banana, and cherry"
 
 anymany(["x", "y", "z", "a", "b", "c", "d"], { max: 3 });
 // "x, y, z, and +4"
@@ -86,8 +85,6 @@ Default is `"conjunction"` (and) in `"long"` style. Both map straight to
 anymany(["a", "b", "c"]);                        // "a, b, and c"
 anymany(["a", "b", "c"], { style: "short" });    // "a, b, & c"
 anymany(["a", "b", "c"], { style: "narrow" });   // "a, b, c"
-anymany(["a", "b", "c"], { locale: "de" });      // "a, b und c"
-anymany(["a", "b", "c"], { locale: "ja" });      // "a、b、c"
 ```
 
 ## disjunction
@@ -96,9 +93,8 @@ anymany(["a", "b", "c"], { locale: "ja" });      // "a、b、c"
 joiner word.
 
 ```ts
-anymany(["S", "M", "L"], { type: "disjunction" });               // "S, M, or L"
-anymany(["S", "M", "L"], { type: "disjunction", locale: "ru" }); // "S, M или L"
-anymany(["4 kg", "2 m"], { type: "unit" });                      // "4 kg, 2 m"
+anymany(["S", "M", "L"], { type: "disjunction" });  // "S, M, or L"
+anymany(["4 kg", "2 m"], { type: "unit" });         // "4 kg, 2 m"
 ```
 
 ## sort
@@ -108,8 +104,8 @@ language-aware collation, not code-point order. The input array is never
 mutated.
 
 ```ts
-anymany(["Öl", "Zebra", "Apfel"], { sort: true, locale: "de" });
-// "Apfel, Öl und Zebra"   ← Ö sorts after A, not after Z
+anymany(["cherry", "apple", "Banana"], { sort: true });
+// "apple, Banana, and cherry"   ← plain .sort() would put "Banana" first
 ```
 
 ## numeric sort
@@ -118,8 +114,8 @@ anymany(["Öl", "Zebra", "Apfel"], { sort: true, locale: "de" });
 `10`. Pass any `Intl.CollatorOptions` object for full control.
 
 ```ts
-anymany(["файл10", "файл2"], { sort: "numeric", locale: "ru" });
-// "файл2 и файл10"
+anymany(["file10", "file2"], { sort: "numeric" });
+// "file2 and file10"
 
 anymany(["a", "A"], { sort: { caseFirst: "upper" } });
 // "A and a"
@@ -134,9 +130,6 @@ localize — no words, locale-safe.
 ```ts
 anymany(["x", "y", "z", "a", "b", "c", "d"], { max: 3 });
 // "x, y, z, and +4"
-
-anymany(["a", "b", "c", "d", "e", "f", "g"], { max: 3, locale: "ar-EG" });
-// "a وb وc و+٤"
 
 anymany(["x", "y", "z", "a", "b"], { max: 3, overflow: (n) => `${n} more` });
 // "x, y, z, and 2 more"
@@ -169,6 +162,32 @@ anymanyParts(tags).map((p, i) =>
 );
 ```
 
+## locales
+
+Everything above works the same in any locale — joiner words, collation, and
+overflow digits all come from `Intl`. Pass any valid BCP 47 tag, including
+regional variants like `en-GB`, `zh-TW`, `pt-BR`; fallback arrays also work.
+
+```ts
+anymany(["a", "b", "c"], { locale: "ru" });                       // "a, b и c"
+anymany(["a", "b", "c"], { locale: "de" });                       // "a, b und c"
+anymany(["a", "b", "c"], { locale: "ja" });                       // "a、b、c"
+anymany(["a", "b", "c"], { type: "disjunction", locale: "ru" });  // "a, b или c"
+
+anymany(["Öl", "Zebra", "Apfel"], { sort: true, locale: "de" });
+// "Apfel, Öl und Zebra"   ← Ö sorts after A, not after Z
+
+anymany(["файл10", "файл2"], { sort: "numeric", locale: "ru" });
+// "файл2 и файл10"
+
+anymany(["a", "b", "c", "d", "e", "f", "g"], { max: 3, locale: "ar-EG" });
+// "a وb وc و+٤"           ← localized overflow digits
+
+anymany(["a", "b"], { locale: ["sr-Latn-RS", "en"] });
+```
+
+When omitted, native `Intl` uses the runtime locale.
+
 ---
 
 ## options
@@ -188,7 +207,7 @@ anymanyParts(tags).map((p, i) =>
 
 ## family
 
-anymany is part of a tiny family — same author, same DNA: one function, smart
+anymany is part of a family — same author, same DNA: one function, smart
 defaults, any Intl locale, ~1kb gzip, zero dependencies, SSR-safe, dual
 ESM+CJS.
 
@@ -202,7 +221,7 @@ ESM+CJS.
 
 **Why no pluralization ("1 file" / "2 files")?**
 By design. `Intl` ships no word data, and anymany ships zero language
-dictionaries — that is what keeps it tiny and correct in every locale. The
+dictionaries — that is what keeps it lightweight and correct in every locale. The
 overflow counter is `"+N"` (localized digits) instead of `"and N more"` for
 the same reason. If a feature would require per-language words, it is out of
 scope.

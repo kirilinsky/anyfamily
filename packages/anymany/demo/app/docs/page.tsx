@@ -4,7 +4,7 @@ import { DocsClient } from "./DocsClient";
 export const metadata: Metadata = {
   title: "Docs",
   description:
-    "API reference for anymany, a tiny Intl list formatter. Learn conjunction, disjunction, and unit joins, Collator sorting, overflow counters, and locales.",
+    "API reference for anymany, a zero-dependency Intl list formatter. Learn conjunction, disjunction, and unit joins, Collator sorting, overflow counters, and locales.",
   openGraph: {
     type: "article",
     url: "https://anymany.vercel.app/docs",

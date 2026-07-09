@@ -96,12 +96,12 @@ export default function Home() {
 
       <div className="relative z-20 flex w-full max-w-3xl flex-col items-center gap-8">
         <h1 className="sr-only">
-          anymany - tiny Intl list formatter for any locale
+          anymany - smart Intl list formatter for any locale
         </h1>
         <Logo className="h-auto w-36 opacity-90" />
 
         <div className="relative w-fit max-w-full rounded-xl border border-white/[0.07] bg-black/30 px-4 py-3.5 font-mono">
-          <div className="flex min-h-9 flex-wrap items-center justify-center gap-x-1 gap-y-1.5 text-sm sm:justify-start sm:text-base">
+          <div className="flex min-h-9 flex-wrap items-center justify-center gap-x-1 gap-y-1.5 text-sm sm:text-base">
             <span className="shrink-0 text-amber-400">anymany</span>
             <span className="shrink-0 text-white/30">([</span>
             <input
@@ -271,6 +271,7 @@ export default function Home() {
               ["github", "https://github.com/kirilinsky/anymany"],
               ["npm", "https://www.npmjs.com/package/anymany"],
               ["anywhen", "https://anywhen-kappa.vercel.app/"],
+              ["anyamount", "https://anyamount.vercel.app/"],
             ].map(([label, href]) => (
               <a
                 key={label}

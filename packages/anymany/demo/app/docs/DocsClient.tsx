@@ -234,7 +234,7 @@ export function DocsClient() {
           <Section id="overview" title="Overview">
             <p>
               <strong style={{ color: "var(--text-primary)" }}>anymany</strong>{" "}
-              is a tiny list formatter built entirely on the native{" "}
+              is a list formatter built entirely on the native{" "}
               <code style={{ color: "var(--emerald)" }} className="font-mono">
                 Intl
               </code>{" "}
@@ -251,8 +251,8 @@ export function DocsClient() {
 anymany(['banana', 'apple', 'cherry'])
 // "banana, apple, and cherry"
 
-anymany(['a', 'b', 'c'], { type: 'disjunction', locale: 'ru' })
-// "a, b или c"
+anymany(['S', 'M', 'L'], { type: 'disjunction' })
+// "S, M, or L"
 
 anymany(['x', 'y', 'z', 'a', 'b', 'c', 'd'], { max: 3 })
 // "x, y, z, and +4"`}</Code>
@@ -291,8 +291,8 @@ anymany(['a', 'b', 'c'], { style: 'short' })
 anymany(['4 kg', '2 m'], { type: 'unit' })
 // "4 kg, 2 m"
 
-anymany(['Öl', 'Zebra', 'Apfel'], { sort: true, locale: 'de' })
-// "Apfel, Öl und Zebra"`}</Code>
+anymany(['cherry', 'apple', 'Banana'], { sort: true })
+// "apple, Banana, and cherry"`}</Code>
           </Section>
 
           <Section id="parts" title="anymanyParts()">
@@ -374,14 +374,14 @@ anymanyParts(tags).map((p, i) =>
               before joining — real language-aware collation, not code-point
               order. The input array is never mutated.
             </p>
-            <Code>{`anymany(['Öl', 'Zebra', 'Apfel'], { sort: true, locale: 'de' })
-// "Apfel, Öl und Zebra"   ← Ö sorts after A, not after Z
+            <Code>{`anymany(['cherry', 'apple', 'Banana'], { sort: true })
+// "apple, Banana, and cherry"   ← plain .sort() puts "Banana" first
 
-anymany(['файл10', 'файл2'], { sort: 'numeric', locale: 'ru' })
-// "файл2 и файл10"        ← numbers compared by value
+anymany(['file10', 'file2'], { sort: 'numeric' })
+// "file2 and file10"            ← numbers compared by value
 
 anymany(['a', 'A'], { sort: { caseFirst: 'upper' } })
-// "A and a"               ← any Intl.CollatorOptions`}</Code>
+// "A and a"                     ← any Intl.CollatorOptions`}</Code>
           </Section>
 
           <Section id="max" title="Max + overflow">
@@ -401,9 +401,6 @@ anymany(['a', 'A'], { sort: { caseFirst: 'upper' } })
             </p>
             <Code>{`anymany(['x', 'y', 'z', 'a', 'b', 'c', 'd'], { max: 3 })
 // "x, y, z, and +4"
-
-anymany(['a', 'b', 'c', 'd', 'e', 'f', 'g'], { max: 3, locale: 'ar-EG' })
-// "a وb وc و+٤"           ← localized digits
 
 anymany(['x', 'y', 'z', 'a', 'b'], { max: 3, overflow: (n) => \`\${n} more\` })
 // "x, y, z, and 2 more"`}</Code>
@@ -433,10 +430,18 @@ anymany(['x', 'y', 'z', 'a', 'b'], { max: 3, overflow: (n) => \`\${n} more\` })
 anymany(['a', 'b', 'c'], { locale: 'ru' })   // "a, b и c"
 anymany(['a', 'b', 'c'], { locale: 'de' })   // "a, b und c"
 anymany(['a', 'b', 'c'], { locale: 'ja' })   // "a、b、c"
-anymany(['a', 'b', 'c'], { locale: 'fr' })   // "a, b et c"
 
-anymany(['a', 'b', 'c'], { type: 'disjunction', locale: 'es' })
-// "a, b o c"`}</Code>
+anymany(['a', 'b', 'c'], { type: 'disjunction', locale: 'ru' })
+// "a, b или c"
+
+anymany(['Öl', 'Zebra', 'Apfel'], { sort: true, locale: 'de' })
+// "Apfel, Öl und Zebra"   ← Ö sorts after A, not after Z
+
+anymany(['файл10', 'файл2'], { sort: 'numeric', locale: 'ru' })
+// "файл2 и файл10"
+
+anymany(['a', 'b', 'c', 'd', 'e', 'f', 'g'], { max: 3, locale: 'ar-EG' })
+// "a وb وc و+٤"           ← localized overflow digits`}</Code>
             <p>
               Pass any valid{" "}
               <a
@@ -562,7 +567,7 @@ export function TagList({ tags }: { tags: string[] }) {
                 },
                 {
                   title: "No pluralization, by design",
-                  body: "Intl ships no word data, and anymany ships zero language dictionaries — that is what keeps it tiny and correct in every locale. The overflow counter is '+N' (localized digits) instead of 'and N more'. Need words? Pass your own via the overflow callback.",
+                  body: "Intl ships no word data, and anymany ships zero language dictionaries — that is what keeps it lightweight and correct in every locale. The overflow counter is '+N' (localized digits) instead of 'and N more'. Need words? Pass your own via the overflow callback.",
                 },
                 {
                   title: "The overflow item is a regular list element",

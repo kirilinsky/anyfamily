@@ -67,7 +67,7 @@ export function Logo({ className }: { className?: string }) {
         fontFamily="'JetBrains Mono', monospace"
         fontWeight="700"
         fontSize="100"
-        fill="#f5b66b"
+        fill="#2ce69d"
         textLength="240"
         lengthAdjust="spacingAndGlyphs"
         className="many"

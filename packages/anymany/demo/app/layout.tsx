@@ -7,12 +7,12 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://anymany.vercel.app"),
 
   title: {
-    default: "anymany | Tiny Intl list formatter",
+    default: "anymany | Smart Intl list formatter",
     template: "%s | anymany",
   },
 
   description:
-    "Tiny zero-dependency list formatter for JavaScript and TypeScript. Sort and join arrays of strings in any locale with native Intl.",
+    "Zero-dependency list formatter for JavaScript and TypeScript. Sort and join arrays of strings in any locale with native Intl.",
 
   keywords: [
     "list formatting",
@@ -43,7 +43,7 @@ export const metadata: Metadata = {
     url: "https://anymany.vercel.app",
     title: "anymany — list formatting for any locale",
     description:
-      "Tiny zero-dependency list formatter. Sort and join arrays of strings — conjunction, disjunction, collation, overflow counters — in 200+ locales via native Intl.",
+      "Zero-dependency list formatter. Sort and join arrays of strings — conjunction, disjunction, collation, overflow counters — in 200+ locales via native Intl.",
     siteName: "anymany",
     locale: "en_US",
   },
@@ -52,7 +52,7 @@ export const metadata: Metadata = {
     card: "summary",
     title: "anymany — list formatting for any locale",
     description:
-      "Tiny zero-dependency list formatter. Sorted right, joined right, in any locale via native Intl.",
+      "Zero-dependency list formatter. Sorted right, joined right, in any locale via native Intl.",
     creator: "@kirilinsky",
   },
 

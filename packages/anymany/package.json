@@ -1,7 +1,7 @@
 {
     "name": "anymany",
-    "version": "1.0.0",
-    "description": "Tiny smart list formatter — sort and join arrays of strings in any Intl locale, one function.",
+    "version": "1.0.1",
+    "description": "Smart list formatter — sort and join arrays of strings in any Intl locale, one function.",
     "type": "module",
     "sideEffects": false,
     "main": "./dist/index.cjs",
@@ -76,5 +76,5 @@
     "bugs": {
         "url": "https://github.com/kirilinsky/anymany/issues"
     },
-    "homepage": "https://github.com/kirilinsky/anymany#readme"
+    "homepage": "https://anymany.vercel.app"
 }

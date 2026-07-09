@@ -41,7 +41,8 @@ export interface AnymanyOptions {
   max?: number;
   /**
    * Custom overflow label builder, replaces the default `"+N"`. Receives the
-   * number of hidden items.
+   * number of hidden items. The returned label joins the list verbatim as a
+   * regular element — localizing it is the callback's responsibility.
    *
    * @example
    * ```ts
@@ -55,7 +56,12 @@ const CACHE_LIMIT = 50;
 
 function cacheGet<V>(cache: Map<string, V>, k: string, create: () => V): V {
   const hit = cache.get(k);
-  if (hit) return hit;
+  if (hit) {
+    // re-insert so Map order tracks recency — eviction below is LRU, not FIFO
+    cache.delete(k);
+    cache.set(k, hit);
+    return hit;
+  }
   const v = create();
   if (cache.size >= CACHE_LIMIT) cache.delete(cache.keys().next().value!);
   cache.set(k, v);
