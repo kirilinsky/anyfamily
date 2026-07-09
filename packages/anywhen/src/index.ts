@@ -217,7 +217,7 @@ function smartSegs(
       : segs;
 
   if (abs < (t?.second ?? 45)) return rel(0, "second");
-  if (abs < 3600) {
+  if (abs < (t?.minute ?? 3600)) {
     const m = round(ms / 6e4);
     if (Math.abs(m) < 60) return rel(m, "minute");
   }

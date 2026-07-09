@@ -530,6 +530,11 @@ describe("thresholds option", () => {
       anywhen(NOW + 7_200_000, { locale: "en", thresholds: { minute: 7500 } }),
     ).toBe("in 120 minutes");
   });
+  it("narrows the smart-mode minutes window for past dates via thresholds.minute", () => {
+    const opts = { locale: "en", time: false, thresholds: { minute: 1800 } } as const;
+    expect(anywhen(NOW - 3_000_000, opts)).toBe("today");
+    expect(anywhen(NOW - 1_500_000, opts)).toBe("25 minutes ago");
+  });
   it("does not change default behavior when omitted", () => {
     expect(anywhen(NOW - 60_000, { mode: "relative", locale: "en" })).toBe(
       "1 minute ago",
