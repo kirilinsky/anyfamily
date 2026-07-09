@@ -20,6 +20,8 @@
 
 <p align="center">
   <a href="https://anywhen-kappa.vercel.app/">▸ live demo</a>
+  &nbsp;·&nbsp;
+  <a href="https://anymany.vercel.app/">▸ anymany</a>
 </p>
 
 ---
