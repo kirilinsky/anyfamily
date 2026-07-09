@@ -19,11 +19,12 @@ jobs:
         with:
           version: 10.32.1
 
+      # No registry-url: setup-node would write a placeholder _authToken to
+      # .npmrc, which preempts the OIDC trusted-publishing flow.
       - uses: actions/setup-node@v5
         with:
           node-version: 24
           cache: pnpm
-          registry-url: "https://registry.npmjs.org"
 
       # Trusted publishing needs npm >= 11.5.1 — Node 24 bundles it already
       - run: pnpm install --frozen-lockfile
