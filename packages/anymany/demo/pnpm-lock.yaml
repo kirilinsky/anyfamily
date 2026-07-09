@@ -12,8 +12,8 @@ importers:
         specifier: ^2.0.1
         version: 2.0.1(next@16.2.1(@babel/core@7.29.7)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)
       anymany:
-        specifier: link:..
-        version: link:..
+        specifier: 1.0.0
+        version: 1.0.0
       next:
         specifier: 16.2.1
         version: 16.2.1(@babel/core@7.29.7)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -786,6 +786,10 @@ packages:
   ansi-styles@4.3.0:
     resolution: {integrity: sha512-zbB9rCJAT1rbjiVDb2hqKFHNYLxgtk8NURxZ3IZwD3F6NtxbXZQCnnSi1Lkx+IDohdPlFp222wVALIheZJQSEg==}
     engines: {node: '>=8'}
+
+  anymany@1.0.0:
+    resolution: {integrity: sha512-6OEW4h95HWw0dvVjiMMZYyYmKj/0xG+a6AQE3z2RZ8nWoKu7CfO1yZiVtuHNs5/LyPGH6eaHZz7z2Vn0xftaoA==}
+    engines: {node: '>=18'}
 
   argparse@2.0.1:
     resolution: {integrity: sha512-8+9WqebbFzpX9OR+Wa6O29asIogeRMzcGtAINdpMHHyAg10f05aSFVBbcEqGf/PXw1EjAZ+q2/bEBg3DvurK3Q==}
@@ -2655,6 +2659,8 @@ snapshots:
   ansi-styles@4.3.0:
     dependencies:
       color-convert: 2.0.1
+
+  anymany@1.0.0: {}
 
   argparse@2.0.1: {}
 

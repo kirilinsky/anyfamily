@@ -25,6 +25,9 @@ jobs:
           cache: pnpm
           registry-url: "https://registry.npmjs.org"
 
+      # Trusted publishing needs npm >= 11.5.1
+      - run: npm install -g npm@latest
+
       - run: pnpm install --frozen-lockfile
 
       - run: pnpm typecheck
@@ -42,9 +45,8 @@ jobs:
 
       - run: pnpm publint
 
-      - run: pnpm publish --no-git-checks --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      # OIDC trusted publishing — no token, no provenance
+      - run: npm publish --provenance=false --access public
 
       - name: Create GitHub release
         env:
@@ -52,7 +54,10 @@ jobs:
           TAG: ${{ github.ref_name }}
         run: |
           VERSION="${TAG#v}"
-          NOTES="$(awk "/^## ${VERSION}$/{flag=1; next} /^## /{flag=0} flag" CHANGELOG.md)"
+          NOTES=""
+          if [ -f CHANGELOG.md ]; then
+            NOTES="$(awk "/^## ${VERSION}$/{flag=1; next} /^## /{flag=0} flag" CHANGELOG.md)"
+          fi
 
           if [ -n "$NOTES" ]; then
             gh release create "$TAG" --title "$TAG" --notes "$NOTES"

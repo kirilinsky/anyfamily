@@ -203,29 +203,44 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="flex min-h-10 min-w-0 items-center justify-center sm:min-h-12">
-            {typed ? (
-              <p
-                className="min-w-0 break-words text-center text-4xl tracking-tight text-white/90 sm:text-5xl"
-                style={{ fontFamily: "'Georgia', serif" }}
-              >
-                {typed}
-                <span
-                  className="ml-[2px] inline-block h-[1.2em] w-[2px] align-middle bg-white/60"
-                  style={{
-                    animation: done ? "blink 1s step-end infinite" : "none",
-                    opacity: done ? undefined : 1,
-                  }}
-                />
-                <style>{`@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }`}</style>
-              </p>
+          <div className="flex min-h-10 w-full min-w-0 items-center justify-center sm:min-h-12">
+            {result ? (
+              <div className="relative w-full min-w-0">
+                {/* invisible sizer — reserves the final height so typing never reflows */}
+                <p
+                  aria-hidden
+                  className="invisible w-full break-words text-center text-4xl tracking-tight sm:text-5xl"
+                  style={{ fontFamily: "'Georgia', serif" }}
+                >
+                  {result}
+                  <span className="ml-[2px] inline-block h-[1.2em] w-[2px] align-middle" />
+                </p>
+                <p
+                  className="absolute inset-x-0 top-0 w-full break-words text-center text-4xl tracking-tight text-white/90 sm:text-5xl"
+                  style={{ fontFamily: "'Georgia', serif" }}
+                >
+                  {typed}
+                  <span
+                    className="ml-[2px] inline-block h-[1.2em] w-[2px] align-middle bg-white/60"
+                    style={{
+                      animation: done ? "blink 1s step-end infinite" : "none",
+                      opacity: done ? undefined : 1,
+                    }}
+                  />
+                  <style>{`@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }`}</style>
+                </p>
+              </div>
             ) : (
               <p className="font-serif text-sm italic text-white/15">result</p>
             )}
           </div>
 
-          {done && parts && (
-            <div className="flex max-w-full flex-wrap items-center justify-center gap-x-1.5 gap-y-1 px-2 font-mono text-[11px]">
+          {parts && (
+            <div
+              className={`flex max-w-full flex-wrap items-center justify-center gap-x-1.5 gap-y-1 px-2 font-mono text-[11px] transition-opacity duration-200 ${
+                done ? "opacity-100" : "opacity-0"
+              }`}
+            >
               <span className="text-white/25">anymanyParts →</span>
               {parts.map((p, i) => (
                 <span
