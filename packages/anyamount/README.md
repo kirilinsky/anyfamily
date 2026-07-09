@@ -273,4 +273,5 @@ CI runs the full suite on Node 20, 22, and 24.
 ## part of the any\* family
 
 - [anywhen](https://github.com/kirilinsky/anywhen) — tiny smart date formatter. One function, three modes, any locale.
+- [anymany](https://anymany.vercel.app/) — tiny Intl list formatter. Sort and join string arrays in any locale.
 - **anyamount** — you are here.
