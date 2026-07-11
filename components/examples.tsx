@@ -1,49 +1,67 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { anyaround } from "anyaround";
+import { anyamount } from "anyamount";
+import { anywhen } from "anywhen";
+import { anymany } from "anymany";
 
-/** A single canned demo: the call as it types out, and the string it returns. */
-export type Preset = { call: string; out: string };
+/**
+ * A canned demo. `call` is the source shown typing out; `run` invokes the real
+ * published package so the revealed output is genuine, never hardcoded. anywhen
+ * presets pass a fixed `now` so relative/smart output stays deterministic.
+ */
+export type Preset = { call: string; run: () => string };
 
 export const AROUND_PRESETS: Preset[] = [
-  { call: `anyaround("US", { display: "flag-name" })`, out: "🇺🇸 United States" },
-  { call: `anyaround("fr")`, out: "French" },
-  { call: `anyaround("JPY")`, out: "Japanese Yen" },
-  { call: `anyaround("Cyrl")`, out: "Cyrillic" },
-  { call: `anyaround("DE", { locale: "ru", display: "flag-name" })`, out: "🇩🇪 Германия" },
+  { call: `anyaround("US", { display: "flag-name" })`, run: () => anyaround("US", { display: "flag-name" }) },
+  { call: `anyaround("fr")`, run: () => anyaround("fr") },
+  { call: `anyaround("JPY")`, run: () => anyaround("JPY") },
+  { call: `anyaround("Cyrl")`, run: () => anyaround("Cyrl") },
+  { call: `anyaround("DE", { locale: "ru", display: "flag-name" })`, run: () => anyaround("DE", { locale: "ru", display: "flag-name" }) },
 ];
 
 export const AMOUNT_PRESETS: Preset[] = [
-  { call: `anyamount(1999.5, "USD")`, out: "$1,999.50" },
-  { call: `anyamount(1999.5, "EUR", "de")`, out: "1.999,50 €" },
-  { call: `anyamount(89000, "JPY", "ja")`, out: "￥89,000" },
-  { call: `anyamount(0.4267, "percent")`, out: "42.67%" },
-  { call: `anyamount(5, "kilometer")`, out: "5 km" },
+  { call: `anyamount(1999.5, { mode: "currency", currency: "USD" })`, run: () => anyamount(1999.5, { mode: "currency", currency: "USD" }) },
+  { call: `anyamount(1999.5, { currency: "EUR", locale: "de" })`, run: () => anyamount(1999.5, { mode: "currency", currency: "EUR", locale: "de" }) },
+  { call: `anyamount(89000, { currency: "JPY", locale: "ja" })`, run: () => anyamount(89000, { mode: "currency", currency: "JPY", locale: "ja" }) },
+  { call: `anyamount(1234567, { locale: "en" })`, run: () => anyamount(1234567, { locale: "en" }) },
+  { call: `anyamount(3.2, { mode: "unit", unit: "gigabyte" })`, run: () => anyamount(3.2, { mode: "unit", unit: "gigabyte" }) },
 ];
 
+const NOW = "2026-07-11T12:00:00";
 export const WHEN_PRESETS: Preset[] = [
-  { call: `anywhen("2026-07-11", { dateStyle: "full" })`, out: "Saturday, July 11, 2026" },
-  { call: `anywhen("2026-07-11", { locale: "fr" })`, out: "11 juillet 2026" },
-  { call: `anywhen(-3, "day", "relative")`, out: "3 days ago" },
-  { call: `anywhen("2026-12-25", { locale: "ja" })`, out: "2026年12月25日" },
-  { call: `anywhen("14:30", { timeStyle: "short" })`, out: "2:30 PM" },
+  { call: `anywhen("2026-07-11", { mode: "absolute", format: { dateStyle: "full" } })`, run: () => anywhen("2026-07-11", { mode: "absolute", format: { dateStyle: "full" } }) },
+  { call: `anywhen("2026-07-11", { locale: "ja", format: { dateStyle: "long" } })`, run: () => anywhen("2026-07-11", { mode: "absolute", locale: "ja", format: { dateStyle: "long" } }) },
+  { call: `anywhen("2026-07-08", { mode: "relative" })`, run: () => anywhen("2026-07-08", { mode: "relative", now: NOW }) },
+  { call: `anywhen("2026-07-14", { mode: "relative" })`, run: () => anywhen("2026-07-14", { mode: "relative", now: NOW }) },
+  { call: `anywhen("2026-07-10T12:00", { mode: "smart" })`, run: () => anywhen("2026-07-10T12:00", { mode: "smart", now: NOW }) },
 ];
 
 export const MANY_PRESETS: Preset[] = [
-  { call: `anymany(["a", "b", "c"])`, out: "a, b, and c" },
-  { call: `anymany(["red", "green", "blue"], "or")`, out: "red, green, or blue" },
-  { call: `anymany(["1h", "30m"], "unit")`, out: "1h, 30m" },
-  { call: `anymany(["яблоко", "груша"], "ru")`, out: "яблоко и груша" },
-  { call: `anymany(["A", "B", "C"], "de")`, out: "A, B und C" },
+  { call: `anymany(["a", "b", "c"])`, run: () => anymany(["a", "b", "c"]) },
+  { call: `anymany(["red", "green", "blue"], { type: "disjunction" })`, run: () => anymany(["red", "green", "blue"], { type: "disjunction" }) },
+  { call: `anymany(["1h", "30m"], { type: "unit" })`, run: () => anymany(["1h", "30m"], { type: "unit" }) },
+  { call: `anymany(["груша", "яблоко"], { locale: "ru", sort: true })`, run: () => anymany(["груша", "яблоко"], { locale: "ru", sort: true }) },
+  { call: `anymany(["Öl", "Apfel", "Zebra"], { sort: true, locale: "de" })`, run: () => anymany(["Öl", "Apfel", "Zebra"], { sort: true, locale: "de" }) },
 ];
 
 const TYPE_MS = 42;
 const HOLD_MS = 2600;
 
+function safeRun(run: () => string): string {
+  try {
+    return run();
+  } catch {
+    return "—";
+  }
+}
+
 /**
  * Cycles through `presets`, typing each call out character by character, then
- * revealing its return value. Everything animates after mount; the server (and
- * first client render) shows the first preset fully so hydration matches.
+ * revealing the value the real package returns. Output is computed only after
+ * mount, so the server render stays empty and hydration can't mismatch on ICU
+ * differences between Node and the browser.
  */
 export function CodeAnimation({
   fn,
@@ -92,12 +110,12 @@ export function CodeAnimation({
   const fnPart = typed.slice(0, fn.length);
   const argPart = typed.slice(fn.length);
   const showCaret = mounted && !done;
-  const showOut = mounted ? done : true;
+  const out = mounted && done ? safeRun(preset.run) : "";
 
   return (
     <div className="w-full max-w-xl">
       <div className="rounded-xl border border-white/[0.08] bg-black/40 p-5 sm:p-6">
-        <div className="min-h-[3.5rem] font-mono text-sm leading-relaxed sm:text-base">
+        <div className="min-h-[3.5rem] font-mono text-sm leading-relaxed break-all sm:text-base">
           <span style={{ color: accent }}>{fnPart}</span>
           <span className="text-white/60">{argPart}</span>
           {showCaret && (
@@ -110,8 +128,8 @@ export function CodeAnimation({
         <div
           className="mt-4 flex items-center gap-3 border-t border-white/[0.06] pt-4 transition-all duration-500"
           style={{
-            opacity: showOut ? 1 : 0,
-            transform: showOut ? "none" : "translateY(6px)",
+            opacity: out ? 1 : 0,
+            transform: out ? "none" : "translateY(6px)",
           }}
         >
           <span className="font-mono text-white/25">→</span>
@@ -119,7 +137,7 @@ export function CodeAnimation({
             className="font-mono text-xl font-semibold sm:text-2xl"
             style={{ color: accent }}
           >
-            {preset.out}
+            {out || " "}
           </span>
         </div>
       </div>

@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "versions": "node scripts/versions.mjs",
+    "predev": "node scripts/versions.mjs",
+    "prebuild": "node scripts/versions.mjs",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",

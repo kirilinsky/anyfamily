@@ -1,5 +1,6 @@
 import { FamilyLogo } from "@/components/family-logo";
 import { Tag } from "@/components/ui";
+import versions from "@/data/versions.json";
 import {
   CodeAnimation,
   type Preset,
@@ -134,12 +135,22 @@ export default function Home() {
             {/* Left: identity */}
             <div className="flex flex-col items-start gap-5">
               <FamilyLogo suffix={p.suffix} accent={p.accent} className="h-auto w-48" />
-              <span
-                className="font-mono text-sm lowercase tracking-widest"
-                style={{ color: `${p.accent}cc` }}
-              >
-                {p.tagline}
-              </span>
+              <div className="flex items-center gap-3">
+                <span
+                  className="font-mono text-sm lowercase tracking-widest"
+                  style={{ color: `${p.accent}cc` }}
+                >
+                  {p.tagline}
+                </span>
+                {(versions as Record<string, string>)[p.id] && (
+                  <span
+                    className="rounded-full border px-2 py-0.5 font-mono text-[11px] text-white/50"
+                    style={{ borderColor: `${p.accent}44` }}
+                  >
+                    v{(versions as Record<string, string>)[p.id]}
+                  </span>
+                )}
+              </div>
               <p className="max-w-sm text-sm leading-relaxed text-white/55">
                 {p.description}
               </p>
