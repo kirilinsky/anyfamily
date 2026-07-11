@@ -94,9 +94,51 @@ function ExtLink({ href, label, accent }: { href: string; label: string; accent:
   );
 }
 
+const BASE = "https://anyfamily.site";
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "@id": `${BASE}/#website`,
+      url: BASE,
+      name: "anyfamily",
+      description:
+        "The any* family: micro, zero-dependency JavaScript tools built on native Intl.",
+      inLanguage: "en",
+      author: { "@type": "Person", name: "kirilinsky", url: "https://github.com/kirilinsky" },
+    },
+    {
+      "@type": "ItemList",
+      name: "The any* family of Intl tools",
+      itemListElement: PACKAGES.map((p, idx) => ({
+        "@type": "ListItem",
+        position: idx + 1,
+        item: {
+          "@type": "SoftwareApplication",
+          name: p.id,
+          description: p.description,
+          applicationCategory: "DeveloperApplication",
+          operatingSystem: "Any",
+          url: p.site,
+          softwareVersion: (versions as Record<string, string>)[p.id] || undefined,
+          programmingLanguage: "TypeScript",
+          offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+          author: { "@type": "Person", name: "kirilinsky" },
+        },
+      })),
+    },
+  ],
+};
+
 export default function Home() {
   return (
     <main className="h-screen snap-y snap-mandatory overflow-y-scroll scroll-smooth bg-[#0a0a0a] [scrollbar-width:none]">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <div
         className="pointer-events-none fixed inset-0 z-0 opacity-[0.035]"
         style={{
@@ -111,8 +153,11 @@ export default function Home() {
         <h1 className="font-mono text-5xl font-bold tracking-tight text-white sm:text-7xl">
           the{" "}
           <span
-            className="text-white/40"
-            style={{ fontFamily: "var(--font-inter), 'Inter', sans-serif" }}
+            className="italic"
+            style={{
+              fontFamily: "var(--font-inter), 'Inter', sans-serif",
+              color: "#e9e4d4",
+            }}
           >
             any
           </span>
@@ -139,6 +184,9 @@ export default function Home() {
           <div className="mx-auto grid w-full max-w-6xl items-center gap-10 md:grid-cols-[minmax(0,300px)_1fr] md:gap-16">
             {/* Left: identity */}
             <div className="flex flex-col items-start gap-5">
+              <h2 className="sr-only">
+                {p.id} — {p.tagline}: {p.description}
+              </h2>
               <FamilyLogo suffix={p.suffix} accent={p.accent} className="h-auto w-48" />
               <p className="max-w-sm text-sm leading-relaxed text-white/55">
                 {p.description}
@@ -179,20 +227,6 @@ export default function Home() {
         </section>
       ))}
 
-      {/* Footer */}
-      <section className="relative z-10 flex min-h-[40vh] snap-start items-center justify-center px-6 text-center">
-        <p className="font-mono text-[11px] text-white/30">
-          native Intl. zero data. any locale. ·{" "}
-          <a
-            href="https://github.com/kirilinsky"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-white/45 transition-colors hover:text-white/70"
-          >
-            github.com/kirilinsky
-          </a>
-        </p>
-      </section>
     </main>
   );
 }

@@ -117,6 +117,9 @@ export function CodeAnimation({
   return (
     <div className="w-full max-w-3xl lg:max-w-4xl">
       <div className="rounded-2xl border border-white/[0.08] bg-black/40 p-6 sm:p-8">
+        <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.2em] text-white/30">
+          you call
+        </p>
         <div className="min-h-[3.5rem] whitespace-pre-wrap break-words font-mono text-sm leading-relaxed sm:text-base">
           <span style={{ color: accent }}>{fnPart}</span>
           <span className="text-white/60">{argPart}</span>
@@ -127,8 +130,11 @@ export function CodeAnimation({
           )}
         </div>
 
+        <p className="mt-6 mb-2 font-mono text-[10px] uppercase tracking-[0.2em] text-white/30">
+          you get
+        </p>
         <div
-          className="mt-6 flex min-h-[7rem] items-center gap-4 rounded-xl border border-white/[0.06] bg-white/[0.02] px-5 py-6 transition-all duration-500 sm:min-h-[8rem]"
+          className="flex min-h-[7rem] items-center gap-4 rounded-xl border border-white/[0.06] bg-white/[0.02] px-5 py-6 transition-all duration-500 sm:min-h-[8rem]"
           style={{
             opacity: out ? 1 : 0.25,
             transform: out ? "none" : "translateY(6px)",

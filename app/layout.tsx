@@ -10,7 +10,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://anyfamily.vercel.app"),
+  metadataBase: new URL("https://anyfamily.site"),
   title: "anyfamily — micro Intl tools for any locale",
   description:
     "The any* family: four micro, zero-dependency JavaScript tools built on native Intl. Names & flags, money, dates, and lists — in any locale.",
@@ -31,7 +31,7 @@ export const metadata: Metadata = {
   creator: "kirilinsky",
   openGraph: {
     type: "website",
-    url: "https://anyfamily.vercel.app",
+    url: "https://anyfamily.site",
     title: "anyfamily — micro Intl tools for any locale",
     description:
       "Four micro, zero-dependency tools on native Intl: names & flags, money, dates, lists. Any locale.",
@@ -44,7 +44,7 @@ export const metadata: Metadata = {
     description: "Four micro Intl tools. Zero data. Any locale.",
   },
   robots: { index: true, follow: true },
-  alternates: { canonical: "https://anyfamily.vercel.app" },
+  alternates: { canonical: "https://anyfamily.site" },
 };
 
 export default function RootLayout({
