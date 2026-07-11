@@ -24,7 +24,7 @@ const PACKAGES: Pkg[] = [
   {
     id: "anyaround",
     suffix: "around",
-    accent: "#b493e6",
+    accent: "#6d1625",
     tagline: "names & flags",
     description:
       "Region, language, script, currency, and calendar codes into their localized names — decorated with country flags. Any Intl locale.",
@@ -36,7 +36,7 @@ const PACKAGES: Pkg[] = [
   {
     id: "anyamount",
     suffix: "amount",
-    accent: "#6ee7b7",
+    accent: "#b493e6",
     tagline: "money & numbers",
     description:
       "Numbers, currency, and units into localized, human-readable strings. One function, three modes, any locale.",
