@@ -1,11 +1,12 @@
-import type { ComponentType } from "react";
 import { FamilyLogo } from "@/components/family-logo";
 import { Tag } from "@/components/ui";
 import {
-  AroundExample,
-  AmountExample,
-  WhenExample,
-  ManyExample,
+  CodeAnimation,
+  type Preset,
+  AROUND_PRESETS,
+  AMOUNT_PRESETS,
+  WHEN_PRESETS,
+  MANY_PRESETS,
 } from "@/components/examples";
 
 type Pkg = {
@@ -17,7 +18,7 @@ type Pkg = {
   tags: string[];
   npm: string;
   site: string;
-  Example: ComponentType<{ accent: string }>;
+  presets: Preset[];
 };
 
 // Canonical brand accents: anyaround #6d1625. On the dark page that red is
@@ -33,7 +34,7 @@ const PACKAGES: Pkg[] = [
     tags: ["dates", "datetimeformat", "relative", "i18n"],
     npm: "https://www.npmjs.com/package/anywhen",
     site: "https://anywhen-kappa.vercel.app",
-    Example: WhenExample,
+    presets: WHEN_PRESETS,
   },
   {
     id: "anyamount",
@@ -45,7 +46,7 @@ const PACKAGES: Pkg[] = [
     tags: ["currency", "numberformat", "units", "i18n"],
     npm: "https://www.npmjs.com/package/anyamount",
     site: "https://anyamount.vercel.app",
-    Example: AmountExample,
+    presets: AMOUNT_PRESETS,
   },
   {
     id: "anymany",
@@ -57,7 +58,7 @@ const PACKAGES: Pkg[] = [
     tags: ["lists", "listformat", "i18n"],
     npm: "https://www.npmjs.com/package/anymany",
     site: "https://anymany.vercel.app",
-    Example: ManyExample,
+    presets: MANY_PRESETS,
   },
   {
     id: "anyaround",
@@ -69,7 +70,7 @@ const PACKAGES: Pkg[] = [
     tags: ["flags", "displaynames", "i18n", "ssr"],
     npm: "https://www.npmjs.com/package/anyaround",
     site: "https://anyaround.vercel.app",
-    Example: AroundExample,
+    presets: AROUND_PRESETS,
   },
 ];
 
@@ -89,7 +90,7 @@ function ExtLink({ href, label, accent }: { href: string; label: string; accent:
 
 export default function Home() {
   return (
-    <main className="relative min-h-screen overflow-hidden bg-[#0a0a0a] pb-24">
+    <main className="h-screen snap-y snap-mandatory overflow-y-scroll scroll-smooth bg-[#0a0a0a] [scrollbar-width:none]">
       <div
         className="pointer-events-none fixed inset-0 z-0 opacity-[0.035]"
         style={{
@@ -99,9 +100,9 @@ export default function Home() {
         }}
       />
 
-      {/* Header */}
-      <header className="relative z-10 mx-auto flex max-w-3xl flex-col items-center gap-4 px-6 pt-24 pb-16 text-center sm:pt-28">
-        <h1 className="font-mono text-4xl font-bold tracking-tight text-white sm:text-6xl">
+      {/* Hero */}
+      <section className="relative z-10 flex min-h-screen snap-start flex-col items-center justify-center px-6 text-center">
+        <h1 className="font-mono text-5xl font-bold tracking-tight text-white sm:text-7xl">
           the{" "}
           <span
             className="text-white/40"
@@ -111,66 +112,58 @@ export default function Home() {
           </span>
           <span className="text-violet-300">*</span> family
         </h1>
-        <p className="max-w-xl text-sm text-white/45 sm:text-base">
+        <p className="mt-6 max-w-xl text-sm text-white/45 sm:text-base">
           Micro, zero-dependency tools built on native{" "}
           <code className="font-mono text-white/70">Intl</code>. No data files, no
-          config — just one function each, in any locale. Try them live below.
+          config — just one function each, in any locale.
         </p>
-      </header>
-
-      {/* Package rows */}
-      <section className="relative z-10">
-        {PACKAGES.map((p) => {
-          const Example = p.Example;
-          return (
-            <article
-              key={p.id}
-              className="border-t border-white/[0.06] transition-colors hover:bg-white/[0.012]"
-            >
-              <div className="mx-auto grid max-w-6xl gap-8 px-6 py-12 md:grid-cols-[220px_1fr] md:gap-12 md:px-10 md:py-16">
-                {/* Left: logo */}
-                <div className="flex flex-col items-start gap-4">
-                  <FamilyLogo suffix={p.suffix} accent={p.accent} className="h-auto w-40" />
-                  <span
-                    className="font-mono text-xs lowercase tracking-widest"
-                    style={{ color: `${p.accent}bb` }}
-                  >
-                    {p.tagline}
-                  </span>
-                </div>
-
-                {/* Right: content */}
-                <div className="flex flex-col gap-5">
-                  <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-                    <h2 className="font-mono text-2xl font-bold text-white">{p.id}</h2>
-                    <div className="flex items-center gap-2">
-                      <ExtLink href={p.site} label="site" accent={p.accent} />
-                      <ExtLink href={p.npm} label="npm" accent={p.accent} />
-                    </div>
-                  </div>
-
-                  <p className="max-w-2xl text-sm leading-relaxed text-white/55 sm:text-base">
-                    {p.description}
-                  </p>
-
-                  <div className="flex flex-wrap gap-2">
-                    {p.tags.map((t) => (
-                      <Tag key={t}>{t}</Tag>
-                    ))}
-                  </div>
-
-                  <div className="mt-1 max-w-2xl rounded-xl border border-white/[0.07] bg-black/30 p-4">
-                    <Example accent={p.accent} />
-                  </div>
-                </div>
-              </div>
-            </article>
-          );
-        })}
+        <div className="mt-16 flex flex-col items-center gap-2 text-white/30">
+          <span className="font-mono text-xs uppercase tracking-widest">scroll</span>
+          <span className="animate-bounce text-lg">↓</span>
+        </div>
       </section>
 
+      {/* One full-screen section per package */}
+      {PACKAGES.map((p) => (
+        <section
+          key={p.id}
+          id={p.id}
+          className="relative z-10 flex min-h-screen snap-start items-center px-6 py-16 md:px-10"
+        >
+          <div className="mx-auto grid w-full max-w-6xl items-center gap-10 md:grid-cols-[minmax(0,300px)_1fr] md:gap-16">
+            {/* Left: identity */}
+            <div className="flex flex-col items-start gap-5">
+              <FamilyLogo suffix={p.suffix} accent={p.accent} className="h-auto w-48" />
+              <span
+                className="font-mono text-sm lowercase tracking-widest"
+                style={{ color: `${p.accent}cc` }}
+              >
+                {p.tagline}
+              </span>
+              <p className="max-w-sm text-sm leading-relaxed text-white/55">
+                {p.description}
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {p.tags.map((t) => (
+                  <Tag key={t}>{t}</Tag>
+                ))}
+              </div>
+              <div className="mt-1 flex items-center gap-2">
+                <ExtLink href={p.site} label="site" accent={p.accent} />
+                <ExtLink href={p.npm} label="npm" accent={p.accent} />
+              </div>
+            </div>
+
+            {/* Right: live typing demo */}
+            <div className="flex justify-start md:justify-center">
+              <CodeAnimation fn={p.id} accent={p.accent} presets={p.presets} />
+            </div>
+          </div>
+        </section>
+      ))}
+
       {/* Footer */}
-      <footer className="relative z-10 mx-auto max-w-6xl px-6 pt-16 text-center md:px-10">
+      <section className="relative z-10 flex min-h-[40vh] snap-start items-center justify-center px-6 text-center">
         <p className="font-mono text-[11px] text-white/30">
           native Intl. zero data. any locale. ·{" "}
           <a
@@ -182,7 +175,7 @@ export default function Home() {
             github.com/kirilinsky
           </a>
         </p>
-      </footer>
+      </section>
     </main>
   );
 }

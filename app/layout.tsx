@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 
-import "@dateforge/react-calendar/style.css";
 import "./globals.css";
 
 const inter = Inter({

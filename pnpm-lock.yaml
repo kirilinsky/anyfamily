@@ -14,6 +14,18 @@ importers:
       '@vercel/analytics':
         specifier: ^2.0.1
         version: 2.0.1(next@16.2.1(@babel/core@7.29.7)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)
+      anyamount:
+        specifier: ^1.0.0
+        version: 1.0.0
+      anyaround:
+        specifier: ^0.1.0
+        version: 0.1.0
+      anymany:
+        specifier: ^1.0.1
+        version: 1.0.1
+      anywhen:
+        specifier: ^1.0.2
+        version: 1.0.2
       next:
         specifier: 16.2.1
         version: 16.2.1(@babel/core@7.29.7)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -793,6 +805,22 @@ packages:
   ansi-styles@4.3.0:
     resolution: {integrity: sha512-zbB9rCJAT1rbjiVDb2hqKFHNYLxgtk8NURxZ3IZwD3F6NtxbXZQCnnSi1Lkx+IDohdPlFp222wVALIheZJQSEg==}
     engines: {node: '>=8'}
+
+  anyamount@1.0.0:
+    resolution: {integrity: sha512-oauei9vw+bb/sOVDu7oFEhAOs6AI4OpixN9umB1iEvcOoMhCZzSC1M6tTzd0pYI5wAvLl6R/1KWf8uLL9P/Evw==}
+    engines: {node: '>=18'}
+
+  anyaround@0.1.0:
+    resolution: {integrity: sha512-nALzi1fi685Jq9KcJkF7nxbsGBVwuGkCA8aGYOkH+upuym9UZyF+FHf/Q4xjt5f//4vQ0zSE0dUUb9UgBnGxrQ==}
+    engines: {node: '>=18'}
+
+  anymany@1.0.1:
+    resolution: {integrity: sha512-2yeOOlxFIuFxRuw4dlU1zNwpUvT3etWSSfqQrT5MJOhOLz7jJpkDye483RPlzVT3smL5AFP78yLlossancsxPw==}
+    engines: {node: '>=18'}
+
+  anywhen@1.0.2:
+    resolution: {integrity: sha512-MCQDcJoAPiLa1vs/U0UJ21VFUcvwxsX2exOHvnmwgYR7ecKmfQsuUcWJFcEnu3CSeaqBQGCe1mDGXbdvdYxYyg==}
+    engines: {node: '>=18'}
 
   argparse@2.0.1:
     resolution: {integrity: sha512-8+9WqebbFzpX9OR+Wa6O29asIogeRMzcGtAINdpMHHyAg10f05aSFVBbcEqGf/PXw1EjAZ+q2/bEBg3DvurK3Q==}
@@ -2667,6 +2695,14 @@ snapshots:
   ansi-styles@4.3.0:
     dependencies:
       color-convert: 2.0.1
+
+  anyamount@1.0.0: {}
+
+  anyaround@0.1.0: {}
+
+  anymany@1.0.1: {}
+
+  anywhen@1.0.2: {}
 
   argparse@2.0.1: {}
 

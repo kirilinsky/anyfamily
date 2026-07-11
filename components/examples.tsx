@@ -1,158 +1,142 @@
 "use client";
 
-import { useState } from "react";
-import { SimpleCalendar } from "@dateforge/react-calendar/prebuilt";
-import { Select, TextInput, Result } from "./ui";
+import { useEffect, useState } from "react";
 
-const LOCALES = ["en", "de", "ru", "ja", "ar", "fr", "pt-BR"] as const;
+/** A single canned demo: the call as it types out, and the string it returns. */
+export type Preset = { call: string; out: string };
 
-/** Emoji flag from an ISO 3166-1 alpha-2 code; "" if not two ASCII letters. */
-function toFlag(code: string): string {
-  const c = code.toUpperCase();
-  if (!/^[A-Z]{2}$/.test(c)) return "";
-  return c.replace(/./g, (ch) => String.fromCodePoint(127397 + ch.charCodeAt(0)));
-}
+export const AROUND_PRESETS: Preset[] = [
+  { call: `anyaround("US", { display: "flag-name" })`, out: "🇺🇸 United States" },
+  { call: `anyaround("fr")`, out: "French" },
+  { call: `anyaround("JPY")`, out: "Japanese Yen" },
+  { call: `anyaround("Cyrl")`, out: "Cyrillic" },
+  { call: `anyaround("DE", { locale: "ru", display: "flag-name" })`, out: "🇩🇪 Германия" },
+];
 
-function safe<T>(fn: () => T, fallback: T): T {
-  try {
-    return fn();
-  } catch {
-    return fallback;
-  }
-}
+export const AMOUNT_PRESETS: Preset[] = [
+  { call: `anyamount(1999.5, "USD")`, out: "$1,999.50" },
+  { call: `anyamount(1999.5, "EUR", "de")`, out: "1.999,50 €" },
+  { call: `anyamount(89000, "JPY", "ja")`, out: "￥89,000" },
+  { call: `anyamount(0.4267, "percent")`, out: "42.67%" },
+  { call: `anyamount(5, "kilometer")`, out: "5 km" },
+];
 
-/** anyaround — region code → localized name + flag (Intl.DisplayNames). */
-export function AroundExample({ accent }: { accent: string }) {
-  const [code, setCode] = useState("US");
-  const [locale, setLocale] = useState<string>("en");
+export const WHEN_PRESETS: Preset[] = [
+  { call: `anywhen("2026-07-11", { dateStyle: "full" })`, out: "Saturday, July 11, 2026" },
+  { call: `anywhen("2026-07-11", { locale: "fr" })`, out: "11 juillet 2026" },
+  { call: `anywhen(-3, "day", "relative")`, out: "3 days ago" },
+  { call: `anywhen("2026-12-25", { locale: "ja" })`, out: "2026年12月25日" },
+  { call: `anywhen("14:30", { timeStyle: "short" })`, out: "2:30 PM" },
+];
 
-  const name = safe(
-    () =>
-      new Intl.DisplayNames([locale], { type: "region" }).of(code.toUpperCase()) ??
-      code,
-    code,
-  );
-  const flag = toFlag(code);
+export const MANY_PRESETS: Preset[] = [
+  { call: `anymany(["a", "b", "c"])`, out: "a, b, and c" },
+  { call: `anymany(["red", "green", "blue"], "or")`, out: "red, green, or blue" },
+  { call: `anymany(["1h", "30m"], "unit")`, out: "1h, 30m" },
+  { call: `anymany(["яблоко", "груша"], "ru")`, out: "яблоко и груша" },
+  { call: `anymany(["A", "B", "C"], "de")`, out: "A, B und C" },
+];
 
-  return (
-    <div>
-      <div className="flex flex-wrap items-center gap-2 font-mono text-sm text-white/50">
-        <span style={{ color: accent }}>anyaround</span>
-        <span className="text-white/30">(</span>
-        <TextInput value={code} onChange={setCode} accent="#7dd3fc" width="6ch" testid="input-around-code" />
-        <span className="text-white/30">, {"{ locale:"}</span>
-        <Select value={locale} onChange={setLocale} options={LOCALES} accent={accent} testid="select-around-locale" />
-        <span className="text-white/30">{"})"}</span>
-      </div>
-      <Result>
-        {flag ? `${flag} ${name}` : name}
-      </Result>
-    </div>
-  );
-}
+const TYPE_MS = 42;
+const HOLD_MS = 2600;
 
-/** anyamount — number + currency → formatted money (Intl.NumberFormat). */
-export function AmountExample({ accent }: { accent: string }) {
-  const [amount, setAmount] = useState("1999.5");
-  const [currency, setCurrency] = useState("USD");
-  const [locale, setLocale] = useState<string>("en");
+/**
+ * Cycles through `presets`, typing each call out character by character, then
+ * revealing its return value. Everything animates after mount; the server (and
+ * first client render) shows the first preset fully so hydration matches.
+ */
+export function CodeAnimation({
+  fn,
+  accent,
+  presets,
+}: {
+  fn: string;
+  accent: string;
+  presets: Preset[];
+}) {
+  const [mounted, setMounted] = useState(false);
+  const [i, setI] = useState(0);
+  const [len, setLen] = useState(0);
+  const [done, setDone] = useState(false);
 
-  const n = Number(amount);
-  const out = safe(
-    () =>
-      Number.isFinite(n)
-        ? new Intl.NumberFormat(locale, { style: "currency", currency }).format(n)
-        : "—",
-    "—",
-  );
+  useEffect(() => setMounted(true), []);
 
-  return (
-    <div>
-      <div className="flex flex-wrap items-center gap-2 font-mono text-sm text-white/50">
-        <span style={{ color: accent }}>anyamount</span>
-        <span className="text-white/30">(</span>
-        <TextInput value={amount} onChange={setAmount} accent="#7dd3fc" width="8ch" testid="input-amount-value" />
-        <span className="text-white/30">,</span>
-        <Select value={currency} onChange={setCurrency} options={["USD", "EUR", "JPY", "GBP", "BRL"]} accent={accent} testid="select-amount-currency" />
-        <Select value={locale} onChange={setLocale} options={LOCALES} accent={accent} testid="select-amount-locale" />
-        <span className="text-white/30">)</span>
-      </div>
-      <Result>{out}</Result>
-    </div>
-  );
-}
+  const preset = presets[i];
+  const call = preset.call;
 
-/** anywhen — date → localized date string (Intl.DateTimeFormat). */
-export function WhenExample({ accent }: { accent: string }) {
-  // Fixed initial date keeps SSR prerender and client hydration identical.
-  const [date, setDate] = useState<Date | null>(
-    () => new Date("2026-07-11T12:00:00"),
-  );
-  const [dateStyle, setDateStyle] = useState("full");
-  const [locale, setLocale] = useState<string>("en");
+  // Type the current call out.
+  useEffect(() => {
+    if (!mounted) return;
+    setLen(0);
+    setDone(false);
+    let n = 0;
+    const id = setInterval(() => {
+      n += 1;
+      setLen(n);
+      if (n >= call.length) {
+        clearInterval(id);
+        setDone(true);
+      }
+    }, TYPE_MS);
+    return () => clearInterval(id);
+  }, [mounted, i, call]);
 
-  const out = safe(() => {
-    if (!date || Number.isNaN(date.getTime())) return "—";
-    return new Intl.DateTimeFormat(locale, {
-      dateStyle: dateStyle as "full" | "long" | "medium" | "short",
-    }).format(date);
-  }, "—");
+  // Advance to the next preset after a hold.
+  useEffect(() => {
+    if (!done) return;
+    const id = setTimeout(() => setI((p) => (p + 1) % presets.length), HOLD_MS);
+    return () => clearTimeout(id);
+  }, [done, presets.length]);
+
+  const typed = mounted ? call.slice(0, len) : call;
+  const fnPart = typed.slice(0, fn.length);
+  const argPart = typed.slice(fn.length);
+  const showCaret = mounted && !done;
+  const showOut = mounted ? done : true;
 
   return (
-    <div>
-      <div className="flex flex-wrap items-center gap-2 font-mono text-sm text-white/50">
-        <span style={{ color: accent }}>anywhen</span>
-        <span className="text-white/30">(pick a day, {"{"}</span>
-        <Select value={dateStyle} onChange={setDateStyle} options={["full", "long", "medium", "short"]} accent={accent} testid="select-when-style" />
-        <Select value={locale} onChange={setLocale} options={LOCALES} accent={accent} testid="select-when-locale" />
-        <span className="text-white/30">{"})"}</span>
+    <div className="w-full max-w-xl">
+      <div className="rounded-xl border border-white/[0.08] bg-black/40 p-5 sm:p-6">
+        <div className="min-h-[3.5rem] font-mono text-sm leading-relaxed sm:text-base">
+          <span style={{ color: accent }}>{fnPart}</span>
+          <span className="text-white/60">{argPart}</span>
+          {showCaret && (
+            <span className="ml-0.5 animate-pulse" style={{ color: accent }}>
+              ▋
+            </span>
+          )}
+        </div>
+
+        <div
+          className="mt-4 flex items-center gap-3 border-t border-white/[0.06] pt-4 transition-all duration-500"
+          style={{
+            opacity: showOut ? 1 : 0,
+            transform: showOut ? "none" : "translateY(6px)",
+          }}
+        >
+          <span className="font-mono text-white/25">→</span>
+          <span
+            className="font-mono text-xl font-semibold sm:text-2xl"
+            style={{ color: accent }}
+          >
+            {preset.out}
+          </span>
+        </div>
       </div>
 
-      <div className="mt-3 flex w-full max-w-[320px]">
-        <SimpleCalendar
-          value={date}
-          onChange={setDate}
-          locale={locale}
-          theme="espresso"
-          scheme="dark"
-          className="w-full"
-          data-testid="calendar-when"
-        />
+      {/* preset progress dots */}
+      <div className="mt-4 flex gap-2">
+        {presets.map((_, k) => (
+          <span
+            key={k}
+            className="h-1.5 rounded-full transition-all duration-300"
+            style={{
+              width: k === i ? 20 : 6,
+              background: k === i ? accent : "rgba(255,255,255,0.15)",
+            }}
+          />
+        ))}
       </div>
-
-      <Result>{out}</Result>
-    </div>
-  );
-}
-
-/** anymany — string list → localized join (Intl.ListFormat). */
-export function ManyExample({ accent }: { accent: string }) {
-  const [raw, setRaw] = useState("apple, pear, plum");
-  const [type, setType] = useState("conjunction");
-  const [locale, setLocale] = useState<string>("en");
-
-  const items = raw.split(",").map((s) => s.trim()).filter(Boolean);
-  const out = safe(
-    () =>
-      new Intl.ListFormat(locale, {
-        type: type as "conjunction" | "disjunction" | "unit",
-        style: "long",
-      }).format(items),
-    "—",
-  );
-
-  return (
-    <div>
-      <div className="flex flex-wrap items-center gap-2 font-mono text-sm text-white/50">
-        <span style={{ color: accent }}>anymany</span>
-        <span className="text-white/30">(</span>
-        <TextInput value={raw} onChange={setRaw} accent="#7dd3fc" width="18ch" testid="input-many-list" />
-        <span className="text-white/30">,</span>
-        <Select value={type} onChange={setType} options={["conjunction", "disjunction", "unit"]} accent={accent} testid="select-many-type" />
-        <Select value={locale} onChange={setLocale} options={LOCALES} accent={accent} testid="select-many-locale" />
-        <span className="text-white/30">)</span>
-      </div>
-      <Result>{out}</Result>
     </div>
   );
 }
