@@ -48,7 +48,7 @@ const PACKAGES: Pkg[] = [
   {
     id: "anywhen",
     suffix: "when",
-    accent: "#7dd3fc",
+    accent: "#f5b66b",
     tagline: "dates & times",
     description:
       "Dates and times into localized strings and relative phrasing. Built on native Intl, no data files.",
@@ -60,7 +60,7 @@ const PACKAGES: Pkg[] = [
   {
     id: "anymany",
     suffix: "many",
-    accent: "#fcd34d",
+    accent: "#2ce69d",
     tagline: "lists",
     description:
       "String arrays into localized lists — sort and join in any locale with the native list formatter.",

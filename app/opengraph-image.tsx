@@ -7,8 +7,8 @@ export const contentType = "image/png";
 const PKGS = [
   { name: "anyaround", tagline: "names & flags", accent: "#c85a6e" },
   { name: "anyamount", tagline: "money & numbers", accent: "#b493e6" },
-  { name: "anywhen", tagline: "dates & times", accent: "#7dd3fc" },
-  { name: "anymany", tagline: "lists", accent: "#fcd34d" },
+  { name: "anywhen", tagline: "dates & times", accent: "#f5b66b" },
+  { name: "anymany", tagline: "lists", accent: "#2ce69d" },
 ];
 
 export default function OpengraphImage() {
