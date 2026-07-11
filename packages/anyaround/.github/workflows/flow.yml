@@ -1,0 +1,58 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - "demo/**"
+  pull_request:
+    branches: [main]
+    paths-ignore:
+      - "demo/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [20, 22, 24]
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.32.1
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: ${{ matrix.node }}
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm typecheck
+
+      - run: pnpm lint
+
+      - run: pnpm test:coverage
+
+      - name: Upload coverage to Codecov
+        if: matrix.node == 24
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage/lcov.info
+
+      - run: pnpm build
+
+      - name: Smoke test package outputs
+        run: |
+          node --input-type=module -e "import { anyaround } from './dist/index.mjs'; if (typeof anyaround !== 'function') throw new Error('ESM export failed')"
+          node -e "const { anyaround } = require('./dist/index.cjs'); if (typeof anyaround !== 'function') throw new Error('CJS export failed')"
+
+      - run: pnpm publint

@@ -1,0 +1,85 @@
+{
+    "name": "anyaround",
+    "version": "0.1.0",
+    "description": "Micro smart locale display — one function, any region, language, script, currency or calendar code to its localized name, with country flags. Any Intl locale.",
+    "type": "module",
+    "sideEffects": false,
+    "main": "./dist/index.cjs",
+    "module": "./dist/index.mjs",
+    "types": "./dist/index.d.ts",
+    "packageManager": "pnpm@10.32.1",
+    "engines": {
+        "node": ">=18"
+    },
+    "exports": {
+        ".": {
+            "import": {
+                "types": "./dist/index.d.ts",
+                "default": "./dist/index.mjs"
+            },
+            "require": {
+                "types": "./dist/index.d.cts",
+                "default": "./dist/index.cjs"
+            }
+        }
+    },
+    "files": [
+        "dist"
+    ],
+    "scripts": {
+        "build": "tsdown && node scripts/cjs-types.mjs && node scripts/check-size.mjs",
+        "lint": "oxlint src",
+        "publint": "publint",
+        "test": "vitest run",
+        "test:coverage": "vitest run --coverage",
+        "typecheck": "tsc --noEmit",
+        "release": "npm version patch && git push --follow-tags"
+    },
+    "keywords": [
+        "flag",
+        "flags",
+        "country-flag",
+        "country-flags",
+        "emoji-flag",
+        "region",
+        "country",
+        "countries",
+        "language",
+        "script",
+        "currency",
+        "calendar",
+        "displaynames",
+        "intl",
+        "i18n",
+        "localization",
+        "l10n",
+        "iso-3166",
+        "iso-639",
+        "lightweight",
+        "zero-dependency",
+        "typescript",
+        "esm",
+        "ssr",
+        "anyamount"
+    ],
+    "license": "MIT",
+    "devDependencies": {
+        "@types/node": "^22.19.15",
+        "@vitest/coverage-v8": "^3.2.4",
+        "oxlint": "^1.71.0",
+        "publint": "^0.3.21",
+        "tsdown": "^0.22.3",
+        "typescript": "^5.9.3",
+        "unrun": "^0.3.1",
+        "vitest": "^3.2.4"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/kirilinsky/anyaround.git"
+    },
+    "author": "Kirilinsky (https://github.com/kirilinsky)",
+    "bugs": {
+        "url": "https://github.com/kirilinsky/anyaround/issues"
+    },
+    "homepage": "https://github.com/kirilinsky/anyaround#readme"
+}

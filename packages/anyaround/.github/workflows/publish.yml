@@ -1,0 +1,64 @@
+name: publish
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.32.1
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm typecheck
+
+      - run: pnpm lint
+
+      - run: pnpm test
+
+      - run: pnpm build
+
+      - name: Smoke test package outputs
+        run: |
+          node --input-type=module -e "import { anyaround } from './dist/index.mjs'; if (typeof anyaround !== 'function') throw new Error('ESM export failed')"
+          node -e "const { anyaround } = require('./dist/index.cjs'); if (typeof anyaround !== 'function') throw new Error('CJS export failed')"
+
+      - run: pnpm publint
+
+      # Auth via npm Trusted Publishing (OIDC, id-token: write) — no token secret.
+      - run: pnpm publish --no-git-checks --access public
+        env:
+          NPM_CONFIG_PROVENANCE: "false"
+
+      # Auth via JSR OIDC (id-token: write) — repo must be linked on jsr.io.
+      - run: npx jsr publish
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          VERSION="${TAG#v}"
+          NOTES="$(awk "/^## ${VERSION}$/{flag=1; next} /^## /{flag=0} flag" CHANGELOG.md)"
+
+          if [ -n "$NOTES" ]; then
+            gh release create "$TAG" --title "$TAG" --notes "$NOTES"
+          else
+            gh release create "$TAG" --title "$TAG" --generate-notes
+          fi
