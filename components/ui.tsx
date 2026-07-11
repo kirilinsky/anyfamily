@@ -72,7 +72,7 @@ export function TextInput({
   );
 }
 
-export function Result({ children }: { children: React.ReactNode }) {
+export function Result({ children }: { children: ReactNode }) {
   return (
     <div className="mt-3 flex min-h-9 items-center rounded-md border border-white/[0.07] bg-black/40 px-3 py-2 font-mono text-sm text-white/90">
       {children}
@@ -80,7 +80,7 @@ export function Result({ children }: { children: React.ReactNode }) {
   );
 }
 
-export function Tag({ children }: { children: React.ReactNode }) {
+export function Tag({ children }: { children: ReactNode }) {
   return (
     <span className="rounded-full border border-white/10 bg-white/[0.03] px-2.5 py-1 font-mono text-[11px] lowercase tracking-wide text-white/40">
       {children}
