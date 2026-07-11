@@ -19,6 +19,7 @@ type Pkg = {
   tags: string[];
   npm: string;
   site: string;
+  github: string;
   presets: Preset[];
 };
 
@@ -32,9 +33,10 @@ const PACKAGES: Pkg[] = [
     tagline: "dates & times",
     description:
       "Dates and times into localized strings and relative phrasing. Built on native Intl, no data files.",
-    tags: ["dates", "datetimeformat", "relative", "i18n"],
+    tags: ["dates", "datetimeformat", "relative"],
     npm: "https://www.npmjs.com/package/anywhen",
     site: "https://anywhen-kappa.vercel.app",
+    github: "https://github.com/kirilinsky/anywhen",
     presets: WHEN_PRESETS,
   },
   {
@@ -44,9 +46,10 @@ const PACKAGES: Pkg[] = [
     tagline: "money & numbers",
     description:
       "Numbers, currency, and units into localized, human-readable strings. One function, three modes, any locale.",
-    tags: ["currency", "numberformat", "units", "i18n"],
+    tags: ["currency", "numberformat", "units"],
     npm: "https://www.npmjs.com/package/anyamount",
     site: "https://anyamount.vercel.app",
+    github: "https://github.com/kirilinsky/anyamount",
     presets: AMOUNT_PRESETS,
   },
   {
@@ -56,9 +59,10 @@ const PACKAGES: Pkg[] = [
     tagline: "lists",
     description:
       "String arrays into localized lists — sort and join in any locale with the native list formatter.",
-    tags: ["lists", "listformat", "i18n"],
+    tags: ["lists", "listformat", "sort"],
     npm: "https://www.npmjs.com/package/anymany",
     site: "https://anymany.vercel.app",
+    github: "https://github.com/kirilinsky/anymany",
     presets: MANY_PRESETS,
   },
   {
@@ -68,9 +72,10 @@ const PACKAGES: Pkg[] = [
     tagline: "names & flags",
     description:
       "Region, language, script, currency, and calendar codes into their localized names — decorated with country flags. Any Intl locale.",
-    tags: ["flags", "displaynames", "i18n", "ssr"],
+    tags: ["flags", "displaynames", "ssr"],
     npm: "https://www.npmjs.com/package/anyaround",
     site: "https://anyaround.vercel.app",
+    github: "https://github.com/kirilinsky/anyaround",
     presets: AROUND_PRESETS,
   },
 ];
@@ -135,6 +140,23 @@ export default function Home() {
             {/* Left: identity */}
             <div className="flex flex-col items-start gap-5">
               <FamilyLogo suffix={p.suffix} accent={p.accent} className="h-auto w-48" />
+              <p className="max-w-sm text-sm leading-relaxed text-white/55">
+                {p.description}
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {p.tags.map((t) => (
+                  <Tag key={t}>{t}</Tag>
+                ))}
+              </div>
+              <div className="mt-1 flex flex-wrap items-center gap-2">
+                <ExtLink href={p.site} label="site" accent={p.accent} />
+                <ExtLink href={p.npm} label="npm" accent={p.accent} />
+                <ExtLink href={p.github} label="github" accent={p.accent} />
+              </div>
+            </div>
+
+            {/* Right: tagline + version above the live typing demo */}
+            <div className="flex flex-col items-start gap-4">
               <div className="flex items-center gap-3">
                 <span
                   className="font-mono text-sm lowercase tracking-widest"
@@ -151,22 +173,6 @@ export default function Home() {
                   </span>
                 )}
               </div>
-              <p className="max-w-sm text-sm leading-relaxed text-white/55">
-                {p.description}
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {p.tags.map((t) => (
-                  <Tag key={t}>{t}</Tag>
-                ))}
-              </div>
-              <div className="mt-1 flex items-center gap-2">
-                <ExtLink href={p.site} label="site" accent={p.accent} />
-                <ExtLink href={p.npm} label="npm" accent={p.accent} />
-              </div>
-            </div>
-
-            {/* Right: live typing demo */}
-            <div className="flex justify-start md:justify-center">
               <CodeAnimation fn={p.id} accent={p.accent} presets={p.presets} />
             </div>
           </div>

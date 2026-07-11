@@ -13,28 +13,30 @@ import { anymany } from "anymany";
  */
 export type Preset = { call: string; run: () => string };
 
+// Ordered simplest-first: the bare one-argument call leads, so the essence of
+// each package reads immediately before the option-rich variants appear.
 export const AROUND_PRESETS: Preset[] = [
-  { call: `anyaround("US", { display: "flag-name" })`, run: () => anyaround("US", { display: "flag-name" }) },
-  { call: `anyaround("fr")`, run: () => anyaround("fr") },
+  { call: `anyaround("US")`, run: () => anyaround("US") },
   { call: `anyaround("JPY")`, run: () => anyaround("JPY") },
   { call: `anyaround("Cyrl")`, run: () => anyaround("Cyrl") },
+  { call: `anyaround("US", { display: "flag-name" })`, run: () => anyaround("US", { display: "flag-name" }) },
   { call: `anyaround("DE", { locale: "ru", display: "flag-name" })`, run: () => anyaround("DE", { locale: "ru", display: "flag-name" }) },
 ];
 
 export const AMOUNT_PRESETS: Preset[] = [
+  { call: `anyamount(1234567)`, run: () => anyamount(1234567, { locale: "en" }) },
   { call: `anyamount(1999.5, { mode: "currency", currency: "USD" })`, run: () => anyamount(1999.5, { mode: "currency", currency: "USD" }) },
   { call: `anyamount(1999.5, { currency: "EUR", locale: "de" })`, run: () => anyamount(1999.5, { mode: "currency", currency: "EUR", locale: "de" }) },
   { call: `anyamount(89000, { currency: "JPY", locale: "ja" })`, run: () => anyamount(89000, { mode: "currency", currency: "JPY", locale: "ja" }) },
-  { call: `anyamount(1234567, { locale: "en" })`, run: () => anyamount(1234567, { locale: "en" }) },
   { call: `anyamount(3.2, { mode: "unit", unit: "gigabyte" })`, run: () => anyamount(3.2, { mode: "unit", unit: "gigabyte" }) },
 ];
 
 const NOW = "2026-07-11T12:00:00";
 export const WHEN_PRESETS: Preset[] = [
-  { call: `anywhen("2026-07-11", { mode: "absolute", format: { dateStyle: "full" } })`, run: () => anywhen("2026-07-11", { mode: "absolute", format: { dateStyle: "full" } }) },
-  { call: `anywhen("2026-07-11", { locale: "ja", format: { dateStyle: "long" } })`, run: () => anywhen("2026-07-11", { mode: "absolute", locale: "ja", format: { dateStyle: "long" } }) },
   { call: `anywhen("2026-07-08", { mode: "relative" })`, run: () => anywhen("2026-07-08", { mode: "relative", now: NOW }) },
   { call: `anywhen("2026-07-14", { mode: "relative" })`, run: () => anywhen("2026-07-14", { mode: "relative", now: NOW }) },
+  { call: `anywhen("2026-07-11", { format: { dateStyle: "full" } })`, run: () => anywhen("2026-07-11", { mode: "absolute", format: { dateStyle: "full" } }) },
+  { call: `anywhen("2026-07-11", { locale: "ja", format: { dateStyle: "long" } })`, run: () => anywhen("2026-07-11", { mode: "absolute", locale: "ja", format: { dateStyle: "long" } }) },
   { call: `anywhen("2026-07-10T12:00", { mode: "smart" })`, run: () => anywhen("2026-07-10T12:00", { mode: "smart", now: NOW }) },
 ];
 
@@ -113,9 +115,9 @@ export function CodeAnimation({
   const out = mounted && done ? safeRun(preset.run) : "";
 
   return (
-    <div className="w-full max-w-xl">
-      <div className="rounded-xl border border-white/[0.08] bg-black/40 p-5 sm:p-6">
-        <div className="min-h-[3.5rem] font-mono text-sm leading-relaxed break-all sm:text-base">
+    <div className="w-full max-w-3xl lg:max-w-4xl">
+      <div className="rounded-2xl border border-white/[0.08] bg-black/40 p-6 sm:p-8">
+        <div className="min-h-[3.5rem] whitespace-pre-wrap break-words font-mono text-sm leading-relaxed sm:text-base">
           <span style={{ color: accent }}>{fnPart}</span>
           <span className="text-white/60">{argPart}</span>
           {showCaret && (
@@ -126,15 +128,15 @@ export function CodeAnimation({
         </div>
 
         <div
-          className="mt-4 flex items-center gap-3 border-t border-white/[0.06] pt-4 transition-all duration-500"
+          className="mt-6 flex min-h-[7rem] items-center gap-4 rounded-xl border border-white/[0.06] bg-white/[0.02] px-5 py-6 transition-all duration-500 sm:min-h-[8rem]"
           style={{
-            opacity: out ? 1 : 0,
+            opacity: out ? 1 : 0.25,
             transform: out ? "none" : "translateY(6px)",
           }}
         >
-          <span className="font-mono text-white/25">→</span>
+          <span className="font-mono text-lg text-white/25">→</span>
           <span
-            className="font-mono text-xl font-semibold sm:text-2xl"
+            className="font-mono text-2xl font-semibold break-words sm:text-4xl"
             style={{ color: accent }}
           >
             {out || " "}
