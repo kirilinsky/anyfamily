@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { SimpleCalendar } from "@dateforge/react-calendar/prebuilt";
 import { Select, TextInput, Result } from "./ui";
 
 const LOCALES = ["en", "de", "ru", "ja", "ar", "fr", "pt-BR"] as const;
@@ -83,36 +84,42 @@ export function AmountExample({ accent }: { accent: string }) {
 
 /** anywhen — date → localized date string (Intl.DateTimeFormat). */
 export function WhenExample({ accent }: { accent: string }) {
-  const [date, setDate] = useState("2026-07-11");
+  // Fixed initial date keeps SSR prerender and client hydration identical.
+  const [date, setDate] = useState<Date | null>(
+    () => new Date("2026-07-11T12:00:00"),
+  );
   const [dateStyle, setDateStyle] = useState("full");
   const [locale, setLocale] = useState<string>("en");
 
   const out = safe(() => {
-    const d = new Date(`${date}T12:00:00`);
-    if (Number.isNaN(d.getTime())) return "—";
+    if (!date || Number.isNaN(date.getTime())) return "—";
     return new Intl.DateTimeFormat(locale, {
       dateStyle: dateStyle as "full" | "long" | "medium" | "short",
-    }).format(d);
+    }).format(date);
   }, "—");
 
   return (
     <div>
       <div className="flex flex-wrap items-center gap-2 font-mono text-sm text-white/50">
         <span style={{ color: accent }}>anywhen</span>
-        <span className="text-white/30">(</span>
-        <input
-          type="date"
-          value={date}
-          onChange={(e) => setDate(e.target.value)}
-          data-testid="input-when-date"
-          style={{ color: "#7dd3fc", colorScheme: "dark" }}
-          className="h-8 shrink-0 rounded-md border border-white/10 bg-white/[0.03] px-2 font-mono text-sm outline-none hover:border-white/20"
-        />
-        <span className="text-white/30">, {"{"}</span>
+        <span className="text-white/30">(pick a day, {"{"}</span>
         <Select value={dateStyle} onChange={setDateStyle} options={["full", "long", "medium", "short"]} accent={accent} testid="select-when-style" />
         <Select value={locale} onChange={setLocale} options={LOCALES} accent={accent} testid="select-when-locale" />
         <span className="text-white/30">{"})"}</span>
       </div>
+
+      <div className="mt-3 flex w-full max-w-[320px]">
+        <SimpleCalendar
+          value={date}
+          onChange={setDate}
+          locale={locale}
+          theme="espresso"
+          scheme="dark"
+          className="w-full"
+          data-testid="calendar-when"
+        />
+      </div>
+
       <Result>{out}</Result>
     </div>
   );

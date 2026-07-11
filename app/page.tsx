@@ -20,18 +20,20 @@ type Pkg = {
   Example: ComponentType<{ accent: string }>;
 };
 
+// Canonical brand accents: anyaround #6d1625. On the dark page that red is
+// too low-contrast, so anyaround renders with a lightened tint (#c85a6e).
 const PACKAGES: Pkg[] = [
   {
-    id: "anyaround",
-    suffix: "around",
-    accent: "#6d1625",
-    tagline: "names & flags",
+    id: "anywhen",
+    suffix: "when",
+    accent: "#f5b66b",
+    tagline: "dates & times",
     description:
-      "Region, language, script, currency, and calendar codes into their localized names — decorated with country flags. Any Intl locale.",
-    tags: ["flags", "displaynames", "i18n", "ssr"],
-    npm: "https://www.npmjs.com/package/anyaround",
-    site: "https://anyaround.vercel.app",
-    Example: AroundExample,
+      "Dates and times into localized strings and relative phrasing. Built on native Intl, no data files.",
+    tags: ["dates", "datetimeformat", "relative", "i18n"],
+    npm: "https://www.npmjs.com/package/anywhen",
+    site: "https://anywhen-kappa.vercel.app",
+    Example: WhenExample,
   },
   {
     id: "anyamount",
@@ -46,18 +48,6 @@ const PACKAGES: Pkg[] = [
     Example: AmountExample,
   },
   {
-    id: "anywhen",
-    suffix: "when",
-    accent: "#f5b66b",
-    tagline: "dates & times",
-    description:
-      "Dates and times into localized strings and relative phrasing. Built on native Intl, no data files.",
-    tags: ["dates", "datetimeformat", "relative", "i18n"],
-    npm: "https://www.npmjs.com/package/anywhen",
-    site: "https://anywhen-kappa.vercel.app",
-    Example: WhenExample,
-  },
-  {
     id: "anymany",
     suffix: "many",
     accent: "#2ce69d",
@@ -68,6 +58,18 @@ const PACKAGES: Pkg[] = [
     npm: "https://www.npmjs.com/package/anymany",
     site: "https://anymany.vercel.app",
     Example: ManyExample,
+  },
+  {
+    id: "anyaround",
+    suffix: "around",
+    accent: "#c85a6e",
+    tagline: "names & flags",
+    description:
+      "Region, language, script, currency, and calendar codes into their localized names — decorated with country flags. Any Intl locale.",
+    tags: ["flags", "displaynames", "i18n", "ssr"],
+    npm: "https://www.npmjs.com/package/anyaround",
+    site: "https://anyaround.vercel.app",
+    Example: AroundExample,
   },
 ];
 
@@ -100,7 +102,13 @@ export default function Home() {
       {/* Header */}
       <header className="relative z-10 mx-auto flex max-w-3xl flex-col items-center gap-4 px-6 pt-24 pb-16 text-center sm:pt-28">
         <h1 className="font-mono text-4xl font-bold tracking-tight text-white sm:text-6xl">
-          the <span className="text-white/40">any</span>
+          the{" "}
+          <span
+            className="text-white/40"
+            style={{ fontFamily: "var(--font-inter), 'Inter', sans-serif" }}
+          >
+            any
+          </span>
           <span className="text-violet-300">*</span> family
         </h1>
         <p className="max-w-xl text-sm text-white/45 sm:text-base">

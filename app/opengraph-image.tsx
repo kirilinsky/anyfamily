@@ -5,10 +5,10 @@ export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
 const PKGS = [
-  { name: "anyaround", tagline: "names & flags", accent: "#c85a6e" },
-  { name: "anyamount", tagline: "money & numbers", accent: "#b493e6" },
   { name: "anywhen", tagline: "dates & times", accent: "#f5b66b" },
+  { name: "anyamount", tagline: "money & numbers", accent: "#b493e6" },
   { name: "anymany", tagline: "lists", accent: "#2ce69d" },
+  { name: "anyaround", tagline: "names & flags", accent: "#c85a6e" },
 ];
 
 export default function OpengraphImage() {
