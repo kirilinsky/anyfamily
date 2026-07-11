@@ -5,6 +5,7 @@
 <h1 align="center">anyaround</h1>
 
 <p align="center">
+  <a href="https://anyaround.vercel.app"><img src="https://img.shields.io/badge/homepage-anyaround.vercel.app-black?style=flat-square" alt="homepage" /></a>
   <a href="https://www.npmjs.com/package/anyaround"><img src="https://img.shields.io/npm/v/anyaround?style=flat-square&color=black" alt="npm" /></a>
   <a href="https://bundlephobia.com/package/anyaround"><img src="https://img.shields.io/bundlephobia/minzip/anyaround?style=flat-square&color=black&label=gzip" /></a>
   <a href="https://github.com/kirilinsky/anyaround/actions/workflows/flow.yml"><img src="https://github.com/kirilinsky/anyaround/actions/workflows/flow.yml/badge.svg" alt="CI" /></a>
@@ -306,4 +307,4 @@ suite on Node 20, 22, and 24.
 - [anyamount](https://github.com/kirilinsky/anyamount) — tiny smart number formatter. One function, three modes, any locale.
 - [anywhen](https://github.com/kirilinsky/anywhen) — tiny smart date formatter. One function, three modes, any locale.
 - [anymany](https://anymany.vercel.app/) — tiny Intl list formatter. Sort and join string arrays in any locale.
-- **anyaround** — you are here.
+- **anyaround** — you are here. [anyaround.vercel.app](https://anyaround.vercel.app)
