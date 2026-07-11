@@ -184,6 +184,7 @@ export function DocsClient() {
               docs
             </span>
             <select
+              data-testid="select-docs-nav"
               value={active}
               onChange={(e) => scrollTo(e.target.value)}
               className="rounded-md border bg-transparent px-2 py-1 font-mono text-xs md:hidden"

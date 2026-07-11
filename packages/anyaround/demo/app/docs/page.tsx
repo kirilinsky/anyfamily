@@ -13,7 +13,7 @@ export const metadata: Metadata = {
       "API reference for anyaround: localized region, language, script, and currency names with country flags via native Intl.",
   },
   twitter: {
-    card: "summary",
+    card: "summary_large_image",
     title: "anyaround docs — API reference",
     description:
       "Localized names and country flags via native Intl.",

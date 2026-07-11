@@ -110,6 +110,7 @@ export default function Home() {
             <span className="shrink-0 text-violet-300">anyaround</span>
             <span className="shrink-0 text-white/30">(</span>
             <input
+              data-testid="input-code"
               value={codeStr}
               onChange={(e) => setCodeStr(e.target.value)}
               spellCheck={false}
@@ -118,11 +119,12 @@ export default function Home() {
               style={{
                 width: `calc(${Math.max(codeStr.length, 1)}ch + 1.75rem)`,
               }}
-              className="h-8 min-w-0 shrink rounded-md border border-transparent px-1.5 text-left text-sky-300 outline-none transition-colors hover:border-white/10 hover:bg-white/[0.05] focus:border-sky-300/40"
+              className="h-8 shrink-0 rounded-md border border-transparent px-1.5 text-center text-sky-300 outline-none transition-colors hover:border-white/10 hover:bg-white/[0.05] focus:border-sky-300/40"
             />
             <span className="shrink-0 text-white/30">, {"{"}</span>
             <span className="shrink-0 text-white/55">mode:</span>
             <select
+              data-testid="select-mode"
               value={mode}
               onChange={(e) => setMode(e.target.value as Mode)}
               style={{
@@ -145,6 +147,7 @@ export default function Home() {
                 <span className="shrink-0 text-white/30">,</span>
                 <span className="shrink-0 text-white/55">display:</span>
                 <select
+                  data-testid="select-display"
                   value={display}
                   onChange={(e) => setDisplay(e.target.value as Display)}
                   style={{ width: `calc(${display.length + 2}ch + 0.75rem)` }}
@@ -163,6 +166,7 @@ export default function Home() {
                 <span className="shrink-0 text-white/30">,</span>
                 <span className="shrink-0 text-white/55">languageDisplay:</span>
                 <select
+                  data-testid="select-languageDisplay"
                   value={languageDisplay}
                   onChange={(e) =>
                     setLanguageDisplay(e.target.value as "dialect" | "standard")
@@ -180,6 +184,7 @@ export default function Home() {
             <span className="shrink-0 text-white/30">,</span>
             <span className="shrink-0 text-white/55">locale:</span>
             <select
+              data-testid="select-locale"
               value={locale}
               onChange={(e) => setLocale(e.target.value)}
               style={{ width: `calc(${locale.length + 2}ch + 0.75rem)` }}
@@ -292,7 +297,7 @@ export default function Home() {
 
       <footer className="fixed bottom-0 left-0 right-0 z-20 border-t border-white/[0.05] bg-[#0a0a0a]/80 backdrop-blur-sm">
         <div className="mx-auto flex min-h-14 max-w-3xl flex-col items-center justify-center gap-1 px-6 py-2 sm:min-h-12 sm:flex-row sm:justify-between sm:py-0">
-          <p className="text-center font-mono text-[11px] text-white/30">
+          <p className="text-center font-mono text-[11px] text-white/30 sm:whitespace-nowrap">
             Intl knows every name. anyaround adds the flag.
           </p>
 
@@ -301,6 +306,7 @@ export default function Home() {
               ["github", "https://github.com/kirilinsky/anyaround"],
               ["npm", "https://www.npmjs.com/package/anyaround"],
               ["anyamount", "https://anyamount.vercel.app/"],
+              ["anywhen", "https://anywhen-kappa.vercel.app/"],
               ["anymany", "https://anymany.vercel.app/"],
             ].map(([label, href]) => (
               <a

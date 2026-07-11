@@ -51,7 +51,7 @@ export const metadata: Metadata = {
   },
 
   twitter: {
-    card: "summary",
+    card: "summary_large_image",
     title: "anyaround — localized names & flags for any locale",
     description:
       "Micro zero-dependency locale display. Names and country flags via native Intl.",
