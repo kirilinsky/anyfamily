@@ -287,7 +287,7 @@ anyaround("DE", { display: "flag" }); // "🇩🇪"`}</Code>
           <Section id="info" title="anyaroundInfo()">
             <p>
               <code style={{ color: "var(--sky)" }}>
-                anyaroundInfo(code, options?) → {"{ code, type, name, flag }"}
+                anyaroundInfo(code, options?) → {"{ code, type, name, flag, found }"}
               </code>
             </p>
             <p>
@@ -295,14 +295,21 @@ anyaround("DE", { display: "flag" }); // "🇩🇪"`}</Code>
               a <code style={{ color: "var(--violet)" }}>&lt;select&gt;</code>.
             </p>
             <Code>{`anyaroundInfo("US", { locale: "en" });
-// { code: "US", type: "region", name: "United States", flag: "🇺🇸" }
+// { code: "US", type: "region", name: "United States", flag: "🇺🇸", found: true }
 
 anyaroundInfo("en", { locale: "fr" });
-// { code: "en", type: "language", name: "anglais", flag: "" }`}</Code>
+// { code: "en", type: "language", name: "anglais", flag: "", found: true }
+
+anyaroundInfo("QZ", { mode: "region" });
+// { code: "QZ", type: "region", name: "QZ", flag: "🇶🇿", found: false }`}</Code>
             <p>
               <code style={{ color: "var(--amber)" }}>flag</code> is{" "}
               <code style={{ color: "var(--emerald)" }}>&quot;&quot;</code>{" "}
-              whenever the code is not a flag-bearing alpha-2 region.
+              whenever the code is not a flag-bearing alpha-2 region.{" "}
+              <code style={{ color: "var(--amber)" }}>found</code> is{" "}
+              <code style={{ color: "var(--emerald)" }}>false</code> when{" "}
+              <code>Intl</code> had no name — <code>name</code> is then the code
+              or <code>&quot;&quot;</code>, so you can tell a hit from a miss.
             </p>
           </Section>
 
@@ -347,7 +354,10 @@ anyaround("gregory", { mode: "calendar" });               // "Gregorian Calendar
               Output shape for flag-bearing regions. Only in smart / region mode.
             </Prop>
             <Prop name="fallback" type='"code" | "none"' def='"code"'>
-              What to do with a code that has no known name.
+              On a miss, <code>name</code> becomes the code
+              (<code>&quot;code&quot;</code>) or <code>&quot;&quot;</code>{" "}
+              (<code>&quot;none&quot;</code>). Either way{" "}
+              <code>found</code> is <code>false</code>.
             </Prop>
             <Prop name="languageDisplay" type='"dialect" | "standard"' def='"dialect"'>
               Dialect (<code>&quot;American English&quot;</code>) vs standard

@@ -275,8 +275,9 @@ export default function Home() {
                   [
                     ["code", info.code],
                     ["type", info.type],
-                    ["name", info.name],
+                    ["name", info.name || "∅"],
                     ["flag", info.flag || "∅"],
+                    ["found", info.found ? "true" : "false"],
                   ] as const
                 ).map(([key, val]) => (
                   <span
