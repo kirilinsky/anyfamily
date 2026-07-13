@@ -41,10 +41,14 @@ jobs:
 
       - run: pnpm publint
 
+      # npm OIDC Trusted Publishing needs npm >= 11.5.1; pnpm's own publish does
+      # NOT perform the OIDC token exchange, so publish with npm itself.
+      - name: Update npm for trusted publishing
+        run: npm install -g npm@latest
+
       # Auth via npm Trusted Publishing (OIDC, id-token: write) — no token secret.
-      - run: pnpm publish --no-git-checks --access public
-        env:
-          NPM_CONFIG_PROVENANCE: "false"
+      # Provenance is generated automatically under OIDC.
+      - run: npm publish --access public
 
       # Auth via JSR OIDC (id-token: write) — repo must be linked on jsr.io.
       - run: npx jsr publish
