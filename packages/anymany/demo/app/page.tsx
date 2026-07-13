@@ -270,8 +270,7 @@ export default function Home() {
             {[
               ["github", "https://github.com/kirilinsky/anymany"],
               ["npm", "https://www.npmjs.com/package/anymany"],
-              ["anywhen", "https://anywhen-kappa.vercel.app/"],
-              ["anyamount", "https://anyamount.vercel.app/"],
+              ["anyfamily", "https://anyfamily.site"],
             ].map(([label, href]) => (
               <a
                 key={label}
