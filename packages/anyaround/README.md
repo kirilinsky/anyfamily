@@ -5,7 +5,6 @@
 <h1 align="center">anyaround</h1>
 
 <p align="center">
-  <a href="https://anyaround.vercel.app"><img src="https://img.shields.io/badge/homepage-anyaround.vercel.app-black?style=flat-square" alt="homepage" /></a>
   <a href="https://www.npmjs.com/package/anyaround"><img src="https://img.shields.io/npm/v/anyaround?style=flat-square&color=black" alt="npm" /></a>
   <a href="https://bundlephobia.com/package/anyaround"><img src="https://img.shields.io/bundlephobia/minzip/anyaround?style=flat-square&color=black&label=gzip" /></a>
   <a href="https://github.com/kirilinsky/anyaround/actions/workflows/flow.yml"><img src="https://github.com/kirilinsky/anyaround/actions/workflows/flow.yml/badge.svg" alt="CI" /></a>
@@ -17,6 +16,10 @@
   <strong>Micro locale display built on native <code>Intl</code>.</strong>
   <br />
   Turn <code>"US"</code> into <code>"🇺🇸 United States"</code>, <code>"en"</code> into <code>"English"</code>, <code>"Cyrl"</code> into <code>"Cyrillic"</code>, <code>"EUR"</code> into <code>"Euro"</code>.
+</p>
+
+<p align="center">
+  <strong><a href="https://anyaround.vercel.app">▶ Live demo</a></strong>
 </p>
 
 ---
@@ -215,10 +218,13 @@ instead of a ready string — build your own output, or drive a `<select>`.
 import { anyaroundInfo } from "anyaround";
 
 anyaroundInfo("US", { locale: "en" });
-// { code: "US", type: "region", name: "United States", flag: "🇺🇸" }
+// { code: "US", type: "region", name: "United States", flag: "🇺🇸", found: true }
 
 anyaroundInfo("en", { locale: "fr" });
-// { code: "en", type: "language", name: "anglais", flag: "" }
+// { code: "en", type: "language", name: "anglais", flag: "", found: true }
+
+anyaroundInfo("QZ", { mode: "region" });
+// { code: "QZ", type: "region", name: "QZ", flag: "🇶🇿", found: false }
 
 // React: a country dropdown with flags
 countries.map((cc) => {
@@ -227,7 +233,10 @@ countries.map((cc) => {
 });
 ```
 
-`flag` is `""` whenever the code is not a flag-bearing alpha-2 region.
+`flag` is `""` whenever the code is not a flag-bearing alpha-2 region. `found`
+is `false` when `Intl` had no name for the code — `name` is then the code
+(`fallback: "code"`, the default) or `""` (`fallback: "none"`), so you can tell
+a real hit from a miss.
 
 ---
 
@@ -278,7 +287,9 @@ Honest ones:
 - **No reverse lookup.** Name → code is not provided; this maps codes to names,
   not the other way.
 - **Flags are alpha-2 only.** Numeric M49 regions and non-region kinds have no
-  flag; those fall back to the name.
+  flag; those fall back to the name. Flags are derived from the code's shape,
+  not validated against a country list — any two-letter code yields a
+  Regional-Indicator pair (e.g. `"QZ"` → `🇶🇿`), even when `found` is `false`.
 - **Not every code is known everywhere.** Older runtimes have thinner ICU data;
   `fallback: "code"` (the default) returns the code rather than throwing.
 
@@ -286,9 +297,9 @@ Honest ones:
 
 ## stability
 
-anyaround follows [semver](https://semver.org/). While `0.x`, minor versions
-may still adjust the API. Exact display strings come from `Intl` and may vary
-between ICU versions, so never assert on them across environments.
+anyaround follows [semver](https://semver.org/). The `1.x` API is stable —
+breaking changes wait for a major bump. Exact display strings come from `Intl`
+and may vary between ICU versions, so never assert on them across environments.
 
 ---
 
@@ -308,3 +319,5 @@ suite on Node 20, 22, and 24.
 - [anywhen](https://github.com/kirilinsky/anywhen) — tiny smart date formatter. One function, three modes, any locale.
 - [anymany](https://anymany.vercel.app/) — tiny Intl list formatter. Sort and join string arrays in any locale.
 - **anyaround** — you are here. [anyaround.vercel.app](https://anyaround.vercel.app)
+
+See the whole family at **[anyfamily.site](https://anyfamily.site)**.

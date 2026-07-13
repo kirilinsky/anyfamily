@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.0
+
+First stable release. The API is now under semver — no breaking changes until 2.0.
+
+- No API changes from `0.1.0`; the surface has proven stable.
+- Docs polished and example outputs reconciled with current ICU.
+- `prepublishOnly` guards the build so `dist` is never published stale.
+
 ## 0.1.0
 
 Initial trial release. The API may still move before 1.0.

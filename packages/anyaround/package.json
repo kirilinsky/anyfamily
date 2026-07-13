@@ -1,6 +1,6 @@
 {
     "name": "anyaround",
-    "version": "0.1.0",
+    "version": "1.0.0",
     "description": "Micro smart locale display — one function, any region, language, script, currency or calendar code to its localized name, with country flags. Any Intl locale.",
     "type": "module",
     "sideEffects": false,
@@ -24,7 +24,8 @@
         }
     },
     "files": [
-        "dist"
+        "dist",
+        "llms.txt"
     ],
     "scripts": {
         "build": "tsdown && node scripts/cjs-types.mjs && node scripts/check-size.mjs",
@@ -33,6 +34,7 @@
         "test": "vitest run",
         "test:coverage": "vitest run --coverage",
         "typecheck": "tsc --noEmit",
+        "prepublishOnly": "npm run build",
         "release": "npm version patch && git push --follow-tags"
     },
     "keywords": [

@@ -87,6 +87,7 @@ describe("anyaroundInfo", () => {
       type: "region",
       name: "United States",
       flag: "🇺🇸",
+      found: true,
     });
   });
 
@@ -109,9 +110,13 @@ describe("fallback", () => {
     expect(anyaround("QZ", { mode: "region", locale: "en", fallback: "code" })).toBe("QZ");
   });
 
-  it("returns the code via the internal guard when Intl yields nothing (fallback: none)", () => {
-    // fallback "none" makes Intl return undefined; resolve()'s `?? code` still yields a string.
-    expect(anyaround("QZ", { mode: "region", locale: "en", fallback: "none" })).toBe("QZ");
+  it("returns an empty string on a miss (fallback: none)", () => {
+    expect(anyaround("QZ", { mode: "region", locale: "en", fallback: "none" })).toBe("");
+  });
+
+  it("reports found=false on a miss and found=true on a hit", () => {
+    expect(anyaroundInfo("QZ", { mode: "region", locale: "en" }).found).toBe(false);
+    expect(anyaroundInfo("US", { mode: "region", locale: "en" }).found).toBe(true);
   });
 });
 

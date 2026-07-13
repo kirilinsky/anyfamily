@@ -17,7 +17,7 @@ export type Mode = "smart" | DisplayType;
 
 /**
  * The five {@linkcode Intl.DisplayNames} kinds this library resolves. This is
- * also the value of {@linkcode AroundInfo.type} after smart detection.
+ * also the value of {@linkcode AnyaroundInfo.type} after smart detection.
  */
 export type DisplayType = "region" | "language" | "script" | "currency" | "calendar";
 
@@ -39,11 +39,13 @@ export type Style = "long" | "short" | "narrow";
 export type Display = "name" | "flag" | "flag-name" | "name-flag";
 
 /**
- * Behavior when a code is structurally valid but has no known name.
+ * What `name` becomes when a code is structurally valid but has no known name.
  *
- * - `"code"` — return the (canonicalized) code (default)
- * - `"none"` — resolve to the code as well, but ICU may return `undefined`;
- *   handled internally so a string is always produced.
+ * - `"code"` — the (canonicalized) code, e.g. `"QZ"` (default)
+ * - `"none"` — an empty string `""`
+ *
+ * Either way {@linkcode AnyaroundInfo.found} is `false` on a miss, so the two
+ * are always distinguishable.
  */
 export type Fallback = "code" | "none";
 
@@ -119,15 +121,26 @@ type ResolvedOptions = BaseOptions & {
  * The structured result of resolving a code, returned by
  * {@linkcode anyaroundInfo}.
  */
-export interface AroundInfo {
+export interface AnyaroundInfo {
   /** The canonicalized input code. */
   code: string;
   /** The kind it was resolved as (after smart detection). */
   type: DisplayType;
-  /** Localized name, or the code itself when unknown. */
+  /**
+   * Localized name. When the code has no known name, this is the
+   * canonicalized code (`fallback: "code"`, the default) or `""`
+   * (`fallback: "none"`). Check {@linkcode AnyaroundInfo.found} to tell them
+   * apart.
+   */
   name: string;
   /** Flag emoji, or `""` when the code is not a flag-bearing alpha-2 region. */
   flag: string;
+  /**
+   * `true` when `Intl` had a localized name for the code, `false` when `name`
+   * is a fallback (the code or `""`). Lets callers distinguish a real hit from
+   * a miss.
+   */
+  found: boolean;
 }
 
 const CACHE_LIMIT = 50;
@@ -194,7 +207,7 @@ function toFlag(code: string): string {
   return c.replace(/./g, (ch) => String.fromCodePoint(127397 + ch.charCodeAt(0)));
 }
 
-function resolve(code: string, options: AnyaroundOptions): AroundInfo {
+function resolve(code: string, options: AnyaroundOptions): AnyaroundInfo {
   if (typeof code !== "string" || code.trim() === "")
     throw new TypeError(`Invalid code: ${String(code)}`);
 
@@ -218,12 +231,16 @@ function resolve(code: string, options: AnyaroundOptions): AroundInfo {
 
   const c = canonical(code.trim(), type);
 
-  const dnOptions: Intl.DisplayNamesOptions = { type, style, fallback };
+  // Always ask ICU with fallback "none" so a miss surfaces as `undefined`;
+  // we then apply the caller's `fallback` ourselves and report it via `found`.
+  const dnOptions: Intl.DisplayNamesOptions = { type, style, fallback: "none" };
   if (type === "language" && languageDisplay) dnOptions.languageDisplay = languageDisplay;
 
-  const name = dn(locale, dnOptions).of(c) ?? c;
+  const resolved = dn(locale, dnOptions).of(c);
+  const found = resolved != null;
+  const name = found ? resolved : fallback === "none" ? "" : c;
   const flag = type === "region" ? toFlag(c) : "";
-  return { code: c, type, name, flag };
+  return { code: c, type, name, flag, found };
 }
 
 /**
@@ -237,7 +254,7 @@ function resolve(code: string, options: AnyaroundOptions): AroundInfo {
  * @example
  * anyaround("US");                                  // "United States"
  * anyaround("US", { display: "flag-name" });        // "🇺🇸 United States"
- * anyaround("US", { locale: "ru" });                // "США"
+ * anyaround("US", { locale: "ru" });                // "Соединенные Штаты"
  * anyaround("en");                                  // "English"
  * anyaround("Cyrl");                                // "Cyrillic"
  * anyaround("EUR");                                 // "Euro"
@@ -263,23 +280,25 @@ export function anyaround(code: string, options: AnyaroundOptions = {}): string 
 
 /**
  * Like {@linkcode anyaround}, but returns the structured
- * {@linkcode AroundInfo} — the canonical `code`, resolved `type`, localized
+ * {@linkcode AnyaroundInfo} — the canonical `code`, resolved `type`, localized
  * `name`, and `flag` (empty when not applicable) — so callers can compose their
  * own output.
  *
  * @example
  * anyaroundInfo("US");
- * // { code: "US", type: "region", name: "United States", flag: "🇺🇸" }
+ * // { code: "US", type: "region", name: "United States", flag: "🇺🇸", found: true }
  * anyaroundInfo("en", { locale: "fr" });
- * // { code: "en", type: "language", name: "anglais", flag: "" }
+ * // { code: "en", type: "language", name: "anglais", flag: "", found: true }
+ * anyaroundInfo("QZ", { mode: "region" });
+ * // { code: "QZ", type: "region", name: "QZ", flag: "🇶🇿", found: false }
  *
  * @param code - A region, language, script, currency, or calendar code.
  * @param options - Interpretation and formatting options (`display` is ignored).
- * @returns The {@linkcode AroundInfo} record.
+ * @returns The {@linkcode AnyaroundInfo} record.
  * @throws {TypeError} If `code` is empty or not a string.
  * @throws {RangeError} If `mode` is not a recognized kind.
  * @see {@linkcode anyaround} for the ready-to-render string form.
  */
-export function anyaroundInfo(code: string, options: AnyaroundOptions = {}): AroundInfo {
+export function anyaroundInfo(code: string, options: AnyaroundOptions = {}): AnyaroundInfo {
   return resolve(code, options);
 }
