@@ -306,9 +306,7 @@ export default function Home() {
             {[
               ["github", "https://github.com/kirilinsky/anyaround"],
               ["npm", "https://www.npmjs.com/package/anyaround"],
-              ["anyamount", "https://anyamount.vercel.app/"],
-              ["anywhen", "https://anywhen-kappa.vercel.app/"],
-              ["anymany", "https://anymany.vercel.app/"],
+              ["anyfamily", "https://anyfamily.site"],
             ].map(([label, href]) => (
               <a
                 key={label}
