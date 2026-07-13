@@ -1,7 +1,15 @@
 {
   "name": "anyfamily",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
+  "description": "Landing page for the any* family — micro, zero-dependency Intl tools.",
+  "homepage": "https://anyfamily.site",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kirilinsky/anyfamily.git"
+  },
+  "author": "Kirilinsky (https://github.com/kirilinsky)",
+  "license": "MIT",
   "scripts": {
     "versions": "node scripts/versions.mjs",
     "predev": "node scripts/versions.mjs",
@@ -12,10 +20,9 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "@dateforge/react-calendar": "^3.1.0",
     "@vercel/analytics": "^2.0.1",
     "anyamount": "^1.0.0",
-    "anyaround": "^0.1.0",
+    "anyaround": "^1.0.0",
     "anymany": "^1.0.1",
     "anywhen": "^1.0.2",
     "next": "16.2.1",

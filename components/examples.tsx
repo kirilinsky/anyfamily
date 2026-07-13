@@ -79,6 +79,7 @@ export function CodeAnimation({
   const [len, setLen] = useState(0);
   const [done, setDone] = useState(false);
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time hydration gate
   useEffect(() => setMounted(true), []);
 
   const preset = presets[i];
@@ -87,6 +88,8 @@ export function CodeAnimation({
   // Type the current call out.
   useEffect(() => {
     if (!mounted) return;
+    // Reset the typewriter when the preset changes; timers drive the rest.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLen(0);
     setDone(false);
     let n = 0;
