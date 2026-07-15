@@ -22,8 +22,8 @@ export function InstallChip({ command, accent }: { command: string; accent: stri
         });
       }}
       aria-label={`Copy "${command}" to clipboard`}
-      style={{ borderColor: `${accent}55` }}
-      className="group flex cursor-pointer items-center gap-3 rounded-xl border bg-white/[0.04] px-5 py-3 font-mono text-sm text-white/80 transition-colors hover:bg-white/[0.07] sm:text-base"
+      style={{ borderColor: `${accent}44` }}
+      className="group flex cursor-pointer items-center gap-3 rounded-lg border bg-white/[0.03] px-5 py-3 font-mono text-sm text-white/80 transition-colors hover:bg-white/[0.06] hover:text-white/90 sm:text-base"
     >
       <span className="select-none text-white/30">$</span>
       <span>{command}</span>

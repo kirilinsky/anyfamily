@@ -117,7 +117,7 @@ function ExtLink({
       target="_blank"
       rel="noopener noreferrer"
       style={{ borderColor: `${accent}44` }}
-      className="rounded-md border px-2.5 py-1 font-mono text-[11px] lowercase tracking-wide text-white/50 transition-colors hover:text-white/90"
+      className="rounded-lg border bg-white/[0.03] px-2.5 py-1 font-mono text-[11px] lowercase tracking-wide text-white/50 transition-colors hover:bg-white/[0.06] hover:text-white/90"
     >
       {label} ↗
     </a>
