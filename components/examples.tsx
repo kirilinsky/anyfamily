@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { anyaround } from "anyaround";
 import { anyamount } from "anyamount";
 import { anywhen } from "anywhen";
@@ -21,7 +21,7 @@ export const AROUND_PRESETS: Preset[] = [
   { call: `anyaround("JPY")`, run: () => anyaround("JPY") },
   { call: `anyaround("Cyrl")`, run: () => anyaround("Cyrl") },
   { call: `anyaround("US", { display: "flag-name" })`, run: () => anyaround("US", { display: "flag-name" }) },
-  { call: `anyaround("DE", { locale: "ru", display: "flag-name" })`, run: () => anyaround("DE", { locale: "ru", display: "flag-name" }) },
+  { call: `anyaround("DE", { locale: "fr", display: "flag-name" })`, run: () => anyaround("DE", { locale: "fr", display: "flag-name" }) },
 ];
 
 export const AMOUNT_PRESETS: Preset[] = [
@@ -45,7 +45,7 @@ export const MANY_PRESETS: Preset[] = [
   { call: `anymany(["a", "b", "c"])`, run: () => anymany(["a", "b", "c"]) },
   { call: `anymany(["red", "green", "blue"], { type: "disjunction" })`, run: () => anymany(["red", "green", "blue"], { type: "disjunction" }) },
   { call: `anymany(["1h", "30m"], { type: "unit" })`, run: () => anymany(["1h", "30m"], { type: "unit" }) },
-  { call: `anymany(["груша", "яблоко"], { locale: "ru", sort: true })`, run: () => anymany(["груша", "яблоко"], { locale: "ru", sort: true }) },
+  { call: `anymany(["poire", "pomme"], { locale: "fr", sort: true })`, run: () => anymany(["poire", "pomme"], { locale: "fr", sort: true }) },
   { call: `anymany(["Öl", "Apfel", "Zebra"], { sort: true, locale: "de" })`, run: () => anymany(["Öl", "Apfel", "Zebra"], { sort: true, locale: "de" }) },
 ];
 
@@ -54,7 +54,7 @@ export const LONG_PRESETS: Preset[] = [
   { call: `anylong("PT2H30M")`, run: () => anylong("PT2H30M", { locale: "en" }) },
   { call: `anylong("2h 30m", { style: "long" })`, run: () => anylong("2h 30m", { style: "long", locale: "en" }) },
   { call: `anylong({ hours: 2, minutes: 30 }, { style: "digital" })`, run: () => anylong({ hours: 2, minutes: 30 }, { style: "digital", locale: "en" }) },
-  { call: `anylong("P1DT4H", { locale: "ru" })`, run: () => anylong("P1DT4H", { locale: "ru" }) },
+  { call: `anylong("P1DT4H", { locale: "es" })`, run: () => anylong("P1DT4H", { locale: "es" }) },
 ];
 
 const TYPE_MS = 42;
@@ -84,19 +84,33 @@ export function CodeAnimation({
   presets: Preset[];
 }) {
   const [mounted, setMounted] = useState(false);
+  const [inView, setInView] = useState(false);
   const [i, setI] = useState(0);
   const [len, setLen] = useState(0);
   const [done, setDone] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time hydration gate
   useEffect(() => setMounted(true), []);
+
+  // Only animate while the demo is actually visible.
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setInView(entry.isIntersecting),
+      { threshold: 0.3 },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   const preset = presets[i];
   const call = preset.call;
 
   // Type the current call out.
   useEffect(() => {
-    if (!mounted) return;
+    if (!mounted || !inView) return;
     // Reset the typewriter when the preset changes; timers drive the rest.
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setLen(0);
@@ -111,14 +125,14 @@ export function CodeAnimation({
       }
     }, TYPE_MS);
     return () => clearInterval(id);
-  }, [mounted, i, call]);
+  }, [mounted, inView, i, call]);
 
   // Advance to the next preset after a hold.
   useEffect(() => {
-    if (!done) return;
+    if (!done || !inView) return;
     const id = setTimeout(() => setI((p) => (p + 1) % presets.length), HOLD_MS);
     return () => clearTimeout(id);
-  }, [done, presets.length]);
+  }, [done, inView, presets.length]);
 
   const typed = mounted ? call.slice(0, len) : call;
   const fnPart = typed.slice(0, fn.length);
@@ -127,7 +141,7 @@ export function CodeAnimation({
   const out = mounted && done ? safeRun(preset.run) : "";
 
   return (
-    <div className="w-full max-w-3xl lg:max-w-4xl">
+    <div ref={containerRef} className="w-full max-w-3xl lg:max-w-4xl">
       <div className="rounded-2xl border border-white/[0.08] bg-black/40 p-6 sm:p-8">
         <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.2em] text-white/30">
           you call
