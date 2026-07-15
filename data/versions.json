@@ -1,7 +1,8 @@
 {
-  "anyfamily": "1.0.0",
+  "anyfamily": "1.0.1",
   "anyaround": "1.0.0",
   "anyamount": "1.0.0",
   "anywhen": "1.0.2",
-  "anymany": "1.0.1"
+  "anymany": "1.0.1",
+  "anylong": "1.0.1"
 }

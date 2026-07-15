@@ -9,6 +9,7 @@ const PKGS = [
   { name: "anyamount", tagline: "money & numbers", accent: "#b493e6" },
   { name: "anymany", tagline: "lists", accent: "#2ce69d" },
   { name: "anyaround", tagline: "names & flags", accent: "#c85a6e" },
+  { name: "anylong", tagline: "durations", accent: "#2cc2c9" },
 ];
 
 export default function OpengraphImage() {

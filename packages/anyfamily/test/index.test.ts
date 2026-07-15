@@ -1,12 +1,20 @@
 import { describe, expect, it } from "vitest";
-import { anywhen, anyamount, anymany, anyaround } from "../src/index";
+import {
+  anywhen,
+  anyamount,
+  anymany,
+  anyaround,
+  anylong,
+  anylongSupported,
+} from "../src/index";
 
 describe("anyfamily", () => {
-  it("re-exports all four as functions", () => {
+  it("re-exports all five as functions", () => {
     expect(typeof anywhen).toBe("function");
     expect(typeof anyamount).toBe("function");
     expect(typeof anymany).toBe("function");
     expect(typeof anyaround).toBe("function");
+    expect(typeof anylong).toBe("function");
   });
 
   it("anywhen formats relative time", () => {
@@ -29,5 +37,9 @@ describe("anyfamily", () => {
 
   it("anyaround resolves region names", () => {
     expect(anyaround("US", { locale: "en" })).toBe("United States");
+  });
+
+  it.skipIf(!anylongSupported)("anylong formats durations", () => {
+    expect(anylong("PT2H30M", { locale: "en" })).toBe("2 hr, 30 min");
   });
 });

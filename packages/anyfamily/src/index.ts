@@ -1,11 +1,11 @@
 /**
  * anyfamily — the whole any* family in one install.
  *
- * Named re-exports of anywhen, anyamount, anymany and anyaround, plus every
- * public type from each. Types whose names collide across packages
- * (`Mode`, `Style`, `SmartOptions`, `CurrencyOptions`) are aliased with their
- * package prefix; `Locale` is structurally identical in all four, so it is
- * exported once.
+ * Named re-exports of anywhen, anyamount, anymany, anyaround and anylong,
+ * plus every public type from each. Types whose names collide across
+ * packages (`Mode`, `Style`, `SmartOptions`, `CurrencyOptions`) are aliased
+ * with their package prefix; `Locale` is structurally identical across the
+ * four Intl-formatter packages, so it is exported once.
  */
 
 // anywhen — dates, times, relative phrasing (Intl.DateTimeFormat)
@@ -56,3 +56,13 @@ export type {
   SmartOptions as AnyaroundSmartOptions,
   Style as AnyaroundStyle,
 } from "anyaround";
+
+// anylong — durations (Intl.DurationFormat)
+export { anylong, anylongParts, supported as anylongSupported } from "anylong";
+export type {
+  AnylongOptions,
+  AnylongPart,
+  DecomposeUnit as AnylongDecomposeUnit,
+  DurationInput,
+  DurationRecord,
+} from "anylong";

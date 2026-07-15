@@ -22,6 +22,7 @@ full-screen section per package with a live, self-typing example.
 | **anyamount** | numbers, currency, units | `Intl.NumberFormat` | [site](https://anyamount.vercel.app) · [npm](https://www.npmjs.com/package/anyamount) · [repo](https://github.com/kirilinsky/anyamount) |
 | **anywhen** | dates, times, relative phrasing | `Intl.DateTimeFormat` | [site](https://anywhen-kappa.vercel.app) · [npm](https://www.npmjs.com/package/anywhen) · [repo](https://github.com/kirilinsky/anywhen) |
 | **anymany** | string lists | `Intl.ListFormat` | [site](https://anymany.vercel.app) · [npm](https://www.npmjs.com/package/anymany) · [repo](https://github.com/kirilinsky/anymany) |
+| **anylong** | durations | `Intl.DurationFormat` | [site](https://anylong.vercel.app) · [npm](https://www.npmjs.com/package/anylong) · [repo](https://github.com/kirilinsky/anylong) |
 
 ## how it works
 

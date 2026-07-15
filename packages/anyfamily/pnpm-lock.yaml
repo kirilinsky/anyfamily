@@ -14,6 +14,9 @@ importers:
       anyaround:
         specifier: ^1.0.0
         version: 1.0.0
+      anylong:
+        specifier: ^1.0.1
+        version: 1.0.1
       anymany:
         specifier: ^1.0.1
         version: 1.0.1
@@ -548,6 +551,10 @@ packages:
 
   anyaround@1.0.0:
     resolution: {integrity: sha512-8032Ajuav/6VLaKLxPSNuvN8Knv/mHIS51bZXDbLduYkeH5+gucMp13CkhBytxiBjdmdlf4SE+Y09qOY8P3z6w==}
+    engines: {node: '>=18'}
+
+  anylong@1.0.1:
+    resolution: {integrity: sha512-91lUmP7SLJ2fx1UQNsBHrZ35Ndyz5aQN2czjawPeR1qrZZ+dxVwmvpPxRW6TW/M2HQyhoewAvunmqa8Hg1BVag==}
     engines: {node: '>=18'}
 
   anymany@1.0.1:
@@ -1214,6 +1221,8 @@ snapshots:
   anyamount@1.0.0: {}
 
   anyaround@1.0.0: {}
+
+  anylong@1.0.1: {}
 
   anymany@1.0.1: {}
 

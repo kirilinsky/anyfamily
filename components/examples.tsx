@@ -5,6 +5,7 @@ import { anyaround } from "anyaround";
 import { anyamount } from "anyamount";
 import { anywhen } from "anywhen";
 import { anymany } from "anymany";
+import { anylong } from "anylong";
 
 /**
  * A canned demo. `call` is the source shown typing out; `run` invokes the real
@@ -46,6 +47,14 @@ export const MANY_PRESETS: Preset[] = [
   { call: `anymany(["1h", "30m"], { type: "unit" })`, run: () => anymany(["1h", "30m"], { type: "unit" }) },
   { call: `anymany(["груша", "яблоко"], { locale: "ru", sort: true })`, run: () => anymany(["груша", "яблоко"], { locale: "ru", sort: true }) },
   { call: `anymany(["Öl", "Apfel", "Zebra"], { sort: true, locale: "de" })`, run: () => anymany(["Öl", "Apfel", "Zebra"], { sort: true, locale: "de" }) },
+];
+
+export const LONG_PRESETS: Preset[] = [
+  { call: `anylong(9_000_000)`, run: () => anylong(9_000_000, { locale: "en" }) },
+  { call: `anylong("PT2H30M")`, run: () => anylong("PT2H30M", { locale: "en" }) },
+  { call: `anylong("2h 30m", { style: "long" })`, run: () => anylong("2h 30m", { style: "long", locale: "en" }) },
+  { call: `anylong({ hours: 2, minutes: 30 }, { style: "digital" })`, run: () => anylong({ hours: 2, minutes: 30 }, { style: "digital", locale: "en" }) },
+  { call: `anylong("P1DT4H", { locale: "ru" })`, run: () => anylong("P1DT4H", { locale: "ru" }) },
 ];
 
 const TYPE_MS = 42;

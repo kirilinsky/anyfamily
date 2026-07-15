@@ -1,7 +1,7 @@
 {
   "name": "anyfamily",
-  "version": "1.0.0",
-  "description": "The whole any* family in one install — anywhen, anyamount, anymany and anyaround: micro Intl formatters with zero dependencies of their own.",
+  "version": "1.0.1",
+  "description": "The whole any* family in one install — anywhen, anyamount, anymany, anyaround and anylong: micro Intl formatters with zero dependencies of their own.",
   "type": "module",
   "sideEffects": false,
   "main": "./dist/index.cjs",
@@ -50,7 +50,9 @@
     "anywhen",
     "anyamount",
     "anymany",
-    "anyaround"
+    "anyaround",
+    "anylong",
+    "duration"
   ],
   "homepage": "https://anyfamily.site",
   "repository": {
@@ -66,6 +68,7 @@
   "dependencies": {
     "anyamount": "^1.0.0",
     "anyaround": "^1.0.0",
+    "anylong": "^1.0.1",
     "anymany": "^1.0.1",
     "anywhen": "^1.0.2"
   },

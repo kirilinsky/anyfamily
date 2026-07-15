@@ -23,6 +23,7 @@
     "@vercel/analytics": "^2.0.1",
     "anyamount": "^1.0.0",
     "anyaround": "^1.0.0",
+    "anylong": "^1.0.1",
     "anymany": "^1.0.1",
     "anywhen": "^1.0.2",
     "next": "16.2.1",

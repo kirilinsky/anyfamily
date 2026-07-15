@@ -10,7 +10,7 @@ npm install anyfamily
 ```
 
 ```ts
-import { anywhen, anyamount, anymany, anyaround } from "anyfamily";
+import { anywhen, anyamount, anymany, anyaround, anylong } from "anyfamily";
 ```
 
 ESM + CJS, fully typed, `sideEffects: false` — bundlers tree-shake away
@@ -59,13 +59,24 @@ anyaround("US", { display: "flag-name", locale: "en" });
 // "🇺🇸 United States"
 ```
 
+## anylong — durations
+
+Any duration in — a number, two `Date`s, an ISO 8601 string, shorthand, or a
+duration record — into a localized string, over `Intl.DurationFormat`.
+[npm](https://www.npmjs.com/package/anylong)
+
+```ts
+anylong("PT2H30M", { locale: "en" });
+// "2 hr, 30 min"
+```
+
 ## types
 
-Every public type from all four packages is re-exported. Names that collide
+Every public type from all five packages is re-exported. Names that collide
 across packages (`Mode`, `Style`, `SmartOptions`, `CurrencyOptions`) carry
 their package prefix — `AnywhenMode`, `AnyamountStyle`,
-`AnyaroundCurrencyOptions`, … `Locale` is identical in all four and exported
-once.
+`AnyaroundCurrencyOptions`, … `Locale` is structurally identical in
+anywhen/anyamount/anymany/anyaround and exported once.
 
 ## license
 

@@ -10,6 +10,7 @@ import {
   AMOUNT_PRESETS,
   WHEN_PRESETS,
   MANY_PRESETS,
+  LONG_PRESETS,
 } from "@/components/examples";
 
 type Pkg = {
@@ -80,6 +81,19 @@ const PACKAGES: Pkg[] = [
     site: "https://anyaround.vercel.app",
     github: "https://github.com/kirilinsky/anyaround",
     presets: AROUND_PRESETS,
+  },
+  {
+    id: "anylong",
+    suffix: "long",
+    accent: colors.anylong,
+    tagline: "durations",
+    description:
+      "Any duration in — a number, two Dates, an ISO 8601 string, shorthand, or a duration record — into a localized string. One function over Intl.DurationFormat.",
+    tags: ["duration", "durationformat", "elapsed"],
+    npm: "https://www.npmjs.com/package/anylong",
+    site: "https://anylong.vercel.app",
+    github: "https://github.com/kirilinsky/anylong",
+    presets: LONG_PRESETS,
   },
 ];
 
