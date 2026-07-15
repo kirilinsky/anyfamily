@@ -7,7 +7,7 @@
 import { readFile, writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 
-const PKGS = ["anyaround", "anyamount", "anywhen", "anymany"];
+const PKGS = ["anyfamily", "anyaround", "anyamount", "anywhen", "anymany"];
 const OUT = fileURLToPath(new URL("../data/versions.json", import.meta.url));
 
 async function installedVersion(pkg) {

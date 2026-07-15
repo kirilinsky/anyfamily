@@ -1,6 +1,8 @@
 import { FamilyLogo } from "@/components/family-logo";
+import { InstallChip } from "@/components/install-chip";
 import { Tag } from "@/components/ui";
 import versions from "@/data/versions.json";
+import colors from "@/data/colors.json";
 import {
   CodeAnimation,
   type Preset,
@@ -23,13 +25,14 @@ type Pkg = {
   presets: Preset[];
 };
 
-// Canonical brand accents: anyaround #6d1625. On the dark page that red is
-// too low-contrast, so anyaround renders with a lightened tint (#c85a6e).
+// Accents live in data/colors.json, one per package. Canonical brand red for
+// anyaround is #6d1625 — too low-contrast on the dark page, so the JSON holds
+// a lightened tint (#c85a6e).
 const PACKAGES: Pkg[] = [
   {
     id: "anywhen",
     suffix: "when",
-    accent: "#f5b66b",
+    accent: colors.anywhen,
     tagline: "dates & times",
     description:
       "Dates and times into localized strings and relative phrasing. Built on native Intl, no data files.",
@@ -42,7 +45,7 @@ const PACKAGES: Pkg[] = [
   {
     id: "anyamount",
     suffix: "amount",
-    accent: "#b493e6",
+    accent: colors.anyamount,
     tagline: "money & numbers",
     description:
       "Numbers, currency, and units into localized, human-readable strings. One function, three modes, any locale.",
@@ -55,7 +58,7 @@ const PACKAGES: Pkg[] = [
   {
     id: "anymany",
     suffix: "many",
-    accent: "#2ce69d",
+    accent: colors.anymany,
     tagline: "lists",
     description:
       "String arrays into localized lists — sort and join in any locale with the native list formatter.",
@@ -68,7 +71,7 @@ const PACKAGES: Pkg[] = [
   {
     id: "anyaround",
     suffix: "around",
-    accent: "#c85a6e",
+    accent: colors.anyaround,
     tagline: "names & flags",
     description:
       "Region, language, script, currency, and calendar codes into their localized names — decorated with country flags. Any Intl locale.",
@@ -108,6 +111,20 @@ const jsonLd = {
         "The any* family: micro, zero-dependency JavaScript tools built on native Intl.",
       inLanguage: "en",
       author: { "@type": "Person", name: "kirilinsky", url: "https://github.com/kirilinsky" },
+    },
+    {
+      "@type": "SoftwareApplication",
+      name: "anyfamily",
+      description:
+        "The whole any* family in one install — anywhen, anyamount, anymany and anyaround behind a single import.",
+      applicationCategory: "DeveloperApplication",
+      operatingSystem: "Any",
+      url: BASE,
+      softwareVersion:
+        (versions as Record<string, string>)["anyfamily"] || undefined,
+      programmingLanguage: "TypeScript",
+      offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+      author: { "@type": "Person", name: "kirilinsky" },
     },
     {
       "@type": "ItemList",
@@ -226,6 +243,53 @@ export default function Home() {
           </div>
         </section>
       ))}
+
+      {/* anyfamily — the 4-in-1 meta-package, closing the tour */}
+      <section
+        id="anyfamily"
+        className="relative z-10 flex min-h-screen snap-start flex-col items-center justify-center px-6 text-center"
+      >
+        <h2 className="sr-only">
+          anyfamily — all four any* packages in one install: anywhen, anyamount,
+          anymany and anyaround behind a single import.
+        </h2>
+        <span className="mb-6 font-mono text-xs uppercase tracking-widest text-white/30">
+          or all at once
+        </span>
+        <div className="flex items-center gap-3">
+          <FamilyLogo
+            suffix="family"
+            accent={colors.anyfamily}
+            className="h-auto w-64 sm:w-80"
+          />
+          {(versions as Record<string, string>)["anyfamily"] && (
+            <span
+              className="rounded-full border px-2 py-0.5 font-mono text-[11px] text-white/50"
+              style={{ borderColor: `${colors.anyfamily}44` }}
+            >
+              v{(versions as Record<string, string>)["anyfamily"]}
+            </span>
+          )}
+        </div>
+        <div className="mt-10">
+          <InstallChip command="npm i anyfamily" accent={colors.anyfamily} />
+        </div>
+        <p className="mt-6 max-w-xl text-sm text-white/45 sm:text-base">
+          One install, all four — named re-exports, fully typed, tree-shakeable.
+        </p>
+        <div className="mt-4 flex items-center gap-2">
+          <ExtLink
+            href="https://www.npmjs.com/package/anyfamily"
+            label="npm"
+            accent={colors.anyfamily}
+          />
+          <ExtLink
+            href="https://github.com/kirilinsky/anyfamily"
+            label="github"
+            accent={colors.anyfamily}
+          />
+        </div>
+      </section>
 
     </main>
   );
