@@ -26,10 +26,10 @@ export const AROUND_PRESETS: Preset[] = [
 
 export const AMOUNT_PRESETS: Preset[] = [
   { call: `anyamount(1234567)`, run: () => anyamount(1234567, { locale: "en" }) },
-  { call: `anyamount(1999.5, { mode: "currency", currency: "USD" })`, run: () => anyamount(1999.5, { mode: "currency", currency: "USD" }) },
-  { call: `anyamount(1999.5, { currency: "EUR", locale: "de" })`, run: () => anyamount(1999.5, { mode: "currency", currency: "EUR", locale: "de" }) },
-  { call: `anyamount(89000, { currency: "JPY", locale: "ja" })`, run: () => anyamount(89000, { mode: "currency", currency: "JPY", locale: "ja" }) },
-  { call: `anyamount(3.2, { mode: "unit", unit: "gigabyte" })`, run: () => anyamount(3.2, { mode: "unit", unit: "gigabyte" }) },
+  { call: `anyamount(9_007_199_254_740_993n)`, run: () => anyamount(BigInt("9007199254740993"), { locale: "en" }) },
+  { call: `anyamount(1999.5, { mode: "currency", currency: "EUR", locale: "de" })`, run: () => anyamount(1999.5, { mode: "currency", currency: "EUR", locale: "de" }) },
+  { call: `anyamount(3.2, { mode: "unit", unit: "kilometer-per-hour", style: "long" })`, run: () => anyamount(3.2, { mode: "unit", unit: "kilometer-per-hour", style: "long", locale: "en" }) },
+  { call: `anyamount(2500000, { style: "long", locale: "fr" })`, run: () => anyamount(2500000, { style: "long", locale: "fr" }) },
 ];
 
 const NOW = "2026-07-11T12:00:00";
@@ -54,7 +54,7 @@ export const LONG_PRESETS: Preset[] = [
   { call: `anylong("PT2H30M")`, run: () => anylong("PT2H30M", { locale: "en" }) },
   { call: `anylong("2h 30m", { style: "long" })`, run: () => anylong("2h 30m", { style: "long", locale: "en" }) },
   { call: `anylong({ hours: 2, minutes: 30 }, { style: "digital" })`, run: () => anylong({ hours: 2, minutes: 30 }, { style: "digital", locale: "en" }) },
-  { call: `anylong("P1DT4H", { locale: "es" })`, run: () => anylong("P1DT4H", { locale: "es" }) },
+  { call: `anylong("P1DT4H", { locale: "es", style: "long" })`, run: () => anylong("P1DT4H", { locale: "es", style: "long" }) },
 ];
 
 // Meta-package tour: cycles one import + call per any* package, all from

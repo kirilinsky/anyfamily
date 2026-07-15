@@ -29,9 +29,6 @@ type Pkg = {
   navLabel: string;
 };
 
-// Accents live in data/colors.json, one per package. Canonical brand red for
-// anyaround is #6d1625 — too low-contrast on the dark page, so the JSON holds
-// a lightened tint (#c85a6e).
 const PACKAGES: Pkg[] = [
   {
     id: "anywhen",
@@ -105,7 +102,15 @@ const PACKAGES: Pkg[] = [
   },
 ];
 
-function ExtLink({ href, label, accent }: { href: string; label: string; accent: string }) {
+function ExtLink({
+  href,
+  label,
+  accent,
+}: {
+  href: string;
+  label: string;
+  accent: string;
+}) {
   return (
     <a
       href={href}
@@ -132,7 +137,11 @@ const jsonLd = {
       description:
         "The any* family: micro, zero-dependency JavaScript tools built on native Intl.",
       inLanguage: "en",
-      author: { "@type": "Person", name: "kirilinsky", url: "https://github.com/kirilinsky" },
+      author: {
+        "@type": "Person",
+        name: "kirilinsky",
+        url: "https://github.com/kirilinsky",
+      },
     },
     {
       "@type": "SoftwareApplication",
@@ -161,7 +170,8 @@ const jsonLd = {
           applicationCategory: "DeveloperApplication",
           operatingSystem: "Any",
           url: p.site,
-          softwareVersion: (versions as Record<string, string>)[p.id] || undefined,
+          softwareVersion:
+            (versions as Record<string, string>)[p.id] || undefined,
           programmingLanguage: "TypeScript",
           offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
           author: { "@type": "Person", name: "kirilinsky" },
@@ -189,13 +199,16 @@ export default function Home() {
 
       <SectionNav
         items={[
-          { id: "hero", label: "top", accent: "#ffffff" },
-          ...PACKAGES.map((p) => ({ id: p.id, label: p.navLabel, accent: p.accent })),
+          { id: "hero", label: "hero", accent: "#d6b3e2" },
+          ...PACKAGES.map((p) => ({
+            id: p.id,
+            label: p.navLabel,
+            accent: p.accent,
+          })),
           { id: "anyfamily", label: "a | f", accent: colors.anyfamily },
         ]}
       />
 
-      {/* Hero */}
       <section
         id="hero"
         className="relative z-10 flex min-h-dvh snap-start flex-col items-center justify-center px-6 text-center"
@@ -208,9 +221,9 @@ export default function Home() {
           className="h-auto w-56 sm:w-[26rem] lg:w-[32rem]"
         />
         <p className="mt-4 max-w-xl text-sm text-white/45 sm:mt-6 sm:text-base">
-          Micro, zero-dependency tools built on native{" "}
-          <code className="font-mono text-white/70">Intl</code>. No data files, no
-          config — just one function each, in any locale.
+          Five formatters, zero dependencies — because the dependency is your
+          browser. Dates, money, lists, names, durations:{" "}
+          <span className="text-white/70">one function each, any locale</span>.
         </p>
         <div className="mt-10 flex h-9 w-5 justify-center rounded-full border border-white/15 pt-2 sm:mt-16">
           <span className="animate-scroll-cue-dot h-1.5 w-1 rounded-full bg-white/50" />
@@ -230,15 +243,14 @@ export default function Home() {
               <h2 className="sr-only">
                 {p.id} — {p.tagline}: {p.description}
               </h2>
-              <FamilyLogo suffix={p.suffix} accent={p.accent} className="h-auto w-32 sm:w-40 md:w-48" />
+              <FamilyLogo
+                suffix={p.suffix}
+                accent={p.accent}
+                className="h-auto w-32 sm:w-40 md:w-48"
+              />
               <p className="max-w-sm text-sm leading-relaxed text-white/55">
                 {p.description}
               </p>
-              <div className="hidden flex-wrap gap-2 md:flex">
-                {p.tags.map((t) => (
-                  <Tag key={t}>{t}</Tag>
-                ))}
-              </div>
               <div className="mt-1 hidden md:block">
                 <InstallChip command={`npm i ${p.id}`} accent={p.accent} />
               </div>
@@ -249,23 +261,30 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Right: tagline + version above the live typing demo */}
+            {/* Right: tagline + version + tags above the live typing demo */}
             <div className="flex flex-col items-start gap-2 md:gap-4">
-              <div className="flex items-center gap-3">
-                <span
-                  className="font-mono text-sm lowercase tracking-widest"
-                  style={{ color: `${p.accent}cc` }}
-                >
-                  {p.tagline}
-                </span>
-                {(versions as Record<string, string>)[p.id] && (
+              <div className="flex flex-col items-start gap-2 md:flex-row md:items-center md:gap-3">
+                <div className="flex items-center gap-3">
                   <span
-                    className="rounded-full border px-2 py-0.5 font-mono text-[11px] text-white/50"
-                    style={{ borderColor: `${p.accent}44` }}
+                    className="font-mono text-sm lowercase tracking-widest"
+                    style={{ color: `${p.accent}cc` }}
                   >
-                    v{(versions as Record<string, string>)[p.id]}
+                    {p.tagline}
                   </span>
-                )}
+                  {(versions as Record<string, string>)[p.id] && (
+                    <span
+                      className="rounded-full border px-2 py-0.5 font-mono text-[11px] text-white/50"
+                      style={{ borderColor: `${p.accent}44` }}
+                    >
+                      v{(versions as Record<string, string>)[p.id]}
+                    </span>
+                  )}
+                </div>
+                <div className="flex flex-nowrap items-center gap-1.5 overflow-x-auto [scrollbar-width:none] md:flex-wrap md:gap-2 md:overflow-visible">
+                  {p.tags.map((t) => (
+                    <Tag key={t}>{t}</Tag>
+                  ))}
+                </div>
               </div>
               <CodeAnimation fn={p.id} accent={p.accent} presets={p.presets} />
               <div className="mt-2 flex flex-wrap items-center gap-2 md:hidden">
@@ -296,10 +315,14 @@ export default function Home() {
               className="h-auto w-32 sm:w-40 md:w-48"
             />
             <p className="max-w-sm text-sm leading-relaxed text-white/55">
-              One install, all five — named re-exports, fully typed, tree-shakeable.
+              One install, all five — named re-exports, fully typed,
+              tree-shakeable.
             </p>
             <div className="mt-1">
-              <InstallChip command="npm i anyfamily" accent={colors.anyfamily} />
+              <InstallChip
+                command="npm i anyfamily"
+                accent={colors.anyfamily}
+              />
             </div>
             <div className="mt-1 hidden flex-wrap items-center gap-2 md:flex">
               <ExtLink
@@ -322,7 +345,7 @@ export default function Home() {
                 className="font-mono text-sm lowercase tracking-widest"
                 style={{ color: `${colors.anyfamily}cc` }}
               >
-               all at once
+                all at once
               </span>
               {(versions as Record<string, string>)["anyfamily"] && (
                 <span
@@ -333,7 +356,11 @@ export default function Home() {
                 </span>
               )}
             </div>
-            <CodeAnimation fn="anyfamily" accent={colors.anyfamily} presets={FAMILY_PRESETS} />
+            <CodeAnimation
+              fn="anyfamily"
+              accent={colors.anyfamily}
+              presets={FAMILY_PRESETS}
+            />
             <div className="mt-2 flex flex-wrap items-center gap-2 md:hidden">
               <ExtLink
                 href="https://www.npmjs.com/package/anyfamily"
