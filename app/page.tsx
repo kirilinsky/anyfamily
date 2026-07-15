@@ -258,14 +258,14 @@ export default function Home() {
         </section>
       ))}
 
-      {/* anyfamily — the 4-in-1 meta-package, closing the tour */}
+      {/* anyfamily — the 5-in-1 meta-package, closing the tour */}
       <section
         id="anyfamily"
         className="relative z-10 flex min-h-screen snap-start flex-col items-center justify-center px-6 text-center"
       >
         <h2 className="sr-only">
-          anyfamily — all four any* packages in one install: anywhen, anyamount,
-          anymany and anyaround behind a single import.
+          anyfamily — all five any* packages in one install: anywhen,
+          anyamount, anymany, anyaround and anylong behind a single import.
         </h2>
         <span className="mb-6 font-mono text-xs uppercase tracking-widest text-white/30">
           or all at once
@@ -289,7 +289,7 @@ export default function Home() {
           <InstallChip command="npm i anyfamily" accent={colors.anyfamily} />
         </div>
         <p className="mt-6 max-w-xl text-sm text-white/45 sm:text-base">
-          One install, all four — named re-exports, fully typed, tree-shakeable.
+          One install, all five — named re-exports, fully typed, tree-shakeable.
         </p>
         <div className="mt-4 flex items-center gap-2">
           <ExtLink

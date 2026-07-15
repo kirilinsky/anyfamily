@@ -5,7 +5,7 @@
  * plus every public type from each. Types whose names collide across
  * packages (`Mode`, `Style`, `SmartOptions`, `CurrencyOptions`) are aliased
  * with their package prefix; `Locale` is structurally identical across the
- * four Intl-formatter packages, so it is exported once.
+ * five Intl-formatter packages, so it is exported once.
  */
 
 // anywhen — dates, times, relative phrasing (Intl.DateTimeFormat)

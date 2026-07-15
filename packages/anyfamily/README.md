@@ -1,8 +1,8 @@
 # a\*
 
-[![anyfamily — anywhen · anyamount · anymany · anyaround](https://anyfamily.site/opengraph-image?c5010871842302b6)](https://anyfamily.site)
+[![anyfamily — anywhen · anyamount · anymany · anyaround · anylong](https://anyfamily.site/opengraph-image?c5010871842302b6)](https://anyfamily.site)
 
-**anyfamily — install one, get four.** The whole **any\*** family — micro `Intl`-powered
+**anyfamily — install one, get five.** The whole **any\*** family — micro `Intl`-powered
 formatters, each with zero dependencies of its own — behind a single import.
 
 ```bash
@@ -76,7 +76,7 @@ Every public type from all five packages is re-exported. Names that collide
 across packages (`Mode`, `Style`, `SmartOptions`, `CurrencyOptions`) carry
 their package prefix — `AnywhenMode`, `AnyamountStyle`,
 `AnyaroundCurrencyOptions`, … `Locale` is structurally identical in
-anywhen/anyamount/anymany/anyaround and exported once.
+anywhen/anyamount/anymany/anyaround/anylong and exported once.
 
 ## license
 
