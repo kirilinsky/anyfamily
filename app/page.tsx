@@ -173,7 +173,7 @@ const jsonLd = {
 
 export default function Home() {
   return (
-    <main className="h-screen snap-y snap-mandatory overflow-y-scroll bg-[#0a0a0a] [scrollbar-width:none]">
+    <main className="h-dvh snap-y snap-mandatory overflow-y-scroll bg-[#0a0a0a] [scrollbar-width:none]">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -198,29 +198,22 @@ export default function Home() {
       {/* Hero */}
       <section
         id="hero"
-        className="relative z-10 flex min-h-screen snap-start flex-col items-center justify-center px-6 text-center"
+        className="relative z-10 flex min-h-dvh snap-start flex-col items-center justify-center px-6 text-center"
       >
-        <h1 className="font-mono text-5xl font-bold tracking-tight text-white sm:text-7xl">
-          the{" "}
-          <span
-            className="italic"
-            style={{
-              fontFamily: "var(--font-inter), 'Inter', sans-serif",
-              color: "#e9e4d4",
-            }}
-          >
-            any
-          </span>
-          <span className="text-violet-300">*</span> family
-        </h1>
-        <p className="mt-6 max-w-xl text-sm text-white/45 sm:text-base">
+        <h1 className="sr-only">the any family</h1>
+        <FamilyLogo
+          suffix="family"
+          accent={colors.anyfamily}
+          mark="bar"
+          className="h-auto w-56 sm:w-[26rem] lg:w-[32rem]"
+        />
+        <p className="mt-4 max-w-xl text-sm text-white/45 sm:mt-6 sm:text-base">
           Micro, zero-dependency tools built on native{" "}
           <code className="font-mono text-white/70">Intl</code>. No data files, no
           config — just one function each, in any locale.
         </p>
-        <div className="mt-16 flex flex-col items-center gap-2 text-white/30">
-          <span className="font-mono text-xs uppercase tracking-widest">scroll</span>
-          <span className="animate-bounce text-lg">↓</span>
+        <div className="mt-10 flex h-9 w-5 justify-center rounded-full border border-white/15 pt-2 sm:mt-16">
+          <span className="animate-scroll-cue-dot h-1.5 w-1 rounded-full bg-white/50" />
         </div>
       </section>
 
@@ -229,27 +222,27 @@ export default function Home() {
         <section
           key={p.id}
           id={p.id}
-          className="relative z-10 flex min-h-screen snap-start items-center px-6 py-16 md:px-10"
+          className="relative z-10 flex min-h-dvh snap-start items-center px-5 py-6 md:px-10 md:py-16"
         >
-          <div className="mx-auto grid w-full max-w-6xl items-center gap-10 md:grid-cols-[minmax(0,300px)_1fr] md:gap-16">
+          <div className="mx-auto grid w-full max-w-6xl items-center gap-4 md:grid-cols-[minmax(0,300px)_1fr] md:gap-16">
             {/* Left: identity */}
-            <div className="flex flex-col items-start gap-5">
+            <div className="flex flex-col items-start gap-3 md:gap-5">
               <h2 className="sr-only">
                 {p.id} — {p.tagline}: {p.description}
               </h2>
-              <FamilyLogo suffix={p.suffix} accent={p.accent} className="h-auto w-48" />
+              <FamilyLogo suffix={p.suffix} accent={p.accent} className="h-auto w-32 sm:w-40 md:w-48" />
               <p className="max-w-sm text-sm leading-relaxed text-white/55">
                 {p.description}
               </p>
-              <div className="flex flex-wrap gap-2">
+              <div className="hidden flex-wrap gap-2 md:flex">
                 {p.tags.map((t) => (
                   <Tag key={t}>{t}</Tag>
                 ))}
               </div>
-              <div className="mt-1">
+              <div className="mt-1 hidden md:block">
                 <InstallChip command={`npm i ${p.id}`} accent={p.accent} />
               </div>
-              <div className="mt-1 flex flex-wrap items-center gap-2">
+              <div className="mt-1 hidden flex-wrap items-center gap-2 md:flex">
                 <ExtLink href={p.site} label="demo" accent={p.accent} />
                 <ExtLink href={p.npm} label="npm" accent={p.accent} />
                 <ExtLink href={p.github} label="github" accent={p.accent} />
@@ -257,7 +250,7 @@ export default function Home() {
             </div>
 
             {/* Right: tagline + version above the live typing demo */}
-            <div className="flex flex-col items-start gap-4">
+            <div className="flex flex-col items-start gap-2 md:gap-4">
               <div className="flex items-center gap-3">
                 <span
                   className="font-mono text-sm lowercase tracking-widest"
@@ -275,6 +268,11 @@ export default function Home() {
                 )}
               </div>
               <CodeAnimation fn={p.id} accent={p.accent} presets={p.presets} />
+              <div className="mt-2 flex flex-wrap items-center gap-2 md:hidden">
+                <ExtLink href={p.site} label="demo" accent={p.accent} />
+                <ExtLink href={p.npm} label="npm" accent={p.accent} />
+                <ExtLink href={p.github} label="github" accent={p.accent} />
+              </div>
             </div>
           </div>
         </section>
@@ -283,23 +281,27 @@ export default function Home() {
       {/* anyfamily — the 5-in-1 meta-package, closing the tour */}
       <section
         id="anyfamily"
-        className="relative z-10 flex min-h-screen snap-start items-center px-6 py-16 md:px-10"
+        className="relative z-10 flex min-h-dvh snap-start items-center px-5 py-6 md:px-10 md:py-16"
       >
-        <div className="mx-auto grid w-full max-w-6xl items-center gap-10 md:grid-cols-[minmax(0,300px)_1fr] md:gap-16">
+        <div className="mx-auto grid w-full max-w-6xl items-center gap-4 md:grid-cols-[minmax(0,300px)_1fr] md:gap-16">
           {/* Left: identity */}
-          <div className="flex flex-col items-start gap-5">
+          <div className="flex flex-col items-start gap-3 md:gap-5">
             <h2 className="sr-only">
               anyfamily — all five any* packages in one install: anywhen,
               anyamount, anymany, anyaround and anylong behind a single import.
             </h2>
-            <FamilyLogo suffix="family" accent={colors.anyfamily} className="h-auto w-48" />
+            <FamilyLogo
+              suffix="family"
+              accent={colors.anyfamily}
+              className="h-auto w-32 sm:w-40 md:w-48"
+            />
             <p className="max-w-sm text-sm leading-relaxed text-white/55">
               One install, all five — named re-exports, fully typed, tree-shakeable.
             </p>
             <div className="mt-1">
               <InstallChip command="npm i anyfamily" accent={colors.anyfamily} />
             </div>
-            <div className="mt-1 flex flex-wrap items-center gap-2">
+            <div className="mt-1 hidden flex-wrap items-center gap-2 md:flex">
               <ExtLink
                 href="https://www.npmjs.com/package/anyfamily"
                 label="npm"
@@ -314,13 +316,13 @@ export default function Home() {
           </div>
 
           {/* Right: tagline + version above the live typing demo */}
-          <div className="flex flex-col items-start gap-4">
+          <div className="flex flex-col items-start gap-2 md:gap-4">
             <div className="flex items-center gap-3">
               <span
                 className="font-mono text-sm lowercase tracking-widest"
                 style={{ color: `${colors.anyfamily}cc` }}
               >
-                or all at once
+               all at once
               </span>
               {(versions as Record<string, string>)["anyfamily"] && (
                 <span
@@ -332,6 +334,18 @@ export default function Home() {
               )}
             </div>
             <CodeAnimation fn="anyfamily" accent={colors.anyfamily} presets={FAMILY_PRESETS} />
+            <div className="mt-2 flex flex-wrap items-center gap-2 md:hidden">
+              <ExtLink
+                href="https://www.npmjs.com/package/anyfamily"
+                label="npm"
+                accent={colors.anyfamily}
+              />
+              <ExtLink
+                href="https://github.com/kirilinsky/anyfamily"
+                label="github"
+                accent={colors.anyfamily}
+              />
+            </div>
           </div>
         </div>
       </section>

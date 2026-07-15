@@ -1,16 +1,19 @@
 /**
  * Parametrized "any|<suffix>" wordmark, generalized from the anyaround logo.
- * The cream italic "any" stays fixed; the mono suffix + caret take the
- * package's accent color and the viewBox widens to fit the suffix.
+ * The cream italic "any" stays fixed; the mono suffix takes the package's
+ * accent color. `mark` swaps the divider: "bar" (default) for per-package
+ * logos, "star" for the anyfamily hero flourish (the "any*" asterisk).
  */
 export function FamilyLogo({
   suffix,
   accent,
   className,
+  mark = "bar",
 }: {
   suffix: string;
   accent: string;
   className?: string;
+  mark?: "bar" | "star";
 }) {
   const CHAR = 56; // approx mono glyph advance at fontSize 100
   const suffixLen = suffix.length * CHAR;
@@ -44,7 +47,20 @@ export function FamilyLogo({
         any
       </text>
 
-      <rect x="208" y="32" width="4" height="60" rx="1" fill={accent} />
+      {mark === "star" ? (
+        <text
+          x="196"
+          y="70"
+          fontFamily="'Inter', sans-serif"
+          fontWeight="800"
+          fontSize="64"
+          fill="#c4b5fd"
+        >
+          *
+        </text>
+      ) : (
+        <rect x="208" y="32" width="4" height="60" rx="1" fill={accent} />
+      )}
 
       <text
         x={suffixX}

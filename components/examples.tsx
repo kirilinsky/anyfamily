@@ -166,7 +166,6 @@ export function CodeAnimation({
     return () => clearTimeout(id);
   }, [done, inView, presets.length]);
 
-  const maxLines = Math.max(...presets.map((p) => p.call.split("\n").length));
   const typed = mounted ? call.slice(0, len) : call;
   const fnPart = typed.slice(0, activeFn.length);
   const argPart = typed.slice(activeFn.length);
@@ -175,28 +174,39 @@ export function CodeAnimation({
 
   return (
     <div ref={containerRef} className="w-full max-w-3xl lg:max-w-4xl">
-      <div className="rounded-2xl border border-white/[0.08] bg-black/40 p-6 sm:p-8">
-        <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.2em] text-white/30">
+      <div className="rounded-2xl border border-white/[0.08] bg-black/40 p-3 sm:p-8">
+        <p className="mb-1 font-mono text-[10px] uppercase tracking-[0.2em] text-white/30 sm:mb-2">
           you call
         </p>
-        <div
-          className="whitespace-pre-wrap break-words font-mono text-sm leading-relaxed sm:text-base"
-          style={{ minHeight: `${maxLines * 1.625}rem` }}
-        >
-          <span style={{ color: accent }}>{fnPart}</span>
-          <span className="text-white/60">{argPart}</span>
-          {showCaret && (
-            <span className="ml-0.5 animate-pulse" style={{ color: accent }}>
-              ▋
+        <div className="grid grid-cols-1 font-mono text-sm leading-relaxed sm:text-base">
+          {/* Invisible sizer: every preset's full call stacked in the same grid
+              cell reserves the tallest real wrapped height at this width, so
+              typing never grows the box mid-animation. */}
+          {presets.map((p, k) => (
+            <span
+              key={k}
+              aria-hidden
+              className="invisible col-start-1 row-start-1 whitespace-pre-wrap break-words"
+            >
+              {p.call}
             </span>
-          )}
+          ))}
+          <div className="col-start-1 row-start-1 whitespace-pre-wrap break-words">
+            <span style={{ color: accent }}>{fnPart}</span>
+            <span className="text-white/60">{argPart}</span>
+            {showCaret && (
+              <span className="ml-0.5 animate-pulse" style={{ color: accent }}>
+                ▋
+              </span>
+            )}
+          </div>
         </div>
 
-        <p className="mt-6 mb-2 font-mono text-[10px] uppercase tracking-[0.2em] text-white/30">
+        <p className="mt-4 mb-1 font-mono text-[10px] uppercase tracking-[0.2em] text-white/30 sm:mt-6 sm:mb-2">
           you get
         </p>
         <div
-          className="flex min-h-[7rem] items-center gap-4 rounded-xl border border-white/[0.06] bg-white/[0.02] px-5 py-6 transition-all duration-500 sm:min-h-[8rem]"
+          className="flex min-h-[5rem] items-center gap-4 rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-4 transition-all duration-500 sm:min-h-[8rem] sm:px-5 sm:py-6"
           style={{
             opacity: out ? 1 : 0.25,
             transform: out ? "none" : "translateY(6px)",
@@ -204,7 +214,7 @@ export function CodeAnimation({
         >
           <span className="font-mono text-lg text-white/25">→</span>
           <span
-            className="font-mono text-2xl font-semibold break-words sm:text-4xl"
+            className="font-mono text-xl font-semibold break-words sm:text-4xl"
             style={{ color: accent }}
           >
             {out || " "}
@@ -213,7 +223,7 @@ export function CodeAnimation({
       </div>
 
       {/* preset progress dots */}
-      <div className="mt-4 flex gap-2">
+      <div className="mt-3 flex gap-2 sm:mt-4">
         {presets.map((_, k) => (
           <span
             key={k}

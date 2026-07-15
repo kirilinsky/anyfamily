@@ -15,3 +15,21 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+@keyframes scroll-cue-dot {
+  0% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  70% {
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(11px);
+    opacity: 0;
+  }
+}
+
+.animate-scroll-cue-dot {
+  animation: scroll-cue-dot 1.8s ease-in-out infinite;
+}
