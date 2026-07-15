@@ -12,7 +12,7 @@ import { anylong } from "anylong";
  * published package so the revealed output is genuine, never hardcoded. anywhen
  * presets pass a fixed `now` so relative/smart output stays deterministic.
  */
-export type Preset = { call: string; run: () => string };
+export type Preset = { call: string; run: () => string; fn?: string };
 
 // Ordered simplest-first: the bare one-argument call leads, so the essence of
 // each package reads immediately before the option-rich variants appear.
@@ -55,6 +55,37 @@ export const LONG_PRESETS: Preset[] = [
   { call: `anylong("2h 30m", { style: "long" })`, run: () => anylong("2h 30m", { style: "long", locale: "en" }) },
   { call: `anylong({ hours: 2, minutes: 30 }, { style: "digital" })`, run: () => anylong({ hours: 2, minutes: 30 }, { style: "digital", locale: "en" }) },
   { call: `anylong("P1DT4H", { locale: "es" })`, run: () => anylong("P1DT4H", { locale: "es" }) },
+];
+
+// Meta-package tour: cycles one import + call per any* package, all from
+// "anyfamily" — `fn` overrides the accent-colored prefix per preset since it
+// varies (the import clause), unlike the single-package demos above.
+export const FAMILY_PRESETS: Preset[] = [
+  {
+    fn: `import { anywhen } from "anyfamily";`,
+    call: `import { anywhen } from "anyfamily";\n\nanywhen("2026-07-08", { mode: "relative" })`,
+    run: () => anywhen("2026-07-08", { mode: "relative", now: NOW }),
+  },
+  {
+    fn: `import { anyamount } from "anyfamily";`,
+    call: `import { anyamount } from "anyfamily";\n\nanyamount(1999.5, { mode: "currency", currency: "USD" })`,
+    run: () => anyamount(1999.5, { mode: "currency", currency: "USD" }),
+  },
+  {
+    fn: `import { anymany } from "anyfamily";`,
+    call: `import { anymany } from "anyfamily";\n\nanymany(["red", "green", "blue"], { type: "disjunction" })`,
+    run: () => anymany(["red", "green", "blue"], { type: "disjunction" }),
+  },
+  {
+    fn: `import { anyaround } from "anyfamily";`,
+    call: `import { anyaround } from "anyfamily";\n\nanyaround("JPY")`,
+    run: () => anyaround("JPY"),
+  },
+  {
+    fn: `import { anylong } from "anyfamily";`,
+    call: `import { anylong } from "anyfamily";\n\nanylong("PT2H30M")`,
+    run: () => anylong("PT2H30M", { locale: "en" }),
+  },
 ];
 
 const TYPE_MS = 42;
@@ -107,6 +138,7 @@ export function CodeAnimation({
 
   const preset = presets[i];
   const call = preset.call;
+  const activeFn = preset.fn ?? fn;
 
   // Type the current call out.
   useEffect(() => {
@@ -134,9 +166,10 @@ export function CodeAnimation({
     return () => clearTimeout(id);
   }, [done, inView, presets.length]);
 
+  const maxLines = Math.max(...presets.map((p) => p.call.split("\n").length));
   const typed = mounted ? call.slice(0, len) : call;
-  const fnPart = typed.slice(0, fn.length);
-  const argPart = typed.slice(fn.length);
+  const fnPart = typed.slice(0, activeFn.length);
+  const argPart = typed.slice(activeFn.length);
   const showCaret = mounted && !done;
   const out = mounted && done ? safeRun(preset.run) : "";
 
@@ -146,7 +179,10 @@ export function CodeAnimation({
         <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.2em] text-white/30">
           you call
         </p>
-        <div className="min-h-[3.5rem] whitespace-pre-wrap break-words font-mono text-sm leading-relaxed sm:text-base">
+        <div
+          className="whitespace-pre-wrap break-words font-mono text-sm leading-relaxed sm:text-base"
+          style={{ minHeight: `${maxLines * 1.625}rem` }}
+        >
           <span style={{ color: accent }}>{fnPart}</span>
           <span className="text-white/60">{argPart}</span>
           {showCaret && (

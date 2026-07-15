@@ -1,5 +1,6 @@
 import { FamilyLogo } from "@/components/family-logo";
 import { InstallChip } from "@/components/install-chip";
+import { SectionNav } from "@/components/section-nav";
 import { Tag } from "@/components/ui";
 import versions from "@/data/versions.json";
 import colors from "@/data/colors.json";
@@ -11,6 +12,7 @@ import {
   WHEN_PRESETS,
   MANY_PRESETS,
   LONG_PRESETS,
+  FAMILY_PRESETS,
 } from "@/components/examples";
 
 type Pkg = {
@@ -24,6 +26,7 @@ type Pkg = {
   site: string;
   github: string;
   presets: Preset[];
+  navLabel: string;
 };
 
 // Accents live in data/colors.json, one per package. Canonical brand red for
@@ -42,6 +45,7 @@ const PACKAGES: Pkg[] = [
     site: "https://anywhen-kappa.vercel.app",
     github: "https://github.com/kirilinsky/anywhen",
     presets: WHEN_PRESETS,
+    navLabel: "a | w",
   },
   {
     id: "anyamount",
@@ -55,6 +59,7 @@ const PACKAGES: Pkg[] = [
     site: "https://anyamount.vercel.app",
     github: "https://github.com/kirilinsky/anyamount",
     presets: AMOUNT_PRESETS,
+    navLabel: "a | a",
   },
   {
     id: "anymany",
@@ -68,6 +73,7 @@ const PACKAGES: Pkg[] = [
     site: "https://anymany.vercel.app",
     github: "https://github.com/kirilinsky/anymany",
     presets: MANY_PRESETS,
+    navLabel: "a | m",
   },
   {
     id: "anyaround",
@@ -81,6 +87,7 @@ const PACKAGES: Pkg[] = [
     site: "https://anyaround.vercel.app",
     github: "https://github.com/kirilinsky/anyaround",
     presets: AROUND_PRESETS,
+    navLabel: "a | r",
   },
   {
     id: "anylong",
@@ -93,6 +100,7 @@ const PACKAGES: Pkg[] = [
     npm: "https://www.npmjs.com/package/anylong",
     site: "https://anylong.vercel.app",
     github: "https://github.com/kirilinsky/anylong",
+    navLabel: "a | l",
     presets: LONG_PRESETS,
   },
 ];
@@ -165,7 +173,7 @@ const jsonLd = {
 
 export default function Home() {
   return (
-    <main className="h-screen snap-y snap-proximity overflow-y-scroll scroll-smooth bg-[#0a0a0a] [scrollbar-width:none]">
+    <main className="h-screen snap-y snap-mandatory overflow-y-scroll bg-[#0a0a0a] [scrollbar-width:none]">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -179,8 +187,19 @@ export default function Home() {
         }}
       />
 
+      <SectionNav
+        items={[
+          { id: "hero", label: "top", accent: "#ffffff" },
+          ...PACKAGES.map((p) => ({ id: p.id, label: p.navLabel, accent: p.accent })),
+          { id: "anyfamily", label: "a | f", accent: colors.anyfamily },
+        ]}
+      />
+
       {/* Hero */}
-      <section className="relative z-10 flex min-h-screen snap-start flex-col items-center justify-center px-6 text-center">
+      <section
+        id="hero"
+        className="relative z-10 flex min-h-screen snap-start flex-col items-center justify-center px-6 text-center"
+      >
         <h1 className="font-mono text-5xl font-bold tracking-tight text-white sm:text-7xl">
           the{" "}
           <span
@@ -227,8 +246,11 @@ export default function Home() {
                   <Tag key={t}>{t}</Tag>
                 ))}
               </div>
+              <div className="mt-1">
+                <InstallChip command={`npm i ${p.id}`} accent={p.accent} />
+              </div>
               <div className="mt-1 flex flex-wrap items-center gap-2">
-                <ExtLink href={p.site} label="site" accent={p.accent} />
+                <ExtLink href={p.site} label="demo" accent={p.accent} />
                 <ExtLink href={p.npm} label="npm" accent={p.accent} />
                 <ExtLink href={p.github} label="github" accent={p.accent} />
               </div>
@@ -261,50 +283,58 @@ export default function Home() {
       {/* anyfamily — the 5-in-1 meta-package, closing the tour */}
       <section
         id="anyfamily"
-        className="relative z-10 flex min-h-screen snap-start flex-col items-center justify-center px-6 text-center"
+        className="relative z-10 flex min-h-screen snap-start items-center px-6 py-16 md:px-10"
       >
-        <h2 className="sr-only">
-          anyfamily — all five any* packages in one install: anywhen,
-          anyamount, anymany, anyaround and anylong behind a single import.
-        </h2>
-        <span className="mb-6 font-mono text-xs uppercase tracking-widest text-white/30">
-          or all at once
-        </span>
-        <div className="flex items-center gap-3">
-          <FamilyLogo
-            suffix="family"
-            accent={colors.anyfamily}
-            className="h-auto w-64 sm:w-80"
-          />
-          {(versions as Record<string, string>)["anyfamily"] && (
-            <span
-              className="rounded-full border px-2 py-0.5 font-mono text-[11px] text-white/50"
-              style={{ borderColor: `${colors.anyfamily}44` }}
-            >
-              v{(versions as Record<string, string>)["anyfamily"]}
-            </span>
-          )}
-        </div>
-        <div className="mt-10">
-          <InstallChip command="npm i anyfamily" accent={colors.anyfamily} />
-        </div>
-        <p className="mt-6 max-w-xl text-sm text-white/45 sm:text-base">
-          One install, all five — named re-exports, fully typed, tree-shakeable.
-        </p>
-        <div className="mt-4 flex items-center gap-2">
-          <ExtLink
-            href="https://www.npmjs.com/package/anyfamily"
-            label="npm"
-            accent={colors.anyfamily}
-          />
-          <ExtLink
-            href="https://github.com/kirilinsky/anyfamily"
-            label="github"
-            accent={colors.anyfamily}
-          />
+        <div className="mx-auto grid w-full max-w-6xl items-center gap-10 md:grid-cols-[minmax(0,300px)_1fr] md:gap-16">
+          {/* Left: identity */}
+          <div className="flex flex-col items-start gap-5">
+            <h2 className="sr-only">
+              anyfamily — all five any* packages in one install: anywhen,
+              anyamount, anymany, anyaround and anylong behind a single import.
+            </h2>
+            <FamilyLogo suffix="family" accent={colors.anyfamily} className="h-auto w-48" />
+            <p className="max-w-sm text-sm leading-relaxed text-white/55">
+              One install, all five — named re-exports, fully typed, tree-shakeable.
+            </p>
+            <div className="mt-1">
+              <InstallChip command="npm i anyfamily" accent={colors.anyfamily} />
+            </div>
+            <div className="mt-1 flex flex-wrap items-center gap-2">
+              <ExtLink
+                href="https://www.npmjs.com/package/anyfamily"
+                label="npm"
+                accent={colors.anyfamily}
+              />
+              <ExtLink
+                href="https://github.com/kirilinsky/anyfamily"
+                label="github"
+                accent={colors.anyfamily}
+              />
+            </div>
+          </div>
+
+          {/* Right: tagline + version above the live typing demo */}
+          <div className="flex flex-col items-start gap-4">
+            <div className="flex items-center gap-3">
+              <span
+                className="font-mono text-sm lowercase tracking-widest"
+                style={{ color: `${colors.anyfamily}cc` }}
+              >
+                or all at once
+              </span>
+              {(versions as Record<string, string>)["anyfamily"] && (
+                <span
+                  className="rounded-full border px-2 py-0.5 font-mono text-[11px] text-white/50"
+                  style={{ borderColor: `${colors.anyfamily}44` }}
+                >
+                  v{(versions as Record<string, string>)["anyfamily"]}
+                </span>
+              )}
+            </div>
+            <CodeAnimation fn="anyfamily" accent={colors.anyfamily} presets={FAMILY_PRESETS} />
+          </div>
         </div>
       </section>
-
     </main>
   );
 }
