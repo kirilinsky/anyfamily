@@ -86,7 +86,6 @@ describe("useAnywhen", () => {
     );
     expect(result.current).toBe("1 minute ago");
 
-    vi.setSystemTime(new Date("2026-01-01T12:01:00Z"));
     act(() => {
       vi.advanceTimersByTime(60_000);
     });
@@ -109,6 +108,38 @@ describe("useAnywhen", () => {
       vi.advanceTimersByTime(5000);
     });
     expect(result.current).toBe(before);
+    vi.useRealTimers();
+  });
+
+  it("does not tick by default once the date is over a day old", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-01-01T12:00:00Z"));
+    const threeDaysAgo = new Date("2025-12-29T12:00:00Z");
+
+    const { result } = renderHook(() =>
+      useAnywhen(threeDaysAgo, { mode: "relative", locale: "en" }),
+    );
+    const before = result.current;
+    act(() => {
+      vi.advanceTimersByTime(10 * 60_000);
+    });
+    expect(result.current).toBe(before);
+    vi.useRealTimers();
+  });
+
+  it("still ticks an old date when refresh is set explicitly", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-01-01T12:00:00Z"));
+    const threeDaysAgo = new Date("2025-12-29T12:00:00Z");
+
+    const { result } = renderHook(() =>
+      useAnywhen(threeDaysAgo, { mode: "relative", locale: "en", refresh: 1000 }),
+    );
+    const before = result.current;
+    act(() => {
+      vi.advanceTimersByTime(24 * 60 * 60_000);
+    });
+    expect(result.current).not.toBe(before);
     vi.useRealTimers();
   });
 });

@@ -17,7 +17,7 @@ import {
   type AnylongOptions,
   type DurationInput,
 } from "anylong";
-import { anywhen, type AnywhenOptions, type DateInput } from "anywhen";
+import { anywhen, type AnywhenOptions, type DateInput, type Locale } from "anywhen";
 
 export type { AnyamountOptions } from "anyamount";
 export type { AnymanyOptions } from "anymany";
@@ -26,8 +26,12 @@ export type { AnylongOptions, DurationInput } from "anylong";
 export type { AnywhenOptions, DateInput } from "anywhen";
 export { anylongSupported };
 
-/** A BCP 47 locale tag, or a fallback chain — same shape every any* package accepts. */
-export type Locale = string | readonly string[];
+/**
+ * A BCP 47 locale tag, or a fallback chain. Structurally identical across
+ * every any* package — re-exported from `anywhen` rather than redeclared,
+ * same as the `anyfamily` meta-package does.
+ */
+export type { Locale } from "anywhen";
 
 const AnyfamilyLocaleContext = createContext<Locale | undefined>(undefined);
 
@@ -60,11 +64,22 @@ function withLocale<T extends { locale?: Locale }>(
 }
 
 const DEFAULT_TICK_MS = 60_000;
+// Beyond this age, "smart"/"relative" output is in days/months and a 60s poll
+// never changes it — ticking is pure waste. Only applies to the default tick;
+// an explicit `refresh` always does what it's told.
+const STALE_AFTER_MS = 24 * 60 * 60 * 1000;
+
+function toTimestamp(date: DateInput): number {
+  if (typeof date === "number") return date;
+  if (typeof date === "string") return new Date(date).getTime();
+  return date.getTime();
+}
 
 export interface UseAnywhenOptions extends AnywhenOptions {
   /**
    * How often to re-render so relative output stays fresh, in ms.
-   * `false` disables ticking. Defaults to 60s; ignored in `"absolute"` mode.
+   * `false` disables ticking. Defaults to 60s (skipped past a day old);
+   * ignored in `"absolute"` mode.
    */
   refresh?: number | false;
 }
@@ -75,13 +90,15 @@ export function useAnywhen(date: DateInput, options?: UseAnywhenOptions): string
   const { refresh, ...rest } = options ?? {};
   const merged = withLocale(rest as AnywhenOptions, locale);
   const mode = merged?.mode ?? "smart";
+  const timestamp = toTimestamp(date);
 
   const [, tick] = useState(0);
   useEffect(() => {
     if (refresh === false || mode === "absolute") return;
+    if (refresh === undefined && Math.abs(Date.now() - timestamp) > STALE_AFTER_MS) return;
     const id = setInterval(() => tick((n) => n + 1), refresh ?? DEFAULT_TICK_MS);
     return () => clearInterval(id);
-  }, [refresh, mode]);
+  }, [refresh, mode, timestamp]);
 
   return anywhen(date, merged);
 }
