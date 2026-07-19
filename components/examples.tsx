@@ -88,6 +88,37 @@ export const FAMILY_PRESETS: Preset[] = [
   },
 ];
 
+// anyfamily-react tour: cycles one hook call per any* package. `run` calls
+// the plain function each hook wraps — same output, no live component tree
+// needed to invoke a hook outside of React.
+export const REACT_PRESETS: Preset[] = [
+  {
+    fn: `useAnywhen`,
+    call: `useAnywhen(date, { mode: "relative" })`,
+    run: () => anywhen("2026-07-08", { mode: "relative", now: NOW }),
+  },
+  {
+    fn: `useAnyamount`,
+    call: `useAnyamount(1999.5, { mode: "currency", currency: "USD" })`,
+    run: () => anyamount(1999.5, { mode: "currency", currency: "USD" }),
+  },
+  {
+    fn: `useAnymany`,
+    call: `useAnymany(["red", "green", "blue"], { type: "disjunction" })`,
+    run: () => anymany(["red", "green", "blue"], { type: "disjunction" }),
+  },
+  {
+    fn: `useAnyaround`,
+    call: `useAnyaround("JPY")`,
+    run: () => anyaround("JPY"),
+  },
+  {
+    fn: `useAnylong`,
+    call: `useAnylong("PT2H30M")`,
+    run: () => anylong("PT2H30M", { locale: "en" }),
+  },
+];
+
 const TYPE_MS = 42;
 const HOLD_MS = 2600;
 

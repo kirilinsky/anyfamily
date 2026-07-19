@@ -13,6 +13,7 @@ import {
   MANY_PRESETS,
   LONG_PRESETS,
   FAMILY_PRESETS,
+  REACT_PRESETS,
 } from "@/components/examples";
 
 type Pkg = {
@@ -158,6 +159,20 @@ const jsonLd = {
       author: { "@type": "Person", name: "kirilinsky" },
     },
     {
+      "@type": "SoftwareApplication",
+      name: "anyfamily-react",
+      description:
+        "React hooks for the any* family — useAnywhen, useAnyamount, useAnymany, useAnyaround and useAnylong, sharing one locale provider.",
+      applicationCategory: "DeveloperApplication",
+      operatingSystem: "Any",
+      url: BASE,
+      softwareVersion:
+        (versions as Record<string, string>)["anyfamily-react"] || undefined,
+      programmingLanguage: "TypeScript",
+      offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+      author: { "@type": "Person", name: "kirilinsky" },
+    },
+    {
       "@type": "ItemList",
       name: "The any* family of Intl tools",
       itemListElement: PACKAGES.map((p, idx) => ({
@@ -206,6 +221,11 @@ export default function Home() {
             accent: p.accent,
           })),
           { id: "anyfamily", label: "a | f", accent: colors.anyfamily },
+          {
+            id: "anyfamily-react",
+            label: "a | rx",
+            accent: colors["anyfamily-react"],
+          },
         ]}
       />
 
@@ -371,6 +391,87 @@ export default function Home() {
                 href="https://github.com/kirilinsky/anyfamily"
                 label="github"
                 accent={colors.anyfamily}
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* anyfamily-react — hooks for the family, closing the tour */}
+      <section
+        id="anyfamily-react"
+        className="relative z-10 flex min-h-dvh snap-start items-center px-5 py-6 md:px-10 md:py-16"
+      >
+        <div className="mx-auto grid w-full max-w-6xl items-center gap-4 md:grid-cols-[minmax(0,300px)_1fr] md:gap-16">
+          {/* Left: identity */}
+          <div className="flex flex-col items-start gap-3 md:gap-5">
+            <h2 className="sr-only">
+              anyfamily-react — React hooks for the any* family: useAnywhen,
+              useAnyamount, useAnymany, useAnyaround and useAnylong, sharing
+              one locale provider.
+            </h2>
+            <FamilyLogo
+              suffix="react"
+              accent={colors["anyfamily-react"]}
+              className="h-auto w-32 sm:w-40 md:w-48"
+            />
+            <p className="max-w-sm text-sm leading-relaxed text-white/55">
+              Every any* formatter as a hook — one locale provider, and
+              relative time that keeps itself fresh.
+            </p>
+            <div className="mt-1">
+              <InstallChip
+                command="npm i anyfamily-react"
+                accent={colors["anyfamily-react"]}
+              />
+            </div>
+            <div className="mt-1 hidden flex-wrap items-center gap-2 md:flex">
+              <ExtLink
+                href="https://www.npmjs.com/package/anyfamily-react"
+                label="npm"
+                accent={colors["anyfamily-react"]}
+              />
+              <ExtLink
+                href="https://github.com/kirilinsky/anyfamily/tree/main/packages/anyfamily-react"
+                label="github"
+                accent={colors["anyfamily-react"]}
+              />
+            </div>
+          </div>
+
+          {/* Right: tagline + version above the live typing demo */}
+          <div className="flex flex-col items-start gap-2 md:gap-4">
+            <div className="flex items-center gap-3">
+              <span
+                className="font-mono text-sm lowercase tracking-widest"
+                style={{ color: `${colors["anyfamily-react"]}cc` }}
+              >
+                hooks for the family
+              </span>
+              {(versions as Record<string, string>)["anyfamily-react"] && (
+                <span
+                  className="rounded-full border px-2 py-0.5 font-mono text-[11px] text-white/50"
+                  style={{ borderColor: `${colors["anyfamily-react"]}44` }}
+                >
+                  v{(versions as Record<string, string>)["anyfamily-react"]}
+                </span>
+              )}
+            </div>
+            <CodeAnimation
+              fn="useAnywhen"
+              accent={colors["anyfamily-react"]}
+              presets={REACT_PRESETS}
+            />
+            <div className="mt-2 flex flex-wrap items-center gap-2 md:hidden">
+              <ExtLink
+                href="https://www.npmjs.com/package/anyfamily-react"
+                label="npm"
+                accent={colors["anyfamily-react"]}
+              />
+              <ExtLink
+                href="https://github.com/kirilinsky/anyfamily/tree/main/packages/anyfamily-react"
+                label="github"
+                accent={colors["anyfamily-react"]}
               />
             </div>
           </div>
