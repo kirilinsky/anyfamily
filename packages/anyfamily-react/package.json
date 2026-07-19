@@ -1,0 +1,89 @@
+{
+  "name": "anyfamily-react",
+  "version": "0.1.0",
+  "description": "React hooks for the any* family — useAnywhen, useAnyamount, useAnymany, useAnyaround, useAnylong, with live-updating relative time and a shared locale provider.",
+  "type": "module",
+  "sideEffects": false,
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "engines": {
+    "node": ">=18"
+  },
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest run"
+  },
+  "keywords": [
+    "intl",
+    "i18n",
+    "l10n",
+    "localization",
+    "react",
+    "hooks",
+    "formatter",
+    "date",
+    "relative-time",
+    "number",
+    "currency",
+    "units",
+    "list",
+    "region",
+    "language",
+    "flags",
+    "duration",
+    "anyfamily",
+    "anywhen",
+    "anyamount",
+    "anymany",
+    "anyaround",
+    "anylong"
+  ],
+  "homepage": "https://anyfamily.site",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kirilinsky/anyfamily.git",
+    "directory": "packages/anyfamily-react"
+  },
+  "bugs": {
+    "url": "https://github.com/kirilinsky/anyfamily/issues"
+  },
+  "author": "kirilinsky (https://github.com/kirilinsky)",
+  "license": "MIT",
+  "peerDependencies": {
+    "react": "^18 || ^19"
+  },
+  "dependencies": {
+    "anyamount": "^1.0.0",
+    "anyaround": "^1.0.0",
+    "anylong": "^1.0.1",
+    "anymany": "^1.0.1",
+    "anywhen": "^1.0.2"
+  },
+  "devDependencies": {
+    "@testing-library/react": "^16.3.0",
+    "@types/react": "^19.2.4",
+    "@types/react-dom": "^19.2.4",
+    "jsdom": "^25.0.1",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "tsup": "^8.5.0",
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.4"
+  }
+}
