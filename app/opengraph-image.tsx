@@ -8,7 +8,7 @@ const PKGS = [
   { name: "anywhen", tagline: "dates & times", accent: "#f5b66b" },
   { name: "anyamount", tagline: "money & numbers", accent: "#b493e6" },
   { name: "anymany", tagline: "lists", accent: "#2ce69d" },
-  { name: "anyaround", tagline: "names & flags", accent: "#6d1625" },
+  { name: "anyaround", tagline: "names & flags", accent: "#be2740" },
   { name: "anylong", tagline: "durations", accent: "#2cc2c9" },
 ];
 
