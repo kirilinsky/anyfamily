@@ -30,3 +30,9 @@ jobs:
       - run: pnpm lint
 
       - run: pnpm build
+
+      - run: pnpm --dir packages/anyfamily install --frozen-lockfile
+      - run: pnpm --dir packages/anyfamily test
+
+      - run: pnpm --dir packages/anyfamily-react install --frozen-lockfile
+      - run: pnpm --dir packages/anyfamily-react test
