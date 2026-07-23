@@ -156,6 +156,7 @@ export function CodeAnimation({
   const [len, setLen] = useState(0);
   const [done, setDone] = useState(false);
   const [fill, setFill] = useState(0);
+  const [hover, setHover] = useState<number | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
   // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time hydration gate
@@ -209,6 +210,7 @@ export function CodeAnimation({
   const cycleMs = call.length * TYPE_MS + HOLD_MS;
   useEffect(() => {
     if (!mounted || !inView) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setFill(0);
       return;
     }
@@ -284,20 +286,26 @@ export function CodeAnimation({
       <div className="mt-3 flex items-center gap-2 sm:mt-4">
         {presets.map((_, k) => {
           const active = k === i;
+          const hovered = k === hover;
           return (
             <button
               key={k}
               type="button"
               onClick={() => setI(k)}
+              onMouseEnter={() => setHover(k)}
+              onMouseLeave={() => setHover(null)}
               aria-label={`Show example ${k + 1}`}
               aria-current={active ? "true" : undefined}
-              className="group -my-2 py-2"
+              className="group -my-2 cursor-pointer py-2"
             >
               <span
-                className="block h-1.5 overflow-hidden rounded-full transition-all duration-300 group-hover:bg-white/30"
+                className="block h-1.5 overflow-hidden rounded-full transition-all duration-300"
                 style={{
-                  width: active ? 24 : 6,
-                  background: "rgba(255,255,255,0.15)",
+                  width: active ? 24 : hovered ? 14 : 6,
+                  background:
+                    !active && hovered
+                      ? "rgba(255,255,255,0.35)"
+                      : "rgba(255,255,255,0.15)",
                 }}
               >
                 {active && (
