@@ -121,7 +121,7 @@ export default function Home() {
         <Logo className="h-auto w-44 opacity-90" />
 
         <div className="relative w-fit max-w-full rounded-xl border border-white/[0.07] bg-black/30 px-4 py-3.5 font-mono">
-          <div className="flex min-h-9 flex-wrap items-center justify-center gap-x-1 gap-y-1.5 text-sm sm:flex-nowrap sm:justify-start sm:text-base">
+          <div className="flex min-h-9 flex-wrap items-center justify-center gap-x-1 gap-y-1.5 text-sm sm:text-base">
             <span className="shrink-0 text-amber-400">anyplural</span>
             <span className="shrink-0 text-white/30">(</span>
 
@@ -142,7 +142,7 @@ export default function Home() {
                   value={value}
                   onChange={(e) => setForm(key, e.target.value)}
                   size={Math.max(value.length, 1)}
-                  className="h-8 min-w-0 rounded-md border border-transparent bg-white/[0.05] px-1.5 text-center text-rose-300 outline-none transition-colors hover:border-white/10 focus:border-rose-300/40"
+                  className="h-8 min-w-0 max-w-[8rem] rounded-md border border-transparent bg-white/[0.05] px-1.5 text-center text-rose-300 outline-none transition-colors hover:border-white/10 focus:border-rose-300/40"
                 />
               </span>
             ))}
