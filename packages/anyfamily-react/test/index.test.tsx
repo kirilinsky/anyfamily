@@ -10,6 +10,7 @@ import {
   useAnylong,
   useAnyamount,
   useAnymany,
+  useAnyplural,
   useAnywhen,
 } from "../src/index";
 
@@ -63,6 +64,13 @@ describe("hooks wrap their underlying formatters", () => {
   it.skipIf(!anylongSupported)("useAnylong formats durations", () => {
     const { result } = renderHook(() => useAnylong("PT2H30M", { locale: "en" }));
     expect(result.current).toBe("2 hr, 30 min");
+  });
+
+  it("useAnyplural picks the plural form", () => {
+    const { result } = renderHook(() =>
+      useAnyplural(5, { one: "item", other: "items" }, { locale: "en" }),
+    );
+    expect(result.current).toBe("5 items");
   });
 });
 

@@ -1,13 +1,14 @@
 # anyfamily-react
 
-[![anyfamily — anywhen · anyamount · anymany · anyaround · anylong](https://anyfamily.site/opengraph-image?c5010871842302b6)](https://anyfamily.site)
+[![anyfamily — anywhen · anyamount · anymany · anyaround · anylong · anyplural](https://anyfamily.site/opengraph-image?v6)](https://anyfamily.site)
 
 React hooks for the **any\*** family:
 [anywhen](https://www.npmjs.com/package/anywhen),
 [anyamount](https://www.npmjs.com/package/anyamount),
 [anymany](https://www.npmjs.com/package/anymany),
-[anyaround](https://www.npmjs.com/package/anyaround) and
-[anylong](https://www.npmjs.com/package/anylong) as hooks, sharing one
+[anyaround](https://www.npmjs.com/package/anyaround),
+[anylong](https://www.npmjs.com/package/anylong) and
+[anyplural](https://www.npmjs.com/package/anyplural) as hooks, sharing one
 locale and keeping relative time fresh without hand-rolled `setInterval`
 plumbing.
 
@@ -59,6 +60,7 @@ function Post({ publishedAt, price }: { publishedAt: Date; price: number }) {
 - `useAnyaround(code, options?)` — see `anyaround`.
 - `useAnylong(input, options?)` — see `anylong`. `anylongSupported` is
   re-exported for the same feature-detection anylong itself provides.
+- `useAnyplural(count, forms, options?)` — see `anyplural`.
 
 `useAnyfamilyLocale()` reads the locale from the nearest provider directly,
 for anything not covered by the hooks above.

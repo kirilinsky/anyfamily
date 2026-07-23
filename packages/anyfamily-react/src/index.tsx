@@ -18,12 +18,14 @@ import {
   type DurationInput,
 } from "anylong";
 import { anywhen, type AnywhenOptions, type DateInput, type Locale } from "anywhen";
+import { anyplural, type AnypluralOptions, type Forms } from "anyplural";
 
 export type { AnyamountOptions } from "anyamount";
 export type { AnymanyOptions } from "anymany";
 export type { AnyaroundOptions } from "anyaround";
 export type { AnylongOptions, DurationInput } from "anylong";
 export type { AnywhenOptions, DateInput } from "anywhen";
+export type { AnypluralOptions, Forms } from "anyplural";
 export { anylongSupported };
 
 /**
@@ -125,4 +127,10 @@ export function useAnyaround(code: string, options?: AnyaroundOptions): string {
 export function useAnylong(input: DurationInput, options?: AnylongOptions): string {
   const locale = useAnyfamilyLocale();
   return anylong(input, withLocale(options, locale));
+}
+
+/** Like `anyplural`, reading `locale` from the nearest {@linkcode AnyfamilyProvider} when not set explicitly. */
+export function useAnyplural(count: number, forms: Forms, options?: AnypluralOptions): string {
+  const locale = useAnyfamilyLocale();
+  return anyplural(count, forms, withLocale(options, locale));
 }

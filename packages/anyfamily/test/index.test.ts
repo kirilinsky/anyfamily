@@ -6,15 +6,17 @@ import {
   anyaround,
   anylong,
   anylongSupported,
+  anyplural,
 } from "../src/index";
 
 describe("anyfamily", () => {
-  it("re-exports all five as functions", () => {
+  it("re-exports all six as functions", () => {
     expect(typeof anywhen).toBe("function");
     expect(typeof anyamount).toBe("function");
     expect(typeof anymany).toBe("function");
     expect(typeof anyaround).toBe("function");
     expect(typeof anylong).toBe("function");
+    expect(typeof anyplural).toBe("function");
   });
 
   it("anywhen formats relative time", () => {
@@ -41,5 +43,11 @@ describe("anyfamily", () => {
 
   it.skipIf(!anylongSupported)("anylong formats durations", () => {
     expect(anylong("PT2H30M", { locale: "en" })).toBe("2 hr, 30 min");
+  });
+
+  it("anyplural picks the plural form", () => {
+    expect(anyplural(5, { one: "item", other: "items" }, { locale: "en" })).toBe(
+      "5 items",
+    );
   });
 });

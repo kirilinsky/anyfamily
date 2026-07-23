@@ -1,7 +1,7 @@
 {
   "name": "anyfamily-react",
-  "version": "1.0.1",
-  "description": "React hooks for the any* family — useAnywhen, useAnyamount, useAnymany, useAnyaround, useAnylong, with live-updating relative time and a shared locale provider.",
+  "version": "1.1.0",
+  "description": "React hooks for the any* family — useAnywhen, useAnyamount, useAnymany, useAnyaround, useAnylong, useAnyplural, with live-updating relative time and a shared locale provider.",
   "type": "module",
   "sideEffects": false,
   "main": "./dist/index.cjs",
@@ -52,7 +52,11 @@
     "anyamount",
     "anymany",
     "anyaround",
-    "anylong"
+    "anylong",
+    "anyplural",
+    "plural",
+    "pluralrules",
+    "ordinal"
   ],
   "homepage": "https://anyfamily.site",
   "repository": {
@@ -73,6 +77,7 @@
     "anyaround": "^1.0.0",
     "anylong": "^1.0.1",
     "anymany": "^1.0.1",
+    "anyplural": "^1.0.0",
     "anywhen": "^1.0.3"
   },
   "devDependencies": {

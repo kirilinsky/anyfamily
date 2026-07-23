@@ -1,8 +1,8 @@
 # a\*
 
-[![anyfamily — anywhen · anyamount · anymany · anyaround · anylong](https://anyfamily.site/opengraph-image?c5010871842302b6)](https://anyfamily.site)
+[![anyfamily — anywhen · anyamount · anymany · anyaround · anylong · anyplural](https://anyfamily.site/opengraph-image?v6)](https://anyfamily.site)
 
-**anyfamily — install one, get five.** The whole **any\*** family — micro `Intl`-powered
+**anyfamily — install one, get six.** The whole **any\*** family — micro `Intl`-powered
 formatters, each with zero dependencies of its own — behind a single import.
 
 ```bash
@@ -10,7 +10,7 @@ npm install anyfamily
 ```
 
 ```ts
-import { anywhen, anyamount, anymany, anyaround, anylong } from "anyfamily";
+import { anywhen, anyamount, anymany, anyaround, anylong, anyplural } from "anyfamily";
 ```
 
 ESM + CJS, fully typed, `sideEffects: false` — bundlers tree-shake away
@@ -70,13 +70,35 @@ anylong("PT2H30M", { locale: "en" });
 // "2 hr, 30 min"
 ```
 
+## anyplural — cardinal & ordinal plurals
+
+Any count into its correct plural form — picks the CLDR category with
+`Intl.PluralRules`, formats the number, and stitches them together.
+[npm](https://www.npmjs.com/package/anyplural)
+
+```ts
+anyplural(5, { one: "item", other: "items" }, { locale: "en" });
+// "5 items"
+```
+
 ## types
 
-Every public type from all five packages is re-exported. Names that collide
+Every public type from all six packages is re-exported. Names that collide
 across packages (`Mode`, `Style`, `SmartOptions`, `CurrencyOptions`) carry
 their package prefix — `AnywhenMode`, `AnyamountStyle`,
 `AnyaroundCurrencyOptions`, … `Locale` is structurally identical in
-anywhen/anyamount/anymany/anyaround/anylong and exported once.
+anywhen/anyamount/anymany/anyaround/anylong/anyplural and exported once.
+
+## react
+
+Using React? [**anyfamily-react**](https://www.npmjs.com/package/anyfamily-react)
+wraps every formatter as a hook — `useAnywhen`, `useAnyamount`, `useAnymany`,
+`useAnyaround`, `useAnylong`, `useAnyplural` — sharing one locale via
+`AnyfamilyProvider`, with relative time that keeps itself fresh.
+
+```bash
+npm install anyfamily-react
+```
 
 ## license
 
