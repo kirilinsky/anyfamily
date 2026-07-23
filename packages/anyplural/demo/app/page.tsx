@@ -52,13 +52,6 @@ const PRESETS: Record<string, Record<PluralType, Forms>> = {
   },
 };
 
-function formsToSource(forms: Forms) {
-  const entries = Object.entries(forms)
-    .map(([k, v]) => `${k}: ${JSON.stringify(v)}`)
-    .join(", ");
-  return `{ ${entries} }`;
-}
-
 function useTypewriter(text: string | null) {
   const [state, setState] = useState({ displayed: "", source: text });
 
@@ -79,10 +72,17 @@ function useTypewriter(text: string | null) {
 
 export default function Home() {
   const [count, setCount] = useState(5);
-  const [locale, setLocale] = useState("ru");
+  const [locale, setLocale] = useState("en");
   const [type, setType] = useState<PluralType>("cardinal");
+  const [forms, setForms] = useState<Forms>(PRESETS.en.cardinal);
 
-  const forms = PRESETS[locale][type];
+  // Reset editable forms to the preset whenever locale or type changes.
+  useEffect(() => {
+    setForms(PRESETS[locale]?.[type] ?? PRESETS.en.cardinal);
+  }, [locale, type]);
+
+  const setForm = (key: string, value: string) =>
+    setForms((prev) => ({ ...prev, [key]: value }));
 
   const result = (() => {
     try {
@@ -132,14 +132,22 @@ export default function Home() {
               className="h-8 w-16 shrink-0 rounded-md border border-transparent bg-white/[0.05] px-1.5 text-center text-sky-300 outline-none transition-colors hover:border-white/10 focus:border-sky-300/40"
             />
 
-            <span className="shrink-0 text-white/30">,</span>
+            <span className="shrink-0 text-white/30">, {"{"}</span>
 
-            <span
-              className="block max-w-[16rem] shrink truncate text-white/45"
-              title={formsToSource(forms)}
-            >
-              {formsToSource(forms)}
-            </span>
+            {Object.entries(forms).map(([key, value], i) => (
+              <span key={key} className="flex shrink-0 items-center gap-1">
+                {i > 0 && <span className="text-white/30">,</span>}
+                <span className="text-white/55">{key}:</span>
+                <input
+                  value={value}
+                  onChange={(e) => setForm(key, e.target.value)}
+                  size={Math.max(value.length, 1)}
+                  className="h-8 min-w-0 rounded-md border border-transparent bg-white/[0.05] px-1.5 text-center text-rose-300 outline-none transition-colors hover:border-white/10 focus:border-rose-300/40"
+                />
+              </span>
+            ))}
+
+            <span className="shrink-0 text-white/30">{"}"}</span>
 
             <span className="shrink-0 text-white/30">, {"{"}</span>
 
