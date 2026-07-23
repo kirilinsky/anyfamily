@@ -12,6 +12,7 @@ import {
   WHEN_PRESETS,
   MANY_PRESETS,
   LONG_PRESETS,
+  PLURAL_PRESETS,
   FAMILY_PRESETS,
   REACT_PRESETS,
 } from "@/components/examples";
@@ -101,6 +102,20 @@ const PACKAGES: Pkg[] = [
     navLabel: "a | l",
     presets: LONG_PRESETS,
   },
+  {
+    id: "anyplural",
+    suffix: "plural",
+    accent: colors.anyplural,
+    tagline: "plurals",
+    description:
+      "Any count into its correct plural form — cardinal or ordinal, in any locale. One function over Intl.PluralRules, no rule tables.",
+    tags: ["plurals", "pluralrules", "ordinal"],
+    npm: "https://www.npmjs.com/package/anyplural",
+    site: "https://anyplural.vercel.app",
+    github: "https://github.com/kirilinsky/anyplural",
+    presets: PLURAL_PRESETS,
+    navLabel: "a | p",
+  },
 ];
 
 function ExtLink({
@@ -148,7 +163,7 @@ const jsonLd = {
       "@type": "SoftwareApplication",
       name: "anyfamily",
       description:
-        "The whole any* family in one install — anywhen, anyamount, anymany and anyaround behind a single import.",
+        "The whole any* family in one install — anywhen, anyamount, anymany, anyaround, anylong and anyplural behind a single import.",
       applicationCategory: "DeveloperApplication",
       operatingSystem: "Any",
       url: BASE,
@@ -162,7 +177,7 @@ const jsonLd = {
       "@type": "SoftwareApplication",
       name: "anyfamily-react",
       description:
-        "React hooks for the any* family — useAnywhen, useAnyamount, useAnymany, useAnyaround and useAnylong, sharing one locale provider.",
+        "React hooks for the any* family — useAnywhen, useAnyamount, useAnymany, useAnyaround, useAnylong and useAnyplural, sharing one locale provider.",
       applicationCategory: "DeveloperApplication",
       operatingSystem: "Any",
       url: BASE,
@@ -241,8 +256,8 @@ export default function Home() {
           className="h-auto w-56 sm:w-[26rem] lg:w-[32rem]"
         />
         <p className="mt-4 max-w-xl text-sm text-white/45 sm:mt-6 sm:text-base">
-          Five formatters, zero dependencies — because the dependency is your
-          browser. Dates, money, lists, names, durations:{" "}
+          Six formatters, zero dependencies — because the dependency is your
+          browser. Dates, money, lists, names, durations, plurals:{" "}
           <span className="text-white/70">one function each, any locale</span>.
         </p>
         <div className="mt-10 flex h-9 w-5 justify-center rounded-full border border-white/15 pt-2 sm:mt-16">
@@ -317,7 +332,7 @@ export default function Home() {
         </section>
       ))}
 
-      {/* anyfamily — the 5-in-1 meta-package, closing the tour */}
+      {/* anyfamily — the 6-in-1 meta-package, closing the tour */}
       <section
         id="anyfamily"
         className="relative z-10 flex min-h-dvh snap-start items-center px-5 py-6 md:px-10 md:py-16"
@@ -326,8 +341,9 @@ export default function Home() {
           {/* Left: identity */}
           <div className="flex flex-col items-start gap-3 md:gap-5">
             <h2 className="sr-only">
-              anyfamily — all five any* packages in one install: anywhen,
-              anyamount, anymany, anyaround and anylong behind a single import.
+              anyfamily — all six any* packages in one install: anywhen,
+              anyamount, anymany, anyaround, anylong and anyplural behind a
+              single import.
             </h2>
             <FamilyLogo
               suffix="family"
@@ -335,7 +351,7 @@ export default function Home() {
               className="h-auto w-32 sm:w-40 md:w-48"
             />
             <p className="max-w-sm text-sm leading-relaxed text-white/55">
-              One install, all five — named re-exports, fully typed,
+              One install, all six — named re-exports, fully typed,
               tree-shakeable.
             </p>
             <div className="mt-1">
@@ -407,8 +423,8 @@ export default function Home() {
           <div className="flex flex-col items-start gap-3 md:gap-5">
             <h2 className="sr-only">
               anyfamily-react — React hooks for the any* family: useAnywhen,
-              useAnyamount, useAnymany, useAnyaround and useAnylong, sharing
-              one locale provider.
+              useAnyamount, useAnymany, useAnyaround, useAnylong and
+              useAnyplural, sharing one locale provider.
             </h2>
             <FamilyLogo
               suffix="react"

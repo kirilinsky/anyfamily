@@ -6,6 +6,7 @@ import { anyamount } from "anyamount";
 import { anywhen } from "anywhen";
 import { anymany } from "anymany";
 import { anylong } from "anylong";
+import { anyplural } from "anyplural";
 
 /**
  * A canned demo. `call` is the source shown typing out; `run` invokes the real
@@ -62,6 +63,15 @@ export const LONG_PRESETS: Preset[] = [
   { call: `anylong(new Date("2026-01-10"), new Date("2026-03-15"))`, run: () => anylong(new Date("2026-01-10"), new Date("2026-03-15"), { largestUnit: "weeks", smallestUnit: "days", style: "long", locale: "en" }) },
 ];
 
+export const PLURAL_PRESETS: Preset[] = [
+  { call: `anyplural(1, { one: "item", other: "items" })`, run: () => anyplural(1, { one: "item", other: "items" }, { locale: "en" }) },
+  { call: `anyplural(5, { one: "item", other: "items" })`, run: () => anyplural(5, { one: "item", other: "items" }, { locale: "en" }) },
+  { call: `anyplural(3, { one: "st", two: "nd", few: "rd", other: "th" }, { type: "ordinal" })`, run: () => anyplural(3, { one: "st", two: "nd", few: "rd", other: "th" }, { type: "ordinal", locale: "en" }) },
+  { call: `anyplural(5, { one: "год", few: "года", many: "лет" }, { locale: "ru" })`, run: () => anyplural(5, { one: "год", few: "года", many: "лет" }, { locale: "ru" }) },
+  { call: `anyplural(0, { zero: "No messages", one: "message", other: "messages" })`, run: () => anyplural(0, { zero: "No messages", one: "message", other: "messages" }, { locale: "en" }) },
+  { call: `anyplural(12480, { one: "email", other: "emails" })`, run: () => anyplural(12480, { one: "email", other: "emails" }, { locale: "en" }) },
+];
+
 // Meta-package tour: cycles one import + call per any* package, all from
 // "anyfamily" — `fn` overrides the accent-colored prefix per preset since it
 // varies (the import clause), unlike the single-package demos above.
@@ -90,6 +100,11 @@ export const FAMILY_PRESETS: Preset[] = [
     fn: `import { anylong } from "anyfamily";`,
     call: `import { anylong } from "anyfamily";\n\nanylong("PT2H30M")`,
     run: () => anylong("PT2H30M", { locale: "en" }),
+  },
+  {
+    fn: `import { anyplural } from "anyfamily";`,
+    call: `import { anyplural } from "anyfamily";\n\nanyplural(5, { one: "item", other: "items" })`,
+    run: () => anyplural(5, { one: "item", other: "items" }, { locale: "en" }),
   },
 ];
 
@@ -121,6 +136,11 @@ export const REACT_PRESETS: Preset[] = [
     fn: `useAnylong`,
     call: `useAnylong("PT2H30M")`,
     run: () => anylong("PT2H30M", { locale: "en" }),
+  },
+  {
+    fn: `useAnyplural`,
+    call: `useAnyplural(5, { one: "item", other: "items" })`,
+    run: () => anyplural(5, { one: "item", other: "items" }, { locale: "en" }),
   },
 ];
 

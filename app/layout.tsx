@@ -13,7 +13,7 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://anyfamily.site"),
   title: "anyfamily — micro Intl tools for any locale",
   description:
-    "The any* family: five micro, zero-dependency JavaScript tools built on native Intl. Names & flags, money, dates, durations, and lists — in any locale.",
+    "The any* family: six micro, zero-dependency JavaScript tools built on native Intl. Names & flags, money, dates, durations, lists, and plurals — in any locale.",
   keywords: [
     "intl",
     "i18n",
@@ -26,6 +26,7 @@ export const metadata: Metadata = {
     "numberformat",
     "datetimeformat",
     "listformat",
+    "pluralrules",
   ],
   authors: [{ name: "kirilinsky", url: "https://github.com/kirilinsky" }],
   creator: "kirilinsky",
@@ -34,14 +35,14 @@ export const metadata: Metadata = {
     url: "https://anyfamily.site",
     title: "anyfamily — micro Intl tools for any locale",
     description:
-      "Five micro, zero-dependency tools on native Intl: names & flags, money, dates, durations, lists. Any locale.",
+      "Six micro, zero-dependency tools on native Intl: names & flags, money, dates, durations, lists, plurals. Any locale.",
     siteName: "anyfamily",
     locale: "en_US",
   },
   twitter: {
     card: "summary_large_image",
     title: "anyfamily — micro Intl tools for any locale",
-    description: "Five micro Intl tools. Zero data. Any locale.",
+    description: "Six micro Intl tools. Zero data. Any locale.",
   },
   robots: { index: true, follow: true },
   alternates: { canonical: "https://anyfamily.site" },

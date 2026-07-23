@@ -10,6 +10,7 @@ const PKGS = [
   { name: "anymany", tagline: "lists", accent: "#2ce69d" },
   { name: "anyaround", tagline: "names & flags", accent: "#be2740" },
   { name: "anylong", tagline: "durations", accent: "#2cc2c9" },
+  { name: "anyplural", tagline: "plurals", accent: "#e879c5" },
 ];
 
 export default function OpengraphImage() {
@@ -43,8 +44,11 @@ export default function OpengraphImage() {
         <div
           style={{
             display: "flex",
-            marginTop: 56,
-            gap: 20,
+            flexWrap: "wrap",
+            justifyContent: "center",
+            maxWidth: 1000,
+            marginTop: 48,
+            gap: 18,
           }}
         >
           {PKGS.map((p) => (

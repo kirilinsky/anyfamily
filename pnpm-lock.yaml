@@ -23,6 +23,9 @@ importers:
       anymany:
         specifier: ^1.0.1
         version: 1.0.1
+      anyplural:
+        specifier: ^1.0.0
+        version: 1.0.0
       anywhen:
         specifier: ^1.0.3
         version: 1.0.3
@@ -813,6 +816,10 @@ packages:
 
   anymany@1.0.1:
     resolution: {integrity: sha512-2yeOOlxFIuFxRuw4dlU1zNwpUvT3etWSSfqQrT5MJOhOLz7jJpkDye483RPlzVT3smL5AFP78yLlossancsxPw==}
+    engines: {node: '>=18'}
+
+  anyplural@1.0.0:
+    resolution: {integrity: sha512-PNJQZ1KC8g1GUZ5b+mhU/A6tJ1Zcj0FXyc68nYsLWEt1ZEFKs6CpacBNoYOFsXArsJZBctklkSFhRcv/ZCPk7w==}
     engines: {node: '>=18'}
 
   anywhen@1.0.3:
@@ -2695,6 +2702,8 @@ snapshots:
   anylong@1.0.1: {}
 
   anymany@1.0.1: {}
+
+  anyplural@1.0.0: {}
 
   anywhen@1.0.3: {}
 
