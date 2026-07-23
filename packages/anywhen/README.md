@@ -20,9 +20,7 @@
 
 <p align="center">
   <a href="https://anywhen-kappa.vercel.app/">▸ live demo</a>
-  &nbsp;·&nbsp;
-  <a href="https://anymany.vercel.app/">▸ anymany</a>
-  &nbsp;·&nbsp;
+  &nbsp;·&nbsp; 
   <a href="https://anyfamily.site/">▸ any family</a>
 </p>
 
@@ -214,17 +212,17 @@ Reads: `locale`, `now`, `numeric`, `style`, `thresholds`.
 
 ## options
 
-| Option     | Type                            | Default          | Used by              |
-| ---------- | ------------------------------- | ---------------- | -------------------- |
-| `mode`     | `"smart" \| "absolute" \| "relative"` | `"smart"`        | —                    |
-| `locale`   | `string \| string[]`            | runtime locale   | all                  |
-| `now`      | `Date \| number \| string`      | current time     | smart, relative      |
-| `timeZone` | `string`                        | runtime timezone | smart, absolute      |
-| `time`     | `boolean`                       | `true`           | smart                |
-| `numeric`  | `boolean`                       | `false`          | relative             |
-| `style`    | `"long" \| "short" \| "narrow"` | `"long"`         | smart, relative      |
-| `format`   | `Intl.DateTimeFormatOptions`    | `{ day, month, year }` | absolute       |
-| `thresholds` | `Partial<Record<unit, number>>` | built-in table   | smart, relative      |
+| Option       | Type                                  | Default                | Used by         |
+| ------------ | ------------------------------------- | ---------------------- | --------------- |
+| `mode`       | `"smart" \| "absolute" \| "relative"` | `"smart"`              | —               |
+| `locale`     | `string \| string[]`                  | runtime locale         | all             |
+| `now`        | `Date \| number \| string`            | current time           | smart, relative |
+| `timeZone`   | `string`                              | runtime timezone       | smart, absolute |
+| `time`       | `boolean`                             | `true`                 | smart           |
+| `numeric`    | `boolean`                             | `false`                | relative        |
+| `style`      | `"long" \| "short" \| "narrow"`       | `"long"`               | smart, relative |
+| `format`     | `Intl.DateTimeFormatOptions`          | `{ day, month, year }` | absolute        |
+| `thresholds` | `Partial<Record<unit, number>>`       | built-in table         | smart, relative |
 
 Each mode reads only the options that apply to it. The rest are ignored.
 
@@ -319,15 +317,15 @@ Pass any valid BCP 47 tag — including regional variants like `en-GB`, `zh-TW`,
 `pt-BR`. Fallback arrays also work.
 
 ```ts
-anywhen(date, { locale: "de" });           // "gestern, 14:35"
-anywhen(date, { locale: "ru" });           // "вчера, 14:35"
-anywhen(date, { locale: "fr" });           // "hier, 14:35"
+anywhen(date, { locale: "de" }); // "gestern, 14:35"
+anywhen(date, { locale: "ru" }); // "вчера, 14:35"
+anywhen(date, { locale: "fr" }); // "hier, 14:35"
 anywhen(date, { locale: ["sr-Latn-RS", "en"] });
 
-anywhen(date, { mode: "absolute", locale: "ja" });   // "2016年2月5日"
-anywhen(date, { mode: "absolute", locale: "ar" });   // "٥ فبراير ٢٠١٦"
+anywhen(date, { mode: "absolute", locale: "ja" }); // "2016年2月5日"
+anywhen(date, { mode: "absolute", locale: "ar" }); // "٥ فبراير ٢٠١٦"
 
-anywhen(date, { mode: "relative", locale: "tr" });   // "3 saat önce"
+anywhen(date, { mode: "relative", locale: "tr" }); // "3 saat önce"
 ```
 
 When omitted, native `Intl` uses the runtime locale.
@@ -336,12 +334,12 @@ When omitted, native `Intl` uses the runtime locale.
 
 ## vs the alternatives
 
-|                     |  anywhen  | dayjs | date-fns |
-| ------------------- | :-------: | :---: | :------: |
+|                     |  anywhen   | dayjs | date-fns |
+| ------------------- | :--------: | :---: | :------: |
 | gzip                | **~1.3kb** | ~7kb  |  ~20kb   |
-| locale data bundled |  **no**   |  yes  |   yes    |
-| locales             | **200+**  |  140  |   100    |
-| dependencies        |   **0**   |   0   |    0     |
+| locale data bundled |   **no**   |  yes  |   yes    |
+| locales             |  **200+**  |  140  |   100    |
+| dependencies        |   **0**    |   0   |    0     |
 
 ---
 
