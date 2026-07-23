@@ -235,20 +235,51 @@ describe("smart mode (default)", () => {
       /\d{1,2}:\d{2}/,
     );
   });
-  it("future > 1h → relative", () => {
-    expect(anywhen(NOW + 3 * 3_600_000, { locale: "en" })).toBe("in 3 hours");
+  it("future same day → includes today", () => {
+    expect(anywhen(NOW + 3 * 3_600_000, { locale: "en" })).toMatch(/today/i);
   });
-  it("future 2 weeks → relative", () => {
-    expect(anywhen(NOW + 14 * 86_400_000, { locale: "en" })).toBe("in 2 weeks");
-  });
-  it("future 3 months → relative", () => {
-    expect(anywhen(NOW + 90 * 86_400_000, { locale: "en" })).toBe(
-      "in 3 months",
+  it("future same day → includes time", () => {
+    expect(anywhen(NOW + 3 * 3_600_000, { locale: "en" })).toMatch(
+      /\d{1,2}:\d{2}/,
     );
   });
-  it("future in russian → relative", () => {
-    expect(anywhen(NOW + 14 * 86_400_000, { locale: "ru" })).toBe(
-      "через 2 недели",
+  it("tomorrow → includes tomorrow", () => {
+    expect(anywhen(NOW + 24 * 3_600_000, { locale: "en" })).toMatch(
+      /tomorrow/i,
+    );
+  });
+  it("tomorrow → includes time", () => {
+    expect(anywhen(NOW + 24 * 3_600_000, { locale: "en" })).toMatch(
+      /\d{1,2}:\d{2}/,
+    );
+  });
+  it("3 days ahead → includes weekday", () => {
+    expect(anywhen(NOW + 3 * 86_400_000, { locale: "en" })).toMatch(
+      /Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday/,
+    );
+  });
+  it("3 days ahead → includes time", () => {
+    expect(anywhen(NOW + 3 * 86_400_000, { locale: "en" })).toMatch(
+      /\d{1,2}:\d{2}/,
+    );
+  });
+  it("10 days ahead → absolute date", () => {
+    expect(anywhen(NOW + 10 * 86_400_000, { locale: "en" })).toMatch(/2016/);
+  });
+  it("10 days ahead → no time in absolute", () => {
+    expect(anywhen(NOW + 10 * 86_400_000, { locale: "en" })).not.toMatch(
+      /\d{1,2}:\d{2}/,
+    );
+  });
+  it("tomorrow in russian → includes завтра", () => {
+    expect(anywhen(NOW + 24 * 3_600_000, { locale: "ru" })).toMatch(/завтра/i);
+  });
+  it("past and future are symmetric — yesterday/tomorrow", () => {
+    expect(anywhen(NOW - 24 * 3_600_000, { locale: "en", time: false })).toBe(
+      "yesterday",
+    );
+    expect(anywhen(NOW + 24 * 3_600_000, { locale: "en", time: false })).toBe(
+      "tomorrow",
     );
   });
 });
@@ -262,8 +293,10 @@ describe("smart mode — minute/hour rollover", () => {
       "today",
     );
   });
-  it("3599s future rolls over to in 1 hour", () => {
-    expect(anywhen(NOW + 3_599_000, { locale: "en" })).toBe("in 1 hour");
+  it("3599s future rolls over to today", () => {
+    expect(anywhen(NOW + 3_599_000, { locale: "en", time: false })).toBe(
+      "today",
+    );
   });
 });
 
@@ -398,9 +431,9 @@ describe("smart mode — style option", () => {
       "10m ago",
     );
   });
-  it("short shortens future relative wording", () => {
-    expect(anywhen(NOW + 3 * 3_600_000, { locale: "en", style: "short" })).toBe(
-      "in 3 hr.",
+  it("short shortens sub-hour future relative wording", () => {
+    expect(anywhen(NOW + 600_000, { locale: "en", style: "short" })).toBe(
+      "in 10 min.",
     );
   });
   it("style leaves clock-bearing same-day label intact", () => {
@@ -525,10 +558,14 @@ describe("thresholds option", () => {
       anywhen(NOW - 60_000, { locale: "en", thresholds: { second: 90 } }),
     ).toBe("now");
   });
-  it("applies to future dates in smart mode", () => {
-    expect(
-      anywhen(NOW + 7_200_000, { locale: "en", thresholds: { minute: 7500 } }),
-    ).toBe("in 120 minutes");
+  it("applies symmetrically to future dates in smart mode", () => {
+    const opts = { locale: "en", time: false, thresholds: { minute: 1800 } } as const;
+    // narrowed minute window rolls both directions past the phrase into calendar labels
+    expect(anywhen(NOW - 3_000_000, opts)).toBe("today");
+    expect(anywhen(NOW + 3_000_000, opts)).toBe("today");
+    // inside the window both still render as minutes, mirrored
+    expect(anywhen(NOW - 1_500_000, opts)).toBe("25 minutes ago");
+    expect(anywhen(NOW + 1_500_000, opts)).toBe("in 25 minutes");
   });
   it("narrows the smart-mode minutes window for past dates via thresholds.minute", () => {
     const opts = { locale: "en", time: false, thresholds: { minute: 1800 } } as const;

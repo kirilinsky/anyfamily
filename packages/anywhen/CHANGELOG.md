@@ -1,5 +1,35 @@
 # Changelog
 
+## 1.0.3
+
+### Changed
+
+- Smart mode now labels **future** dates with the same calendar phrasing it
+  already used for the past — symmetric in both directions. Within the next
+  week you get `"tomorrow, 3:00 PM"` and `"Friday, 3:00 PM"` instead of the
+  numeric `"in 1 day"` / `"in 3 days"`; beyond a week it falls back to the
+  absolute date, mirroring the past. `relative` mode is unchanged and still
+  always numeric. No API changes, no new options, bundle size unchanged.
+
+  ```ts
+  anywhen(inThreeHours); // "today, 5:00 PM"
+  anywhen(tomorrow); // "tomorrow, 2:35 PM"
+  anywhen(inThreeDays); // "Friday, 2:35 PM"
+  ```
+
+## 1.0.2
+
+### Fixed
+
+- Smart mode now honors `thresholds.minute`. The sub-hour minutes window was
+  hardcoded to 3600s, ignoring the override; it now reads
+  `thresholds.minute ?? 3600` like the other units.
+
+  ```ts
+  anywhen(date, { thresholds: { minute: 1800 } });
+  // rolls into "today" / weekday labels past 30 min instead of 60
+  ```
+
 ## 1.0.1
 
 ### Docs

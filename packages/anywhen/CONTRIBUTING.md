@@ -3,6 +3,9 @@
 anywhen is small and focused, contributions should follow the same philosophy:
 minimal, no dependencies, native `Intl` only.
 
+By participating, you agree to abide by the
+[Code of Conduct](./CODE_OF_CONDUCT.md).
+
 ## Setup
 
 Development tooling requires Node.js 20+.

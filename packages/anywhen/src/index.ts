@@ -9,7 +9,7 @@ export type Locale = string | readonly string[];
 /**
  * Rendering strategy.
  *
- * - `"smart"` — context-aware: relative when near, calendar labels for recent days, absolute when far (default)
+ * - `"smart"` — context-aware: relative when near, calendar labels for nearby days (past and future), absolute when far (default)
  * - `"absolute"` — plain `Intl.DateTimeFormat` output
  * - `"relative"` — always relative, past and future
  */
@@ -222,16 +222,12 @@ function smartSegs(
     if (Math.abs(m) < 60) return rel(m, "minute");
   }
 
-  if (ms > 0) {
-    const [v, u] = unit(ms, t);
-    return rel(v, u);
-  }
-
   const calendarDiff = dayDiff(date, now, timeZone);
 
   if (calendarDiff === 0) return withTime(rel(0, "day"));
   if (calendarDiff === -1) return withTime(rel(-1, "day"));
-  if (calendarDiff < -1 && calendarDiff > -7)
+  if (calendarDiff === 1) return withTime(rel(1, "day"));
+  if (calendarDiff > -7 && calendarDiff < 7)
     return withTime([{ f: dtf(locale, { timeZone, weekday: "long" }), d: date }]);
 
   return [{ f: dtf(locale, { ...DATE_OPTS, timeZone }), d: date }];
