@@ -1,6 +1,6 @@
 {
   "name": "anyfamily-react",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "React hooks for the any* family — useAnywhen, useAnyamount, useAnymany, useAnyaround, useAnylong, with live-updating relative time and a shared locale provider.",
   "type": "module",
   "sideEffects": false,
@@ -73,7 +73,7 @@
     "anyaround": "^1.0.0",
     "anylong": "^1.0.1",
     "anymany": "^1.0.1",
-    "anywhen": "^1.0.2"
+    "anywhen": "^1.0.3"
   },
   "devDependencies": {
     "@testing-library/react": "^16.3.0",

@@ -24,8 +24,8 @@ importers:
         specifier: ^1.0.1
         version: 1.0.1
       anywhen:
-        specifier: ^1.0.2
-        version: 1.0.2
+        specifier: ^1.0.3
+        version: 1.0.3
       next:
         specifier: 16.2.1
         version: 16.2.1(@babel/core@7.29.7)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -815,8 +815,8 @@ packages:
     resolution: {integrity: sha512-2yeOOlxFIuFxRuw4dlU1zNwpUvT3etWSSfqQrT5MJOhOLz7jJpkDye483RPlzVT3smL5AFP78yLlossancsxPw==}
     engines: {node: '>=18'}
 
-  anywhen@1.0.2:
-    resolution: {integrity: sha512-MCQDcJoAPiLa1vs/U0UJ21VFUcvwxsX2exOHvnmwgYR7ecKmfQsuUcWJFcEnu3CSeaqBQGCe1mDGXbdvdYxYyg==}
+  anywhen@1.0.3:
+    resolution: {integrity: sha512-0m1bvmPqWy1aIxnAMs7spsX4rJzp7ORlP1QkOrZpXHXOMHDs8xj7Zmpi3UrEowbLgJpwaQFdAPBssPDlIHyrgw==}
     engines: {node: '>=18'}
 
   argparse@2.0.1:
@@ -2696,7 +2696,7 @@ snapshots:
 
   anymany@1.0.1: {}
 
-  anywhen@1.0.2: {}
+  anywhen@1.0.3: {}
 
   argparse@2.0.1: {}
 

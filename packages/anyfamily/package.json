@@ -1,6 +1,6 @@
 {
   "name": "anyfamily",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "The whole any* family in one install — anywhen, anyamount, anymany, anyaround and anylong: micro Intl formatters with zero dependencies of their own.",
   "type": "module",
   "sideEffects": false,
@@ -70,7 +70,7 @@
     "anyaround": "^1.0.0",
     "anylong": "^1.0.1",
     "anymany": "^1.0.1",
-    "anywhen": "^1.0.2"
+    "anywhen": "^1.0.3"
   },
   "devDependencies": {
     "tsup": "^8.5.0",

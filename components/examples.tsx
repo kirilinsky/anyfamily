@@ -22,6 +22,7 @@ export const AROUND_PRESETS: Preset[] = [
   { call: `anyaround("Cyrl")`, run: () => anyaround("Cyrl") },
   { call: `anyaround("US", { display: "flag-name" })`, run: () => anyaround("US", { display: "flag-name" }) },
   { call: `anyaround("DE", { locale: "fr", display: "flag-name" })`, run: () => anyaround("DE", { locale: "fr", display: "flag-name" }) },
+  { call: `anyaround("GBP", { locale: "ja" })`, run: () => anyaround("GBP", { locale: "ja" }) },
 ];
 
 export const AMOUNT_PRESETS: Preset[] = [
@@ -30,15 +31,17 @@ export const AMOUNT_PRESETS: Preset[] = [
   { call: `anyamount(1999.5, { mode: "currency", currency: "EUR", locale: "de" })`, run: () => anyamount(1999.5, { mode: "currency", currency: "EUR", locale: "de" }) },
   { call: `anyamount(3.2, { mode: "unit", unit: "kilometer-per-hour", style: "long" })`, run: () => anyamount(3.2, { mode: "unit", unit: "kilometer-per-hour", style: "long", locale: "en" }) },
   { call: `anyamount(2500000, { style: "long", locale: "fr" })`, run: () => anyamount(2500000, { style: "long", locale: "fr" }) },
+  { call: `anyamount(1500.5, { mode: "unit", unit: "gigabyte", style: "long" })`, run: () => anyamount(1500.5, { mode: "unit", unit: "gigabyte", style: "long", locale: "en" }) },
 ];
 
 const NOW = "2026-07-11T12:00:00";
 export const WHEN_PRESETS: Preset[] = [
-  { call: `anywhen("2026-07-08", { mode: "relative" })`, run: () => anywhen("2026-07-08", { mode: "relative", now: NOW }) },
+  { call: `anywhen("2026-07-11T11:50", { mode: "relative" })`, run: () => anywhen("2026-07-11T11:50", { mode: "relative", now: NOW }) },
+  { call: `anywhen("2026-07-11T12:10", { mode: "relative" })`, run: () => anywhen("2026-07-11T12:10", { mode: "relative", now: NOW }) },
+  { call: `anywhen("2026-07-12T09:00", { mode: "smart" })`, run: () => anywhen("2026-07-12T09:00", { mode: "smart", now: NOW }) },
   { call: `anywhen("2026-07-14", { mode: "relative" })`, run: () => anywhen("2026-07-14", { mode: "relative", now: NOW }) },
-  { call: `anywhen("2026-07-11", { format: { dateStyle: "full" } })`, run: () => anywhen("2026-07-11", { mode: "absolute", format: { dateStyle: "full" } }) },
+  { call: `anywhen("2026-07-25", { mode: "relative" })`, run: () => anywhen("2026-07-25", { mode: "relative", now: NOW }) },
   { call: `anywhen("2026-07-11", { locale: "ja", format: { dateStyle: "long" } })`, run: () => anywhen("2026-07-11", { mode: "absolute", locale: "ja", format: { dateStyle: "long" } }) },
-  { call: `anywhen("2026-07-10T12:00", { mode: "smart" })`, run: () => anywhen("2026-07-10T12:00", { mode: "smart", now: NOW }) },
 ];
 
 export const MANY_PRESETS: Preset[] = [
@@ -47,6 +50,7 @@ export const MANY_PRESETS: Preset[] = [
   { call: `anymany(["1h", "30m"], { type: "unit" })`, run: () => anymany(["1h", "30m"], { type: "unit" }) },
   { call: `anymany(["poire", "pomme"], { locale: "fr", sort: true })`, run: () => anymany(["poire", "pomme"], { locale: "fr", sort: true }) },
   { call: `anymany(["Öl", "Apfel", "Zebra"], { sort: true, locale: "de" })`, run: () => anymany(["Öl", "Apfel", "Zebra"], { sort: true, locale: "de" }) },
+  { call: `anymany(["赤", "青"], { type: "disjunction", locale: "ja" })`, run: () => anymany(["赤", "青"], { type: "disjunction", locale: "ja" }) },
 ];
 
 export const LONG_PRESETS: Preset[] = [
@@ -55,6 +59,7 @@ export const LONG_PRESETS: Preset[] = [
   { call: `anylong("2h 30m", { style: "long" })`, run: () => anylong("2h 30m", { style: "long", locale: "en" }) },
   { call: `anylong({ hours: 2, minutes: 30 }, { style: "digital" })`, run: () => anylong({ hours: 2, minutes: 30 }, { style: "digital", locale: "en" }) },
   { call: `anylong("P1DT4H", { locale: "es", style: "long" })`, run: () => anylong("P1DT4H", { locale: "es", style: "long" }) },
+  { call: `anylong(new Date("2026-01-10"), new Date("2026-03-15"))`, run: () => anylong(new Date("2026-01-10"), new Date("2026-03-15"), { largestUnit: "weeks", smallestUnit: "days", style: "long", locale: "en" }) },
 ];
 
 // Meta-package tour: cycles one import + call per any* package, all from
@@ -150,6 +155,7 @@ export function CodeAnimation({
   const [i, setI] = useState(0);
   const [len, setLen] = useState(0);
   const [done, setDone] = useState(false);
+  const [fill, setFill] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
 
   // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time hydration gate
@@ -196,6 +202,26 @@ export function CodeAnimation({
     const id = setTimeout(() => setI((p) => (p + 1) % presets.length), HOLD_MS);
     return () => clearTimeout(id);
   }, [done, inView, presets.length]);
+
+  // Drive the active dot's progress bar across the whole cycle: type the call
+  // out (≈ call.length · TYPE_MS) then hold (HOLD_MS). Reset to 0, then flip to
+  // 100 on the next frame so the CSS width transition actually fires.
+  const cycleMs = call.length * TYPE_MS + HOLD_MS;
+  useEffect(() => {
+    if (!mounted || !inView) {
+      setFill(0);
+      return;
+    }
+    setFill(0);
+    let inner = 0;
+    const outer = requestAnimationFrame(() => {
+      inner = requestAnimationFrame(() => setFill(100));
+    });
+    return () => {
+      cancelAnimationFrame(outer);
+      cancelAnimationFrame(inner);
+    };
+  }, [mounted, inView, i, call]);
 
   const typed = mounted ? call.slice(0, len) : call;
   const fnPart = typed.slice(0, activeFn.length);
@@ -253,18 +279,41 @@ export function CodeAnimation({
         </div>
       </div>
 
-      {/* preset progress dots */}
-      <div className="mt-3 flex gap-2 sm:mt-4">
-        {presets.map((_, k) => (
-          <span
-            key={k}
-            className="h-1.5 rounded-full transition-all duration-300"
-            style={{
-              width: k === i ? 20 : 6,
-              background: k === i ? accent : "rgba(255,255,255,0.15)",
-            }}
-          />
-        ))}
+      {/* preset progress dots — click to jump; the active dot fills across the
+          cycle so the countdown to the next preset is visible. */}
+      <div className="mt-3 flex items-center gap-2 sm:mt-4">
+        {presets.map((_, k) => {
+          const active = k === i;
+          return (
+            <button
+              key={k}
+              type="button"
+              onClick={() => setI(k)}
+              aria-label={`Show example ${k + 1}`}
+              aria-current={active ? "true" : undefined}
+              className="group -my-2 py-2"
+            >
+              <span
+                className="block h-1.5 overflow-hidden rounded-full transition-all duration-300 group-hover:bg-white/30"
+                style={{
+                  width: active ? 24 : 6,
+                  background: "rgba(255,255,255,0.15)",
+                }}
+              >
+                {active && (
+                  <span
+                    className="block h-full rounded-full"
+                    style={{
+                      width: `${fill}%`,
+                      background: accent,
+                      transition: `width ${fill === 0 ? 0 : cycleMs}ms linear`,
+                    }}
+                  />
+                )}
+              </span>
+            </button>
+          );
+        })}
       </div>
     </div>
   );

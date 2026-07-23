@@ -21,8 +21,8 @@ importers:
         specifier: ^1.0.1
         version: 1.0.1
       anywhen:
-        specifier: ^1.0.2
-        version: 1.0.2
+        specifier: ^1.0.3
+        version: 1.0.3
     devDependencies:
       tsup:
         specifier: ^8.5.0
@@ -561,8 +561,8 @@ packages:
     resolution: {integrity: sha512-2yeOOlxFIuFxRuw4dlU1zNwpUvT3etWSSfqQrT5MJOhOLz7jJpkDye483RPlzVT3smL5AFP78yLlossancsxPw==}
     engines: {node: '>=18'}
 
-  anywhen@1.0.2:
-    resolution: {integrity: sha512-MCQDcJoAPiLa1vs/U0UJ21VFUcvwxsX2exOHvnmwgYR7ecKmfQsuUcWJFcEnu3CSeaqBQGCe1mDGXbdvdYxYyg==}
+  anywhen@1.0.3:
+    resolution: {integrity: sha512-0m1bvmPqWy1aIxnAMs7spsX4rJzp7ORlP1QkOrZpXHXOMHDs8xj7Zmpi3UrEowbLgJpwaQFdAPBssPDlIHyrgw==}
     engines: {node: '>=18'}
 
   assertion-error@2.0.1:
@@ -1226,7 +1226,7 @@ snapshots:
 
   anymany@1.0.1: {}
 
-  anywhen@1.0.2: {}
+  anywhen@1.0.3: {}
 
   assertion-error@2.0.1: {}
 
