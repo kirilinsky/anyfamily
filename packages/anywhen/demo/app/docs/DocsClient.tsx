@@ -350,12 +350,12 @@ anywhenParts(date, { mode: 'relative' }).map((p, i) =>
                 <div className="space-y-2 text-xs font-mono">
                   {[
                     ["< 45s", "now"],
-                    ["< 1 hour", "10 minutes ago"],
-                    ["future > 1h", "in 2 weeks"],
+                    ["< 1 hour", "10 minutes ago / in 10 minutes"],
                     ["same day", "today, 14:35"],
                     ["yesterday", "yesterday, 09:00"],
-                    ["< 7 days", "Wednesday, 11:20"],
-                    ["older", "Feb 5, 2016"],
+                    ["tomorrow", "tomorrow, 09:00"],
+                    ["within 7 days", "Wednesday, 11:20"],
+                    ["older / further", "Feb 5, 2016"],
                   ].map(([when, output]) => (
                     <div key={when} className="flex gap-4">
                       <span
@@ -548,8 +548,12 @@ anywhen(date, { locale: 'en', thresholds: { second: 120 } })
               <code style={{ color: "var(--emerald)" }} className="font-mono">
                 thresholds.second
               </code>{" "}
-              widens the &quot;now&quot; window, and the full table applies to
-              future dates. Calendar labels (today, yesterday, weekday) are not
+              widens the &quot;now&quot; window and{" "}
+              <code style={{ color: "var(--emerald)" }} className="font-mono">
+                thresholds.minute
+              </code>{" "}
+              the sub-hour minutes window, symmetrically in both directions.
+              Calendar labels (today, yesterday, tomorrow, weekday) are not
               affected.
             </p>
           </Section>
