@@ -61,12 +61,14 @@ export default function Home() {
 
   const value = Number(valueStr);
 
-  const options: AnyamountOptions = {
-    mode,
-    locale,
-    ...(mode === "currency" ? { currency } : {}),
-    ...(mode === "unit" ? { unit } : {}),
-  };
+  // Built per mode rather than by spreading, so the options stay assignable
+  // to the discriminated union without a cast.
+  const options: AnyamountOptions =
+    mode === "currency"
+      ? { mode, locale, currency }
+      : mode === "unit"
+        ? { mode, locale, unit }
+        : { mode, locale };
 
   const result = (() => {
     if (valueStr.trim() === "" || Number.isNaN(value)) return null;
