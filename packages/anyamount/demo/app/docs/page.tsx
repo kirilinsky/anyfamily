@@ -4,7 +4,7 @@ import { DocsClient } from "./DocsClient";
 export const metadata: Metadata = {
   title: "Docs",
   description:
-    "API reference for anyamount, a tiny Intl number formatter. Learn smart, currency, and unit modes, compact notation, sanctioned units, and locales.",
+    "API reference for anyamount, a tiny Intl number formatter. Learn smart, currency, and unit modes, currency symbols, compact notation, sanctioned units, and locales.",
   openGraph: {
     type: "article",
     url: "https://anyamount.vercel.app/docs",

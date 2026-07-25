@@ -8,6 +8,7 @@ const NAV = [
   { id: "install", label: "Install" },
   { id: "anyamount", label: "anyamount()" },
   { id: "parts", label: "anyamountParts()" },
+  { id: "symbol", label: "anyamountSymbol()" },
   { id: "modes", label: "Modes" },
   { id: "options", label: "Options" },
   { id: "units", label: "Units" },
@@ -239,8 +240,9 @@ export function DocsClient() {
               <code style={{ color: "var(--emerald)" }} className="font-mono">
                 Intl.NumberFormat
               </code>{" "}
-              browser API. One function, one options object, three modes. This
-              is a 0.x trial release — the API may still move before 1.0.
+              browser API. One function, one options object, three modes —
+              plus a helper for bare currency symbols. The 1.x API is stable:
+              new options arrive in minors, breaking changes only in majors.
             </p>
             <p>
               The browser already knows how to format numbers, money, and
@@ -320,6 +322,45 @@ anyamountParts(price, { mode: 'currency', currency: 'EUR' }).map((p, i) =>
               Note: part values keep the original Intl characters — the space
               between number and unit can be U+00A0 or U+202F (no-break
               spaces) depending on locale and ICU version.
+            </p>
+          </Section>
+
+          <Section id="symbol" title="anyamountSymbol()">
+            <p>
+              Resolves an ISO 4217 code to its localized symbol, with no number
+              attached — for labels, currency pickers, and input affixes, where
+              the amount is rendered separately (or not at all).
+            </p>
+            <Code>{`import { anyamountSymbol } from 'anyamount'
+
+anyamountSymbol('USD', { locale: 'en' })   // "$"
+anyamountSymbol('EUR', { locale: 'en' })   // "€"
+anyamountSymbol('GBP', { locale: 'en' })   // "£"
+anyamountSymbol('JPY', { locale: 'ja' })   // "￥"
+anyamountSymbol('RUB', { locale: 'ru' })   // "₽"
+
+anyamountSymbol('USD', { locale: 'en', display: 'code' })   // "USD"
+anyamountSymbol('USD', { locale: 'en', display: 'name' })   // "US dollars"`}</Code>
+            <p>
+              <code style={{ color: "var(--emerald)" }} className="font-mono">
+                display
+              </code>{" "}
+              defaults to{" "}
+              <code style={{ color: "var(--emerald)" }} className="font-mono">
+                &apos;narrowSymbol&apos;
+              </code>{" "}
+              — the bare symbol, never the disambiguated{" "}
+              <code style={{ color: "var(--emerald)" }} className="font-mono">
+                US$
+              </code>{" "}
+              some locales prefer. Codes with no symbol in the locale&apos;s
+              data come back as the code itself.
+            </p>
+            <p style={{ color: "var(--text-muted)" }} className="text-xs">
+              Note: a malformed code throws a RangeError straight from Intl —
+              &apos;US&apos; is not a currency. Formatting a full amount?
+              Stay in currency mode with currencyDisplay; this is the escape
+              hatch for when there is no amount.
             </p>
           </Section>
 
@@ -420,12 +461,35 @@ anyamount(1999, { mode: 'currency', currency: 'JPY', locale: 'ja' })
 
 anyamount(1999.99, { mode: 'currency', currency: 'EUR', locale: 'en', digits: 0 })
 // "€2,000"`}</Code>
+              <p className="mb-3">
+                <code
+                  style={{ color: "var(--emerald)" }}
+                  className="font-mono"
+                >
+                  currencyDisplay
+                </code>{" "}
+                picks how the currency itself is spelled — symbol by default,
+                opt into anything else.
+              </p>
+              <Code>{`anyamount(1999, { mode: 'currency', currency: 'USD', locale: 'en' })
+// "$1,999.00"  — 'symbol' (default)
+
+anyamount(1999, { mode: 'currency', currency: 'USD', locale: 'en-CA', currencyDisplay: 'narrowSymbol' })
+// "$1,999.00"  — bare symbol, where the locale would print "US$"
+
+anyamount(1999, { mode: 'currency', currency: 'USD', locale: 'en', currencyDisplay: 'code' })
+// "USD 1,999.00"
+
+anyamount(1999, { mode: 'currency', currency: 'USD', locale: 'en', currencyDisplay: 'name' })
+// "1,999.00 US dollars"`}</Code>
               <p
                 style={{ color: "var(--text-muted)" }}
                 className="text-xs mb-2"
               >
                 reads:{" "}
-                <code className="font-mono">locale, currency, digits</code>
+                <code className="font-mono">
+                  locale, currency, currencyDisplay, digits
+                </code>
               </p>
             </div>
 
@@ -500,6 +564,12 @@ anyamount(5, { mode: 'unit', unit: 'kilometer', locale: 'en', style: 'narrow' })
               desc="Currency mode only, required. Any ISO 4217 code — 'EUR', 'USD', 'JPY', 'RSD'."
             />
             <Prop
+              name="currencyDisplay"
+              type="'symbol' | 'narrowSymbol' | 'code' | 'name'"
+              def="'symbol'"
+              desc="Currency mode only. How the currency is spelled: '$1,999.00', 'USD 1,999.00', or '1,999.00 US dollars'. 'narrowSymbol' keeps the bare '$' where a locale would print 'US$'."
+            />
+            <Prop
               name="unit"
               type="Unit"
               desc="Unit mode only, required. A sanctioned unit identifier or a compound '<unit>-per-<unit>' pair. Typed as a union — your editor autocompletes it."
@@ -514,7 +584,7 @@ anyamount(5, { mode: 'unit', unit: 'kilometer', locale: 'en', style: 'narrow' })
               name="digits"
               type="number"
               def="per mode"
-              desc="Maximum fraction digits. Defaults: smart — 2 plain / 1 compact, unit — 2, currency — the currency's own."
+              desc="maximumFractionDigits — a ceiling, not a fixed width: trailing zeros are not padded on, so digits: 2 renders 2.5, not 2.50. Defaults: smart — 2 plain / 1 compact, unit — 2, currency — the currency's own (which it keeps as a minimum)."
             />
           </Section>
 
@@ -661,7 +731,7 @@ anyamount(120, { mode: 'unit', unit: 'kilometer-per-hour', locale: 'ru' })
               {[
                 {
                   title: "No byte auto-scaling yet",
-                  body: "anyamount(3200000000, { mode: 'unit', unit: 'byte' }) will not pick GB for you — pass the unit you want. Automatic scaling is planned for v0.2.",
+                  body: "anyamount(3200000000, { mode: 'unit', unit: 'byte' }) will not pick GB for you — pass the unit you want. Automatic scaling is planned for a future minor.",
                 },
                 {
                   title: "Output depends on the runtime's Intl data",
@@ -672,8 +742,8 @@ anyamount(120, { mode: 'unit', unit: 'kilometer-per-hour', locale: 'ru' })
                   body: "Intl supports a fixed list of unit identifiers and -per- compounds of them. There is no way to format arbitrary custom units — that's an Intl constraint, not an anyamount one.",
                 },
                 {
-                  title: "0.x trial release",
-                  body: "This is v0.1 — one function, three modes, on purpose. No percent mode, no ranges, no parsing. The API may still move before 1.0; new options will arrive in minors.",
+                  title: "Deliberately small",
+                  body: "One function, three modes, on purpose. No percent mode, no ranges, no parsing. anyamount follows semver — the 1.x API is stable, new options arrive in minors, breaking changes only in majors.",
                 },
               ].map(({ title, body }) => (
                 <div
