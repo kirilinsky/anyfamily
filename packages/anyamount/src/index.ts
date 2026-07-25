@@ -14,6 +14,16 @@ export type Mode = "smart" | "currency" | "unit";
 export type Style = "long" | "short" | "narrow";
 
 /**
+ * How a currency is spelled out.
+ *
+ * - `"symbol"` — the locale's symbol (`"$"`, but `"US$"` where the locale disambiguates)
+ * - `"narrowSymbol"` — the short symbol always (`"$"`)
+ * - `"code"` — the ISO 4217 code (`"USD"`)
+ * - `"name"` — the localized name (`"US dollars"`)
+ */
+export type CurrencyDisplay = "symbol" | "narrowSymbol" | "code" | "name";
+
+/**
  * A sanctioned single unit identifier from ECMA-402
  * (`IsSanctionedSingleUnitIdentifier`).
  */
@@ -74,7 +84,16 @@ export type AnyamountPart = Intl.NumberFormatPart;
 interface BaseOptions {
   /** Output locale. Defaults to the runtime locale. */
   locale?: Locale;
-  /** Maximum fraction digits. Defaults per mode: smart — 2 plain / 1 compact, unit — 2, currency — the currency's own. */
+  /**
+   * `maximumFractionDigits` — a ceiling, not a fixed width. Fractions are
+   * rounded to at most this many digits and trailing zeros are not padded on:
+   * `anyamount(2.5, { digits: 2 })` is `"2.5"`, not `"2.50"`.
+   *
+   * Defaults per mode: smart — 2 plain / 1 compact, unit — 2, currency — the
+   * currency's own. Currency mode is the exception on padding: it keeps the
+   * currency's minimum (2 for EUR, 0 for JPY), so `"€2.50"` stays padded, and
+   * a `digits` below that minimum lowers both (`digits: 0` → `"€2"`).
+   */
   digits?: number;
 }
 
@@ -91,6 +110,8 @@ export interface CurrencyOptions extends BaseOptions {
   mode: "currency";
   /** ISO 4217 currency code (`"EUR"`, `"JPY"`). */
   currency: string;
+  /** How to spell the currency out (`"$1,999.00"` / `"USD 1,999.00"` / `"1,999.00 US dollars"`). Defaults to `"symbol"`. */
+  currencyDisplay?: CurrencyDisplay;
 }
 
 /** Options for unit mode. */
@@ -114,6 +135,7 @@ export type AnyamountOptions = SmartOptions | CurrencyOptions | UnitOptions;
 type ResolvedOptions = BaseOptions & {
   mode?: Mode;
   currency?: string;
+  currencyDisplay?: CurrencyDisplay;
   unit?: Unit;
   style?: Style;
 };
@@ -143,7 +165,7 @@ const nf = (l: Locale | undefined, o: Intl.NumberFormatOptions) =>
   );
 
 function plan(value: number | bigint, options: AnyamountOptions): Intl.NumberFormat {
-  const { mode = "smart", locale, currency, unit, style = "short", digits } =
+  const { mode = "smart", locale, currency, currencyDisplay, unit, style = "short", digits } =
     options as ResolvedOptions;
 
   if (!(typeof value === "bigint" || (typeof value === "number" && !Number.isNaN(value))))
@@ -170,8 +192,8 @@ function plan(value: number | bigint, options: AnyamountOptions): Intl.NumberFor
     return nf(
       locale,
       digits === undefined
-        ? { style: "currency", currency }
-        : { style: "currency", currency, maximumFractionDigits: digits },
+        ? { style: "currency", currency, currencyDisplay }
+        : { style: "currency", currency, currencyDisplay, maximumFractionDigits: digits },
     );
   }
 
@@ -243,4 +265,48 @@ export function anyamountParts(
   options: AnyamountOptions = {},
 ): AnyamountPart[] {
   return plan(value, options).formatToParts(value);
+}
+
+/** Options for {@linkcode anyamountSymbol}. */
+export interface SymbolOptions {
+  /** Output locale. Defaults to the runtime locale. */
+  locale?: Locale;
+  /** Which spelling to return. Defaults to `"narrowSymbol"` — the bare symbol, never `"US$"`. */
+  display?: CurrencyDisplay;
+}
+
+/**
+ * Resolves an ISO 4217 currency code to its localized symbol — `"USD"` → `"$"`,
+ * `"EUR"` → `"€"` — with no number attached. For labels, dropdowns, and input
+ * affixes, where the amount is rendered separately (or not at all).
+ *
+ * Codes without a symbol in the locale's data come back as the code itself
+ * (`"XAU"` → `"XAU"`), which is what `Intl` renders too.
+ *
+ * @example
+ * ```ts
+ * anyamountSymbol("USD", { locale: "en" });                   // "$"
+ * anyamountSymbol("EUR", { locale: "en" });                   // "€"
+ * anyamountSymbol("JPY", { locale: "ja" });                   // "￥"
+ * anyamountSymbol("USD", { locale: "en", display: "name" });  // "US dollars"
+ * ```
+ *
+ * @param currency ISO 4217 currency code (case-insensitive).
+ * @param options See {@linkcode SymbolOptions}.
+ * @returns The currency symbol as a bare string.
+ * @throws {TypeError} If `currency` is missing or not a string.
+ * @throws {RangeError} If `currency` is not a well-formed ISO 4217 code — `Intl` decides.
+ */
+export function anyamountSymbol(currency: string, options: SymbolOptions = {}): string {
+  if (!currency || typeof currency !== "string")
+    throw new TypeError('anyamount: anyamountSymbol requires an ISO 4217 currency code, e.g. "USD"');
+
+  const { locale, display = "narrowSymbol" } = options;
+  const parts = nf(locale, {
+    style: "currency",
+    currency,
+    currencyDisplay: display,
+  }).formatToParts(0);
+
+  return parts.find((p) => p.type === "currency")!.value;
 }

@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.1.0
+
+Currency symbols, both opt-in. No change to existing output.
+
+- **`currencyDisplay` option** — currency mode takes `"symbol"` (default, unchanged), `"narrowSymbol"` (`"$"` where the locale would print `"US$"`), `"code"` (`"USD 1,999.00"`), or `"name"` (`"1,999.00 US dollars"`).
+- **`anyamountSymbol(currency, options?)`** — new export resolving an ISO 4217 code to its localized symbol with no number attached (`"USD"` → `"$"`, `"JPY"` → `"￥"`), for labels, pickers, and input affixes. `display` defaults to `"narrowSymbol"`; codes with no symbol return the code itself.
+- Types `CurrencyDisplay` and `SymbolOptions` exported.
+
 ## 1.0.0
 
 First stable release.

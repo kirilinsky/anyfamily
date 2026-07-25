@@ -1,5 +1,10 @@
 import { describe, it, expect } from "vitest";
-import { anyamount, anyamountParts, type AnyamountOptions } from "./index";
+import {
+  anyamount,
+  anyamountParts,
+  anyamountSymbol,
+  type AnyamountOptions,
+} from "./index";
 
 // Exact Intl output strings vary between ICU versions, so assertions here
 // use parts, regexes, and reassembly instead of full-string snapshots
@@ -316,5 +321,127 @@ describe("formatter cache", () => {
       anyamount(42, { locale: "en", digits: i % 20 });
     }
     expect(anyamount(0.1234, { locale: "en" })).toBe("0.12");
+  });
+});
+
+describe("currencyDisplay option", () => {
+  it("defaults to the locale's symbol", () => {
+    const parts = anyamountParts(1999, { mode: "currency", currency: "USD", locale: "en" });
+    expect(parts.find((p) => p.type === "currency")?.value).toBe("$");
+  });
+
+  it("code renders the ISO code", () => {
+    const parts = anyamountParts(1999, {
+      mode: "currency",
+      currency: "USD",
+      locale: "en",
+      currencyDisplay: "code",
+    });
+    expect(parts.find((p) => p.type === "currency")?.value).toBe("USD");
+  });
+
+  it("name renders the localized name", () => {
+    expect(
+      anyamount(1999, {
+        mode: "currency",
+        currency: "USD",
+        locale: "en",
+        currencyDisplay: "name",
+      }),
+    ).toMatch(/dollar/i);
+  });
+
+  it("narrowSymbol drops the disambiguating prefix", () => {
+    const narrow = anyamountParts(5, {
+      mode: "currency",
+      currency: "USD",
+      locale: "en-CA",
+      currencyDisplay: "narrowSymbol",
+    }).find((p) => p.type === "currency")?.value;
+    expect(narrow).toBe("$");
+  });
+
+  it("combines with digits", () => {
+    expect(
+      anyamount(1999.99, {
+        mode: "currency",
+        currency: "EUR",
+        locale: "en",
+        currencyDisplay: "code",
+        digits: 0,
+      }),
+    ).toMatch(/^EUR\s?2,000$/);
+  });
+});
+
+describe("anyamountSymbol", () => {
+  it("resolves common codes to their symbol", () => {
+    expect(anyamountSymbol("USD", { locale: "en" })).toBe("$");
+    expect(anyamountSymbol("EUR", { locale: "en" })).toBe("€");
+    expect(anyamountSymbol("GBP", { locale: "en" })).toBe("£");
+  });
+
+  it("is case-insensitive", () => {
+    expect(anyamountSymbol("usd", { locale: "en" })).toBe("$");
+  });
+
+  it("localizes the symbol", () => {
+    expect(anyamountSymbol("JPY", { locale: "ja" })).toBe("￥");
+    expect(anyamountSymbol("RUB", { locale: "ru" })).toBe("₽");
+  });
+
+  it("stays narrow across locales that disambiguate", () => {
+    expect(anyamountSymbol("USD", { locale: "en-CA" })).toBe("$");
+  });
+
+  it("display picks another spelling", () => {
+    expect(anyamountSymbol("USD", { locale: "en", display: "code" })).toBe("USD");
+    expect(anyamountSymbol("USD", { locale: "en", display: "name" })).toMatch(/dollar/i);
+    expect(anyamountSymbol("USD", { locale: "en", display: "symbol" })).toMatch(/\$/);
+  });
+
+  it("falls back to the code when the locale has no symbol", () => {
+    expect(anyamountSymbol("XAU", { locale: "en" })).toBe("XAU");
+  });
+
+  it("works without a locale", () => {
+    expect(typeof anyamountSymbol("EUR")).toBe("string");
+  });
+
+  it("throws a TypeError on a missing or non-string code", () => {
+    expect(() => anyamountSymbol("")).toThrow(TypeError);
+    // @ts-expect-error — currency must be a string
+    expect(() => anyamountSymbol(840)).toThrow(TypeError);
+    // @ts-expect-error — currency is required
+    expect(() => anyamountSymbol()).toThrow(TypeError);
+  });
+
+  it("throws a RangeError on a malformed code", () => {
+    expect(() => anyamountSymbol("US")).toThrow(RangeError);
+  });
+});
+
+describe("digits is maximumFractionDigits, not a fixed width", () => {
+  it("does not pad trailing zeros in smart mode", () => {
+    expect(anyamount(2.5, { locale: "en", digits: 2 })).toBe("2.5");
+    expect(anyamount(2.567, { locale: "en", digits: 2 })).toBe("2.57");
+  });
+
+  it("does not pad trailing zeros in unit mode", () => {
+    expect(anyamount(3, { mode: "unit", unit: "gigabyte", locale: "en", digits: 2 })).toMatch(
+      /^3\s?GB$/,
+    );
+  });
+
+  it("keeps the currency's own minimum when digits is higher", () => {
+    expect(
+      anyamount(2, { mode: "currency", currency: "EUR", locale: "en", digits: 4 }),
+    ).toMatch(/2[.,]00$/);
+  });
+
+  it("lowers the currency's minimum when digits is below it", () => {
+    expect(
+      anyamount(2.5, { mode: "currency", currency: "EUR", locale: "en", digits: 1 }),
+    ).toMatch(/2[.,]5$/);
   });
 });

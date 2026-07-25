@@ -128,7 +128,24 @@ anyamount(1999.99, { mode: "currency", currency: "EUR", locale: "en", digits: 0 
 
 Fraction digits default to the currency's own (2 for EUR, 0 for JPY).
 
-Reads: `locale`, `currency`, `digits`.
+`currencyDisplay` picks how the currency itself is spelled — symbol by
+default, opt into anything else:
+
+```ts
+anyamount(1999, { mode: "currency", currency: "USD", locale: "en" });
+// "$1,999.00"  — "symbol" (default)
+
+anyamount(1999, { mode: "currency", currency: "USD", locale: "en-CA", currencyDisplay: "narrowSymbol" });
+// "$1,999.00"  — bare symbol, where the locale would otherwise print "US$"
+
+anyamount(1999, { mode: "currency", currency: "USD", locale: "en", currencyDisplay: "code" });
+// "USD 1,999.00"
+
+anyamount(1999, { mode: "currency", currency: "USD", locale: "en", currencyDisplay: "name" });
+// "1,999.00 US dollars"
+```
+
+Reads: `locale`, `currency`, `currencyDisplay`, `digits`.
 
 ### unit
 
@@ -158,14 +175,45 @@ Reads: `locale`, `unit`, `style`, `digits`.
 
 ## options
 
-| Option     | Type                              | Default        | Used by       |
-| ---------- | --------------------------------- | -------------- | ------------- |
-| `mode`     | `"smart" \| "currency" \| "unit"` | `"smart"`      | —             |
-| `locale`   | `string \| string[]`              | runtime locale | all           |
-| `currency` | `string` (ISO 4217)               | — (required)   | currency      |
-| `unit`     | sanctioned unit identifier        | — (required)   | unit          |
-| `style`    | `"long" \| "short" \| "narrow"`   | `"short"`      | smart, unit   |
-| `digits`   | `number` (max fraction digits)    | smart default  | all           |
+| Option            | Type                                                | Default        | Used by     |
+| ----------------- | --------------------------------------------------- | -------------- | ----------- |
+| `mode`            | `"smart" \| "currency" \| "unit"`                    | `"smart"`      | —           |
+| `locale`          | `string \| string[]`                                 | runtime locale | all         |
+| `currency`        | `string` (ISO 4217)                                  | — (required)   | currency    |
+| `currencyDisplay` | `"symbol" \| "narrowSymbol" \| "code" \| "name"`     | `"symbol"`     | currency    |
+| `unit`            | sanctioned unit identifier                           | — (required)   | unit        |
+| `style`           | `"long" \| "short" \| "narrow"`                      | `"short"`      | smart, unit |
+| `digits`          | `number` → `maximumFractionDigits`                   | per mode       | all         |
+
+### digits
+
+`digits` maps to `maximumFractionDigits` — a ceiling, not a fixed width. The
+fraction is rounded to at most that many digits, and trailing zeros are never
+padded on:
+
+```ts
+anyamount(2.5, { locale: "en", digits: 2 });     // "2.5"   — not "2.50"
+anyamount(2.567, { locale: "en", digits: 2 });   // "2.57"
+anyamount(3, { mode: "unit", unit: "gigabyte", locale: "en", digits: 2 });
+// "3 GB"  — not "3.00 GB"
+```
+
+Currency mode is the exception, because the currency carries its own minimum
+(2 for EUR, 0 for JPY) and `Intl` keeps it:
+
+```ts
+anyamount(2.5, { mode: "currency", currency: "EUR", locale: "en" });
+// "€2.50"  — padded to EUR's minimum
+
+anyamount(2.5, { mode: "currency", currency: "EUR", locale: "en", digits: 1 });
+// "€2.5"   — a digits below the minimum lowers both
+
+anyamount(2, { mode: "currency", currency: "EUR", locale: "en", digits: 4 });
+// "€2.00"  — raising the ceiling does not raise the minimum
+```
+
+Fixed-width output for every mode is not an option today — use
+`anyamountParts()` and pad the `fraction` part yourself if you need it.
 
 The options type is a discriminated union on `mode` — TypeScript requires
 `currency` in currency mode and `unit` in unit mode at compile time, and
@@ -199,6 +247,35 @@ anyamountParts(price, { mode: "currency", currency: "EUR" }).map((p, i) =>
   p.type === "currency" ? <small key={i}>{p.value}</small> : p.value,
 );
 ```
+
+---
+
+## symbol
+
+`anyamountSymbol()` resolves an ISO 4217 code to its localized symbol, with no
+number attached — for labels, currency pickers, and input affixes, where the
+amount is rendered separately (or not at all).
+
+```ts
+import { anyamountSymbol } from "anyamount";
+
+anyamountSymbol("USD", { locale: "en" });   // "$"
+anyamountSymbol("EUR", { locale: "en" });   // "€"
+anyamountSymbol("GBP", { locale: "en" });   // "£"
+anyamountSymbol("JPY", { locale: "ja" });   // "￥"
+anyamountSymbol("RUB", { locale: "ru" });   // "₽"
+
+anyamountSymbol("USD", { locale: "en", display: "code" });   // "USD"
+anyamountSymbol("USD", { locale: "en", display: "name" });   // "US dollars"
+```
+
+`display` defaults to `"narrowSymbol"` — the bare symbol, never the
+disambiguated `"US$"` some locales prefer. Codes with no symbol in the
+locale's data come back as the code itself (`"XAU"` → `"XAU"`), same as `Intl`
+renders them. A malformed code throws a `RangeError` from `Intl`.
+
+Formatting a full amount? Stay in currency mode with `currencyDisplay` — this
+is the escape hatch for when there is no amount.
 
 ---
 
