@@ -330,6 +330,54 @@ anywhen(date, { mode: "relative", locale: "tr" }); // "3 saat önce"
 
 When omitted, native `Intl` uses the runtime locale.
 
+### calendars and eras
+
+Non-Gregorian calendars need no extra API. Pick the calendar with the BCP 47
+`-u-ca-` extension on `locale`, and ask for the era through `format` — both are
+passed straight to `Intl.DateTimeFormat`.
+
+```ts
+anywhen(date, {
+  mode: "absolute",
+  locale: "ja-JP-u-ca-japanese",
+  format: { era: "short", year: "numeric", month: "short", day: "numeric" },
+});
+// "平成28年2月5日"
+
+anywhen(date, { mode: "absolute", locale: "th-TH-u-ca-buddhist" });
+// "5 ก.พ. 2559"
+
+anywhen(date, { mode: "absolute", locale: "en-US-u-ca-islamic-umalqura" });
+// "Rab. II 26, 1437 AH"
+
+anywhen(date, { mode: "absolute", locale: "zh-TW-u-ca-roc", format: { era: "short", year: "numeric", month: "short", day: "numeric" } });
+// "民國105年2月5日"
+```
+
+`anywhenParts` reports the era as its own part, so it can be styled apart from
+the year:
+
+```ts
+anywhenParts(date, {
+  mode: "absolute",
+  locale: "en-u-ca-gregory",
+  format: { era: "short", day: "numeric", month: "short", year: "numeric" },
+});
+// [… { type: "year", value: "2016" }, { type: "literal", value: " " }, { type: "era", value: "AD" }]
+```
+
+Two limits worth knowing:
+
+- **Absolute mode only.** Smart mode uses its own fixed date shape and ignores
+  `format`, so eras do not appear in its absolute fallback.
+- **`eraDisplay` is not usable yet.** The option is still Stage 2 and current
+  engines ignore it silently — it never reaches `resolvedOptions()`. Once it
+  ships it will work through `format` with no change to anywhen.
+
+Smart-mode day boundaries (`today`, `yesterday`, weekday) are computed on
+Gregorian days. Every calendar `Intl` ships switches days at local midnight too,
+so the boundaries line up — only the printed labels differ.
+
 ---
 
 ## vs the alternatives
