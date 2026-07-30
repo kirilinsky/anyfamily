@@ -24,6 +24,7 @@ full-screen section per package with a live, self-typing example.
 | **anymany** | string lists | `Intl.ListFormat` | [site](https://anymany.vercel.app) · [npm](https://www.npmjs.com/package/anymany) · [repo](https://github.com/kirilinsky/anymany) |
 | **anylong** | durations | `Intl.DurationFormat` | [site](https://anylong.vercel.app) · [npm](https://www.npmjs.com/package/anylong) · [repo](https://github.com/kirilinsky/anylong) |
 | **anyplural** | cardinal / ordinal plurals | `Intl.PluralRules` | [site](https://anyplural.vercel.app) · [npm](https://www.npmjs.com/package/anyplural) · [repo](https://github.com/kirilinsky/anyplural) |
+| **anyword** | words / graphemes / sentences, count + truncate | `Intl.Segmenter` | [site](https://anyword.vercel.app) · [npm](https://www.npmjs.com/package/anyword) · [repo](https://github.com/kirilinsky/anyword) |
 
 ## how it works
 
