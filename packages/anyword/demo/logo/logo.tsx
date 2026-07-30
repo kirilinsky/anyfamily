@@ -53,7 +53,7 @@ export function Logo({ className }: { className?: string }) {
         width="4"
         height="60"
         rx="1"
-        fill="#f5b66b"
+        fill="#c9f53c"
         className="caret"
       />
 
@@ -63,7 +63,7 @@ export function Logo({ className }: { className?: string }) {
         fontFamily="'JetBrains Mono', monospace"
         fontWeight="700"
         fontSize="100"
-        fill="#f5b66b"
+        fill="#c9f53c"
         textLength="240"
         lengthAdjust="spacingAndGlyphs"
         className="word"

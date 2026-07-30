@@ -102,7 +102,7 @@ export default function Home() {
               }}
               className={`rounded-full border px-3 py-1 font-mono text-[11px] transition-colors ${
                 text === s.text
-                  ? "border-amber-400/40 bg-amber-400/[0.08] text-amber-300/90"
+                  ? "border-accent/40 bg-accent/[0.08] text-accent/90"
                   : "border-white/[0.07] text-white/30 hover:border-white/15 hover:text-white/60"
               }`}
             >
@@ -113,7 +113,7 @@ export default function Home() {
 
         <div className="w-full max-w-full rounded-xl border border-white/[0.07] bg-black/30 px-4 py-3.5 font-mono">
           <div className="flex min-h-9 flex-wrap items-center justify-center gap-x-1 gap-y-1.5 text-sm sm:justify-start sm:text-base">
-            <span className="shrink-0 text-amber-400">anyword</span>
+            <span className="shrink-0 text-accent">anyword</span>
             <span className="shrink-0 text-white/30">(</span>
             <span className="shrink-0 text-sky-300">&quot;</span>
             <input
