@@ -107,7 +107,7 @@ anyword(text, { by: "sentence" });
 
 ---
 
-## granularity
+## granularity — word, grapheme, sentence
 
 `by` maps straight to `Intl.Segmenter`:
 
@@ -129,7 +129,7 @@ Grapheme and sentence modes never drop anything, so `raw` does nothing there.
 
 ---
 
-## count
+## count words and characters
 
 `anywordCount()` takes the same options and counts segments instead of
 returning them:
@@ -146,7 +146,7 @@ characters the user believes they typed.
 
 ---
 
-## truncate
+## truncate without breaking emoji
 
 `anywordTruncate(text, limit, options?)` cuts to at most `limit` segments —
 graphemes by default, so an emoji or an accented letter is never split.
@@ -263,6 +263,70 @@ import { anyword, supported } from "anyword";
 
 supported ? anyword(text) : text.split(/\s+/);
 ```
+
+---
+
+## faq
+
+### How do I count emoji as one character in JavaScript?
+
+`.length` counts UTF-16 code units, so `"👨‍👩‍👧".length` is `8`. Count graphemes
+instead:
+
+```ts
+anywordCount("👨‍👩‍👧", { by: "grapheme" }); // 1
+anywordCount("héllo", { by: "grapheme" }); // 5
+```
+
+### How do I count words in Chinese, Japanese or Thai?
+
+Those scripts have no spaces, so `.split(/\s+/)` returns one chunk. Word mode
+uses the locale's own break rules:
+
+```ts
+anywordCount("世界test");                    // 2
+anyword("これは日本語です", { locale: "ja" }); // ["これ", "は", "日本語", "です"]
+anyword("สวัสดีชาวโลก", { locale: "th" });  // ["สวัสดี", "ชาว", "โลก"]
+```
+
+### How do I truncate a string without breaking an emoji?
+
+`slice()` can cut inside a surrogate pair and produce mojibake.
+`anywordTruncate` always lands on a grapheme boundary:
+
+```ts
+anywordTruncate(bio, 140, { ellipsis: "…" });
+```
+
+### How do I split a string into characters safely?
+
+`[...str]` splits by code point, which tears `👨‍👩‍👧‍👦` into pieces and separates
+combining accents from their letter. Use grapheme mode:
+
+```ts
+anyword(title, { by: "grapheme" }); // ["👨‍👩‍👧", " ", "h", "i"]
+```
+
+The same trick reverses text safely:
+`anyword(text, { by: "grapheme" }).reverse().join("")`.
+
+### How do I split text into sentences?
+
+```ts
+anyword(text, { by: "sentence" }); // ["Hi. ", "Go now!"]
+```
+
+### Is this a replacement for grapheme-splitter?
+
+For grapheme splitting, yes — same job, ~10x smaller, because the Unicode
+tables come from the runtime instead of the bundle. anyword also does words and
+sentences, which grapheme-splitter does not. The trade: it needs
+`Intl.Segmenter`, so check `supported` if you target old engines.
+
+### Do I need a polyfill?
+
+Not on Node 18+, Chrome 87+, Firefox 125+ or Safari 14.1+. Below that,
+`supported` is `false` and every function throws — branch on the flag.
 
 ---
 

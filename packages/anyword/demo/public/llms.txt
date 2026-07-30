@@ -1,0 +1,59 @@
+# anyword
+
+> Micro text segmenter for JavaScript and TypeScript, built on native `Intl.Segmenter`. Splits, counts and truncates text by word, grapheme or sentence, correctly in any locale. Zero dependencies, under 1kb gzip, ESM + CJS, SSR-safe.
+
+anyword exists because naive JavaScript quietly gets text wrong:
+
+- `"👨‍👩‍👧".length` is `8`, not `1` — `.length` counts UTF-16 code units, not characters users see.
+- `"世界test".split(/\s+/)` finds one "word" — scripts without spaces need real boundary rules.
+- `[...str]` rips composite emoji and combining accents apart.
+- `str.slice(0, 140)` can cut an emoji in half and produce mojibake.
+
+`Intl.Segmenter` knows where the real boundaries are. anyword is the thin wrapper over it — no rule tables, no locale files, no config.
+
+## Install
+
+```bash
+npm install anyword
+```
+
+## API
+
+- `anyword(text, options?): string[]` — segments as plain strings.
+- `anywordParts(text, options?): { segment, index, isWordLike? }[]` — segments with offsets into the original text.
+- `anywordCount(text, options?): number` — number of segments.
+- `anywordTruncate(text, limit, options?): string` — cut to at most `limit` segments, never mid-emoji.
+- `supported: boolean` — whether `Intl.Segmenter` exists in this runtime.
+
+Options: `by` (`"word" | "grapheme" | "sentence"`, default `"word"`; `anywordTruncate` defaults to `"grapheme"`), `locale` (BCP 47 tag or fallback array, default runtime locale), `raw` (word mode: keep spaces and punctuation, default `false`), `ellipsis` (`anywordTruncate` only, default `""`).
+
+```ts
+import { anyword, anywordCount, anywordTruncate } from "anyword";
+
+anyword("don't stop 世界");                    // ["don't", "stop", "世界"]
+anyword("👨‍👩‍👧 hi", { by: "grapheme" });         // ["👨‍👩‍👧", " ", "h", "i"]
+anywordCount("👨‍👩‍👧", { by: "grapheme" });      // 1
+anywordTruncate("héllo 👨‍👩‍👧", 5, { ellipsis: "…" }); // "héllo…"
+```
+
+## Use it when
+
+- Counting characters for a length limit the way users count them (emoji = 1).
+- Counting words in text that may be Chinese, Japanese or Thai.
+- Truncating a preview or bio without breaking an emoji or an accented letter.
+- Splitting text into sentences.
+- Animating text per character with emoji intact.
+- Reversing a string safely.
+
+Not an NLP toolkit: no stemming, no stop words, no message catalogs.
+
+## Docs
+
+- [Full reference in one file](https://anyword-three.vercel.app/llms-full.txt): every function, option and edge case as plain markdown.
+- [Interactive demo and docs](https://anyword-three.vercel.app/): live segmentation playground.
+- [README on GitHub](https://github.com/kirilinsky/anyword): source, tests, CI.
+- [npm package](https://www.npmjs.com/package/anyword): install and versions.
+
+## Compatibility
+
+Node.js 18+ · Chrome 87+ · Firefox 125+ · Safari 14.1+ · Deno · Cloudflare Workers · Vercel Edge Runtime. On runtimes without `Intl.Segmenter` every function throws — check the exported `supported` flag first.

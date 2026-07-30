@@ -72,6 +72,56 @@ export const metadata: Metadata = {
   },
 };
 
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "SoftwareSourceCode",
+      "@id": `${baseUrl}#package`,
+      name: "anyword",
+      description:
+        "Micro text segmenter built on native Intl.Segmenter. Split, count and truncate text by word, grapheme or sentence in any locale. Zero dependencies, under 1kb gzip.",
+      url: baseUrl,
+      codeRepository: "https://github.com/kirilinsky/anyword",
+      programmingLanguage: ["TypeScript", "JavaScript"],
+      runtimePlatform: ["Node.js", "Deno", "Browser"],
+      license: "https://opensource.org/licenses/MIT",
+      author: {
+        "@type": "Person",
+        name: "kirilinsky",
+        url: "https://github.com/kirilinsky",
+      },
+      keywords:
+        "text segmentation, word count, grapheme, emoji, truncate, Intl.Segmenter, i18n, unicode, CJK, zero dependency",
+      isPartOf: {
+        "@type": "CreativeWork",
+        name: "any family",
+        url: "https://anyfamily.site/",
+      },
+    },
+    {
+      "@type": "SoftwareApplication",
+      "@id": `${baseUrl}#app`,
+      name: "anyword",
+      applicationCategory: "DeveloperApplication",
+      operatingSystem: "Any",
+      url: baseUrl,
+      downloadUrl: "https://www.npmjs.com/package/anyword",
+      softwareVersion: "1.0.0",
+      offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+    },
+    {
+      "@type": "TechArticle",
+      "@id": `${baseUrl}/docs#reference`,
+      headline: "anyword API reference",
+      description:
+        "API reference for anyword: word, grapheme and sentence granularity, segment offsets, emoji-safe counting and truncation, locales and SSR.",
+      url: `${baseUrl}/docs`,
+      about: { "@id": `${baseUrl}#package` },
+    },
+  ],
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -80,6 +130,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="min-h-full flex flex-col">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
         {children}
         <Analytics />
       </body>

@@ -46,16 +46,23 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
 
+      # tsdown 0.22.x requires Node ^22.18 || >=24.11 (Promise.withResolvers,
+      # native TS config loading). The library itself still supports Node 18+ —
+      # that is what typecheck, lint and the test suite above verify on Node 20.
       - run: pnpm build
+        if: matrix.node != 20
 
       - name: Smoke test package outputs
+        if: matrix.node != 20
         run: |
           node --input-type=module -e "import { anyword } from './dist/index.mjs'; if (typeof anyword !== 'function') throw new Error('ESM export failed')"
           node -e "const { anyword } = require('./dist/index.cjs'); if (typeof anyword !== 'function') throw new Error('CJS export failed')"
 
       - run: pnpm publint
+        if: matrix.node != 20
 
       - name: Check bundle size
+        if: matrix.node != 20
         run: |
           SIZE=$(gzip -c dist/index.mjs | wc -c | tr -d ' ')
           echo "Bundle size: ${SIZE} bytes gzip"

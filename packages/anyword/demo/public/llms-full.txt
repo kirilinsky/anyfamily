@@ -1,0 +1,238 @@
+# anyword — full reference
+
+> Micro text segmenter for JavaScript and TypeScript, built on native `Intl.Segmenter`. Split, count and truncate text by word, grapheme or sentence, in any locale. Zero dependencies, under 1kb gzip, ESM + CJS + types, SSR-safe, stable since 1.0 under semver.
+
+- npm: https://www.npmjs.com/package/anyword
+- JSR: `@kirilinsky/anyword`
+- Source: https://github.com/kirilinsky/anyword
+- Demo and docs: https://anyword-three.vercel.app/
+
+## Why it exists
+
+Naive JavaScript quietly gets text wrong:
+
+| Naive code | Result | Problem |
+| --- | --- | --- |
+| `"👨‍👩‍👧".length` | `8` | counts UTF-16 code units, not user-perceived characters |
+| `"héllo".length` (decomposed) | `6` | combining accent counted separately |
+| `"世界test".split(/\s+/).length` | `1` | no spaces in CJK, so no word boundaries |
+| `"สวัสดีชาวโลก".split(" ")` | one chunk | Thai has no spaces between words |
+| `[..."👨‍👩‍👧"]` | 5 pieces | ZWJ sequence torn apart |
+| `"héllo 👨‍👩‍👧".slice(0, 8)` | broken tail | cut lands inside a surrogate pair |
+
+`Intl.Segmenter` implements the Unicode segmentation rules and ships with every modern runtime. anyword is the thin wrapper: no bundled rule tables, no locale files, no config.
+
+## Install
+
+```bash
+npm install anyword
+# or
+pnpm add anyword
+# or
+yarn add anyword
+```
+
+```ts
+import {
+  anyword,
+  anywordParts,
+  anywordCount,
+  anywordTruncate,
+  supported,
+} from "anyword";
+import type {
+  AnywordOptions,
+  AnywordTruncateOptions,
+  AnywordPart,
+  Granularity,
+  Locale,
+} from "anyword";
+```
+
+CommonJS works too: `const { anyword } = require("anyword")`.
+
+## anyword(text, options?) → string[]
+
+Segments text and returns the pieces as plain strings, in order.
+
+```ts
+anyword("hi there");                        // ["hi", "there"]
+anyword("don't stop 世界");                  // ["don't", "stop", "世界"]
+anyword("hi there", { by: "grapheme" });    // ["h","i"," ","t","h","e","r","e"]
+anyword("Hi. Go now!", { by: "sentence" }); // ["Hi. ", "Go now!"]
+```
+
+Word mode drops the segments between words — spaces and punctuation. Set `raw: true` to keep them; then the pieces join back into the original string:
+
+```ts
+anyword("hi, there!");                // ["hi", "there"]
+anyword("hi, there!", { raw: true }); // ["hi", ",", " ", "there", "!"]
+```
+
+Grapheme and sentence modes never drop anything, so `raw` does nothing there.
+
+Throws `TypeError` if `text` is not a string, `RangeError` if `by` is unknown, and `Error` if `Intl.Segmenter` is unavailable.
+
+## anywordParts(text, options?) → AnywordPart[]
+
+Same arguments as `anyword()`, but returns `{ segment, index, isWordLike? }`. `index` is the code-unit offset in the original string, so you can highlight or slice without searching again.
+
+```ts
+anywordParts("世界 test");
+// [
+//   { segment: "世界", index: 0, isWordLike: true },
+//   { segment: "test", index: 3, isWordLike: true },
+// ]
+
+// React: highlight the matched word in place
+anywordParts(text, { raw: true }).map((p, i) =>
+  p.segment === query ? <mark key={i}>{p.segment}</mark> : p.segment,
+);
+```
+
+`isWordLike` is present in word mode only — in grapheme and sentence modes every segment is content.
+
+## anywordCount(text, options?) → number
+
+Counts segments instead of returning them. Same options.
+
+```ts
+anywordCount("世界 test");                 // 2
+anywordCount("世界test");                  // 2   — .split(/\s+/) says 1
+anywordCount("héllo", { by: "grapheme" }); // 5
+anywordCount("👨‍👩‍👧", { by: "grapheme" });   // 1   — "👨‍👩‍👧".length is 8
+```
+
+Grapheme counting is what a character-limit counter should show: the number of characters the user believes they typed.
+
+## anywordTruncate(text, limit, options?) → string
+
+Cuts to at most `limit` segments — graphemes by default, so an emoji or an accented letter is never split.
+
+```ts
+anywordTruncate("héllo 👨‍👩‍👧", 6);                     // "héllo "
+anywordTruncate("héllo 👨‍👩‍👧", 5, { ellipsis: "…" });   // "héllo…"
+anywordTruncate("one two three", 2, { by: "word" }); // "one two "
+anywordTruncate("short", 99);                        // "short" — already fits
+```
+
+Rules:
+
+- The cut lands on a segment boundary and keeps everything before it verbatim, trailing whitespace included.
+- With `ellipsis`, that trailing whitespace is trimmed and the ellipsis appended.
+- The ellipsis is added only when the text was actually too long — short input comes back untouched.
+- The ellipsis itself does not count toward `limit`.
+- `limit` must be a non-negative finite number, otherwise `RangeError`.
+
+## Options
+
+| Option | Type | Default | Applies to | Notes |
+| --- | --- | --- | --- | --- |
+| `by` | `"word" \| "grapheme" \| "sentence"` | `"word"` | all | `anywordTruncate` defaults to `"grapheme"` — a length limit almost always means characters |
+| `locale` | `string \| string[]` | runtime locale | all | BCP 47 tag or fallback chain |
+| `raw` | `boolean` | `false` | word mode | keep spaces and punctuation |
+| `ellipsis` | `string` | `""` | `anywordTruncate` | appended only when the text was cut |
+
+## Granularity
+
+`by` maps straight to `Intl.Segmenter`:
+
+- `"word"` — words, locale-aware even without spaces. `"don't stop 世界"` → `["don't", "stop", "世界"]`
+- `"grapheme"` — user-perceived characters, emoji and accents kept whole. `"👨‍👩‍👧 hi"` → `["👨‍👩‍👧", " ", "h", "i"]`
+- `"sentence"` — sentences per Unicode sentence-break rules. `"Hi. Go now!"` → `["Hi. ", "Go now!"]`
+
+## Locales
+
+Pass any valid BCP 47 tag; fallback arrays also work. The locale matters most for word breaking in scripts without spaces.
+
+```ts
+anyword("これは日本語です", { locale: "ja" }); // ["これ", "は", "日本語", "です"]
+anyword("สวัสดีชาวโลก", { locale: "th" });  // ["สวัสดี", "ชาว", "โลก"]
+anyword("don't stop", { locale: "en" });    // ["don't", "stop"]
+anyword("hi", { locale: ["xx-Nope", "en"] });
+```
+
+When omitted, native `Intl` uses the runtime locale.
+
+## React, Next.js and SSR
+
+anyword is pure and synchronous — no clock, no state — so it renders the same on server and client. Pass an explicit `locale` to keep output stable across the hydration boundary regardless of the runtime default.
+
+```tsx
+import { anywordCount } from "anyword";
+
+export function CharCounter({ value }: { value: string }) {
+  return (
+    <span>{anywordCount(value, { by: "grapheme", locale: "en" })}/280</span>
+  );
+}
+```
+
+## Recipes
+
+```tsx
+// Word counter
+anywordCount(post.body);
+
+// Character counter users agree with (👨‍👩‍👧 counts as 1, not 8)
+anywordCount(input, { by: "grapheme" });
+
+// Safe preview / char-limit cut
+anywordTruncate(bio, 140, { ellipsis: "…" });
+
+// Word-limited excerpt
+anywordTruncate(article, 30, { by: "word", ellipsis: " …" });
+
+// Per-character animation, emoji intact
+anyword(title, { by: "grapheme" }).map((c, i) => <span key={i}>{c}</span>);
+
+// Safe reverse
+anyword(text, { by: "grapheme" }).reverse().join("");
+
+// Initials
+anyword(fullName)
+  .slice(0, 2)
+  .map((w) => anyword(w, { by: "grapheme" })[0])
+  .join("");
+
+// Split into sentences
+anyword(text, { by: "sentence" });
+```
+
+## Runtime support
+
+`Intl.Segmenter` is missing on older runtimes. There every anyword function throws a clear error at call time; check the exported `supported` flag first if you target them.
+
+```ts
+import { anyword, supported } from "anyword";
+
+supported ? anyword(text) : text.split(/\s+/);
+```
+
+Supported: Node.js 18+, Chrome 87+, Firefox 125+, Safari 14.1+, Edge Runtime, Cloudflare Workers, Deno. CI runs the suite on Node 20, 22 and 24.
+
+## vs the alternatives
+
+| | anyword | grapheme-splitter | words-count + lodash |
+| --- | --- | --- | --- |
+| gzip | < 1kb | ~10kb | ~25kb |
+| unicode data bundled | no | yes | yes |
+| boundary rules | native Intl | bundled tables | regex |
+| word / sentence mode | yes | grapheme only | spaces only |
+| dependencies | 0 | 0 | 1+ |
+
+Reach for a real tokenizer or i18n framework when you need stemming, stop words or message catalogs — anyword only does boundaries.
+
+## Limitations
+
+- Exact segment lists come from the runtime's ICU data and may differ between Node versions, browsers and operating systems, especially for CJK and Thai. Don't assert on exact arrays across environments.
+- Word mode drops separators by default, so the pieces do not rejoin into the input — pass `raw: true` for a lossless round trip.
+- On engines without `Intl.Segmenter` every function throws; branch on `supported`.
+
+## Stability
+
+anyword follows semver. Since 1.0.0 the public API — `anyword`, `anywordParts`, `anywordCount`, `anywordTruncate`, `supported` and the exported types — only changes shape in a major release. New options arrive in minors.
+
+## Part of the any family
+
+anyword belongs to **any family**, a set of micro, zero-dependency, native-first utilities: https://anyfamily.site/
