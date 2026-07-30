@@ -17,7 +17,9 @@
 </p>
 
 <p align="center">
-  <a href="https://anyfamily.site/">any family</a>
+  <a href="https://anyword-three.vercel.app/">▸ live demo</a>
+  &nbsp;·&nbsp;
+  <a href="https://anyfamily.site/">▸ any family</a>
 </p>
 
 ---
