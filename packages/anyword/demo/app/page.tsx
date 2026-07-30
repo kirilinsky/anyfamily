@@ -257,7 +257,7 @@ export default function Home() {
                   value={Math.min(limit, Math.max(graphemes, 1))}
                   onChange={(e) => setLimit(Number(e.target.value))}
                   aria-label="truncate limit"
-                  className="h-1 w-full cursor-pointer appearance-none rounded-full bg-white/10 accent-amber-400"
+                  className="h-1 w-full cursor-pointer appearance-none rounded-full bg-white/10 accent-accent"
                 />
                 <span className="shrink-0 text-[11px] text-white/35">
                   {Math.min(limit, Math.max(graphemes, 1))} graphemes

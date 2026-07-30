@@ -78,7 +78,7 @@ function Prop({
       className="flex flex-col gap-1 py-3 border-b last:border-0"
     >
       <div className="flex items-center gap-3 flex-wrap">
-        <code style={{ color: "var(--amber)" }} className="font-mono text-sm">
+        <code style={{ color: "var(--accent)" }} className="font-mono text-sm">
           {name}
         </code>
         <code style={{ color: "var(--sky)" }} className="font-mono text-xs">
@@ -123,7 +123,7 @@ export function DocsClient() {
       root.style.setProperty("--code-bg", "rgba(0,0,0,0.6)");
       root.style.setProperty("--code-border", "rgba(255,255,255,0.08)");
       root.style.setProperty("--code-text", "#a1a1aa");
-      root.style.setProperty("--amber", "#fbbf24");
+      root.style.setProperty("--accent", "#c9f53c");
       root.style.setProperty("--sky", "#38bdf8");
       root.style.setProperty("--emerald", "#34d399");
       root.style.setProperty("--table-alt", "rgba(255,255,255,0.02)");
@@ -139,7 +139,7 @@ export function DocsClient() {
       root.style.setProperty("--code-bg", "#f4f4f5");
       root.style.setProperty("--code-border", "rgba(0,0,0,0.08)");
       root.style.setProperty("--code-text", "#3f3f46");
-      root.style.setProperty("--amber", "#b45309");
+      root.style.setProperty("--accent", "#4d7c0f");
       root.style.setProperty("--sky", "#0369a1");
       root.style.setProperty("--emerald", "#059669");
       root.style.setProperty("--table-alt", "rgba(0,0,0,0.02)");
@@ -404,7 +404,7 @@ anywordTruncate('short', 99)                         // "short"  — already fit
                   }}
                 >
                   <code
-                    style={{ color: "var(--amber)", minWidth: "6rem" }}
+                    style={{ color: "var(--accent)", minWidth: "6rem" }}
                     className="font-mono text-sm"
                   >
                     &quot;{value}&quot;
