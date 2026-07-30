@@ -57,6 +57,9 @@ function Post({ publishedAt, price }: { publishedAt: Date; price: number }) {
 - `useAnywhen(date, options?)` — see `anywhen`. `options.refresh` controls
   the tick interval.
 - `useAnyamount(value, options?)` — see `anyamount`.
+- `useAnyamountSymbol(currency, options?)` — see `anyamountSymbol`. The bare
+  currency symbol, for labels and input affixes where the amount is rendered
+  separately.
 - `useAnymany(items, options?)` — see `anymany`.
 - `useAnyaround(code, options?)` — see `anyaround`.
 - `useAnylong(input, options?)` — see `anylong`. `anylongSupported` is

@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       anyamount:
-        specifier: ^1.0.0
-        version: 1.0.0
+        specifier: ^1.1.0
+        version: 1.1.0
       anyaround:
         specifier: ^1.0.0
         version: 1.0.0
@@ -654,8 +654,8 @@ packages:
   any-promise@1.3.0:
     resolution: {integrity: sha512-7UvmKalWRt1wgjL1RrGxoSJW/0QZFIegpeGvZG9kjp8vrRu55XTHbwnqq2GpXm9uLbcuhxm3IqX9OB4MZR1b2A==}
 
-  anyamount@1.0.0:
-    resolution: {integrity: sha512-oauei9vw+bb/sOVDu7oFEhAOs6AI4OpixN9umB1iEvcOoMhCZzSC1M6tTzd0pYI5wAvLl6R/1KWf8uLL9P/Evw==}
+  anyamount@1.1.0:
+    resolution: {integrity: sha512-udW4QjWkxnPmZOLQuCW0wRoFNDukP3455aaQa9Wie00qvHy4xXEQz+heQ/TIRHD412Sh2oLypkpnTEVF+ugz+Q==}
     engines: {node: '>=18'}
 
   anyaround@1.0.0:
@@ -1654,7 +1654,7 @@ snapshots:
 
   any-promise@1.3.0: {}
 
-  anyamount@1.0.0: {}
+  anyamount@1.1.0: {}
 
   anyaround@1.0.0: {}
 

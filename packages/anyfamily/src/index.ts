@@ -22,7 +22,7 @@ export type {
 } from "anywhen";
 
 // anyamount — numbers, currency, units (Intl.NumberFormat)
-export { anyamount, anyamountParts } from "anyamount";
+export { anyamount, anyamountParts, anyamountSymbol } from "anyamount";
 export type {
   AnyamountOptions,
   AnyamountPart,
@@ -31,6 +31,7 @@ export type {
   SingleUnit,
   SmartOptions as AnyamountSmartOptions,
   Style as AnyamountStyle,
+  SymbolOptions as AnyamountSymbolOptions,
   Unit,
   UnitOptions,
 } from "anyamount";

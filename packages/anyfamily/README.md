@@ -36,6 +36,8 @@ units, any locale. [npm](https://www.npmjs.com/package/anyamount)
 ```ts
 anyamount(1999, { mode: "currency", currency: "EUR", locale: "en" });
 // "€1,999.00"
+
+anyamountSymbol("EUR", { locale: "en" }); // "€"  — the bare symbol, no amount
 ```
 
 ## anymany — localized lists

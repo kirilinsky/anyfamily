@@ -8,9 +8,12 @@
   <a href="./LICENSE"><img src="https://img.shields.io/badge/license-MIT-black?style=flat-square" alt="MIT" /></a>
 </p>
 
-The landing page for the **any\*** family — micro, zero-dependency JavaScript
-tools built on native `Intl`. One scroll-snapped page: a hero, then one
-full-screen section per package with a live, self-typing example.
+Home of the **any\*** family — micro, zero-dependency JavaScript tools built
+on native `Intl`. The landing is one scroll-snapped page: a hero, then a
+full-screen section per package with a live, self-typing example. Every package
+also has an interactive demo at `/<package>` and an API reference at
+`/docs/<package>`, all served from this one app — the standalone per-package
+demo sites have been folded in.
 
 **→ [anyfamily.site](https://anyfamily.site)**
 
@@ -18,13 +21,13 @@ full-screen section per package with a live, self-typing example.
 
 | Package | Does | Intl API | Links |
 | --- | --- | --- | --- |
-| **anyaround** | region / language / script / currency / calendar names + flags | `Intl.DisplayNames` | [site](https://anyaround.vercel.app) · [npm](https://www.npmjs.com/package/anyaround) · [repo](https://github.com/kirilinsky/anyaround) |
-| **anyamount** | numbers, currency, units | `Intl.NumberFormat` | [site](https://anyamount.vercel.app) · [npm](https://www.npmjs.com/package/anyamount) · [repo](https://github.com/kirilinsky/anyamount) |
-| **anywhen** | dates, times, relative phrasing | `Intl.DateTimeFormat` | [site](https://anywhen-kappa.vercel.app) · [npm](https://www.npmjs.com/package/anywhen) · [repo](https://github.com/kirilinsky/anywhen) |
-| **anymany** | string lists | `Intl.ListFormat` | [site](https://anymany.vercel.app) · [npm](https://www.npmjs.com/package/anymany) · [repo](https://github.com/kirilinsky/anymany) |
-| **anylong** | durations | `Intl.DurationFormat` | [site](https://anylong.vercel.app) · [npm](https://www.npmjs.com/package/anylong) · [repo](https://github.com/kirilinsky/anylong) |
-| **anyplural** | cardinal / ordinal plurals | `Intl.PluralRules` | [site](https://anyplural.vercel.app) · [npm](https://www.npmjs.com/package/anyplural) · [repo](https://github.com/kirilinsky/anyplural) |
-| **anyword** | words / graphemes / sentences, count + truncate | `Intl.Segmenter` | [site](https://anyword.vercel.app) · [npm](https://www.npmjs.com/package/anyword) · [repo](https://github.com/kirilinsky/anyword) |
+| **anyaround** | region / language / script / currency / calendar names + flags | `Intl.DisplayNames` | [demo](https://anyfamily.site/anyaround) · [docs](https://anyfamily.site/docs/anyaround) · [npm](https://www.npmjs.com/package/anyaround) · [repo](https://github.com/kirilinsky/anyaround) |
+| **anyamount** | numbers, currency, units | `Intl.NumberFormat` | [demo](https://anyfamily.site/anyamount) · [docs](https://anyfamily.site/docs/anyamount) · [npm](https://www.npmjs.com/package/anyamount) · [repo](https://github.com/kirilinsky/anyamount) |
+| **anywhen** | dates, times, relative phrasing | `Intl.DateTimeFormat` | [demo](https://anyfamily.site/anywhen) · [docs](https://anyfamily.site/docs/anywhen) · [npm](https://www.npmjs.com/package/anywhen) · [repo](https://github.com/kirilinsky/anywhen) |
+| **anymany** | string lists | `Intl.ListFormat` | [demo](https://anyfamily.site/anymany) · [docs](https://anyfamily.site/docs/anymany) · [npm](https://www.npmjs.com/package/anymany) · [repo](https://github.com/kirilinsky/anymany) |
+| **anylong** | durations | `Intl.DurationFormat` | [demo](https://anyfamily.site/anylong) · [docs](https://anyfamily.site/docs/anylong) · [npm](https://www.npmjs.com/package/anylong) · [repo](https://github.com/kirilinsky/anylong) |
+| **anyplural** | cardinal / ordinal plurals | `Intl.PluralRules` | [demo](https://anyfamily.site/anyplural) · [docs](https://anyfamily.site/docs/anyplural) · [npm](https://www.npmjs.com/package/anyplural) · [repo](https://github.com/kirilinsky/anyplural) |
+| **anyword** | words / graphemes / sentences, count + truncate | `Intl.Segmenter` | [demo](https://anyfamily.site/anyword) · [docs](https://anyfamily.site/docs/anyword) · [npm](https://www.npmjs.com/package/anyword) · [repo](https://github.com/kirilinsky/anyword) |
 
 ## how it works
 

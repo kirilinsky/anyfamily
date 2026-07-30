@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   anywhen,
   anyamount,
+  anyamountSymbol,
   anymany,
   anyaround,
   anylong,
@@ -36,6 +37,10 @@ describe("anyfamily", () => {
     expect(
       anyamount(1999, { mode: "currency", currency: "EUR", locale: "en" }),
     ).toBe("€1,999.00");
+  });
+
+  it("anyamountSymbol resolves a bare currency symbol", () => {
+    expect(anyamountSymbol("EUR", { locale: "en" })).toBe("€");
   });
 
   it("anymany joins lists", () => {

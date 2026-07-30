@@ -1,9 +1,12 @@
+import Link from "next/link";
+
 import { FamilyLogo } from "@/components/family-logo";
 import { InstallChip } from "@/components/install-chip";
 import { SectionNav } from "@/components/section-nav";
 import { Tag } from "@/components/ui";
 import versions from "@/data/versions.json";
 import colors from "@/data/colors.json";
+import { BASE_URL, PACKAGES, demoHref, type Pkg } from "@/lib/packages";
 import {
   CodeAnimation,
   type Preset,
@@ -18,120 +21,23 @@ import {
   REACT_PRESETS,
 } from "@/components/examples";
 
-type Pkg = {
-  id: string;
-  suffix: string;
-  accent: string;
-  tagline: string;
-  description: string;
-  tags: string[];
-  npm: string;
-  site: string;
-  github: string;
-  presets: Preset[];
-  navLabel: string;
+/**
+ * Demo presets live in a client module, so they are joined onto the shared
+ * registry here by id rather than stored in `lib/packages.ts` (which server
+ * code — metadata, sitemap — imports too).
+ */
+const PRESETS_BY_ID: Record<string, Preset[]> = {
+  anywhen: WHEN_PRESETS,
+  anyamount: AMOUNT_PRESETS,
+  anymany: MANY_PRESETS,
+  anyaround: AROUND_PRESETS,
+  anylong: LONG_PRESETS,
+  anyplural: PLURAL_PRESETS,
+  anyword: WORD_PRESETS,
 };
 
-const PACKAGES: Pkg[] = [
-  {
-    id: "anywhen",
-    suffix: "when",
-    accent: colors.anywhen,
-    tagline: "dates & times",
-    description:
-      "Dates and times into localized strings and relative phrasing. Built on native Intl, no data files.",
-    tags: ["dates", "datetimeformat", "relative"],
-    npm: "https://www.npmjs.com/package/anywhen",
-    site: "https://anywhen-kappa.vercel.app",
-    github: "https://github.com/kirilinsky/anywhen",
-    presets: WHEN_PRESETS,
-    navLabel: "a | w",
-  },
-  {
-    id: "anyamount",
-    suffix: "amount",
-    accent: colors.anyamount,
-    tagline: "money & numbers",
-    description:
-      "Numbers, currency, and units into localized, human-readable strings. One function, three modes, any locale.",
-    tags: ["currency", "numberformat", "units"],
-    npm: "https://www.npmjs.com/package/anyamount",
-    site: "https://anyamount.vercel.app",
-    github: "https://github.com/kirilinsky/anyamount",
-    presets: AMOUNT_PRESETS,
-    navLabel: "a | a",
-  },
-  {
-    id: "anymany",
-    suffix: "many",
-    accent: colors.anymany,
-    tagline: "lists",
-    description:
-      "String arrays into localized lists — sort and join in any locale with the native list formatter.",
-    tags: ["lists", "listformat", "sort"],
-    npm: "https://www.npmjs.com/package/anymany",
-    site: "https://anymany.vercel.app",
-    github: "https://github.com/kirilinsky/anymany",
-    presets: MANY_PRESETS,
-    navLabel: "a | m",
-  },
-  {
-    id: "anyaround",
-    suffix: "around",
-    accent: colors.anyaround,
-    tagline: "names & flags",
-    description:
-      "Region, language, script, currency, and calendar codes into their localized names — decorated with country flags. Any Intl locale.",
-    tags: ["flags", "displaynames", "ssr"],
-    npm: "https://www.npmjs.com/package/anyaround",
-    site: "https://anyaround.vercel.app",
-    github: "https://github.com/kirilinsky/anyaround",
-    presets: AROUND_PRESETS,
-    navLabel: "a | r",
-  },
-  {
-    id: "anylong",
-    suffix: "long",
-    accent: colors.anylong,
-    tagline: "durations",
-    description:
-      "Any duration in — a number, two Dates, an ISO 8601 string, shorthand, or a duration record — into a localized string. One function over Intl.DurationFormat.",
-    tags: ["duration", "durationformat", "elapsed"],
-    npm: "https://www.npmjs.com/package/anylong",
-    site: "https://anylong.vercel.app",
-    github: "https://github.com/kirilinsky/anylong",
-    navLabel: "a | l",
-    presets: LONG_PRESETS,
-  },
-  {
-    id: "anyplural",
-    suffix: "plural",
-    accent: colors.anyplural,
-    tagline: "plurals",
-    description:
-      "Any count into its correct plural form — cardinal or ordinal, in any locale. One function over Intl.PluralRules, no rule tables.",
-    tags: ["plurals", "pluralrules", "ordinal"],
-    npm: "https://www.npmjs.com/package/anyplural",
-    site: "https://anyplural.vercel.app",
-    github: "https://github.com/kirilinsky/anyplural",
-    presets: PLURAL_PRESETS,
-    navLabel: "a | p",
-  },
-  {
-    id: "anyword",
-    suffix: "word",
-    accent: colors.anyword,
-    tagline: "words & graphemes",
-    description:
-      "Text into locale-correct words, graphemes and sentences — count and truncate without ripping an emoji in half. One function over Intl.Segmenter.",
-    tags: ["segmenter", "grapheme", "truncate"],
-    npm: "https://www.npmjs.com/package/anyword",
-    site: "https://anyword.vercel.app",
-    github: "https://github.com/kirilinsky/anyword",
-    presets: WORD_PRESETS,
-    navLabel: "a | wd",
-  },
-];
+const LINK_CLASS =
+  "rounded-lg border bg-white/[0.03] px-2.5 py-1 font-mono text-[11px] lowercase tracking-wide text-white/50 transition-colors hover:bg-white/[0.06] hover:text-white/90";
 
 function ExtLink({
   href,
@@ -148,22 +54,40 @@ function ExtLink({
       target="_blank"
       rel="noopener noreferrer"
       style={{ borderColor: `${accent}44` }}
-      className="rounded-lg border bg-white/[0.03] px-2.5 py-1 font-mono text-[11px] lowercase tracking-wide text-white/50 transition-colors hover:bg-white/[0.06] hover:text-white/90"
+      className={LINK_CLASS}
     >
       {label} ↗
     </a>
   );
 }
 
-const BASE = "https://anyfamily.site";
+/**
+ * The demo button. Ported packages route inside this app; the rest still point
+ * at their standalone site and keep the external arrow until they move.
+ */
+function DemoLink({ pkg }: { pkg: Pkg }) {
+  const href = demoHref(pkg);
+  if (pkg.legacySite) {
+    return <ExtLink href={href} label="demo" accent={pkg.accent} />;
+  }
+  return (
+    <Link
+      href={href}
+      style={{ borderColor: `${pkg.accent}44` }}
+      className={LINK_CLASS}
+    >
+      demo →
+    </Link>
+  );
+}
 
 const jsonLd = {
   "@context": "https://schema.org",
   "@graph": [
     {
       "@type": "WebSite",
-      "@id": `${BASE}/#website`,
-      url: BASE,
+      "@id": `${BASE_URL}/#website`,
+      url: BASE_URL,
       name: "anyfamily",
       description:
         "The any* family: micro, zero-dependency JavaScript tools built on native Intl.",
@@ -181,7 +105,7 @@ const jsonLd = {
         "The whole any* family in one install — anywhen, anyamount, anymany, anyaround, anylong, anyplural and anyword behind a single import.",
       applicationCategory: "DeveloperApplication",
       operatingSystem: "Any",
-      url: BASE,
+      url: BASE_URL,
       softwareVersion:
         (versions as Record<string, string>)["anyfamily"] || undefined,
       programmingLanguage: "TypeScript",
@@ -195,7 +119,7 @@ const jsonLd = {
         "React hooks for the any* family — useAnywhen, useAnyamount, useAnymany, useAnyaround, useAnylong, useAnyplural and useAnyword, sharing one locale provider.",
       applicationCategory: "DeveloperApplication",
       operatingSystem: "Any",
-      url: BASE,
+      url: BASE_URL,
       softwareVersion:
         (versions as Record<string, string>)["anyfamily-react"] || undefined,
       programmingLanguage: "TypeScript",
@@ -214,7 +138,7 @@ const jsonLd = {
           description: p.description,
           applicationCategory: "DeveloperApplication",
           operatingSystem: "Any",
-          url: p.site,
+          url: p.legacySite ?? `${BASE_URL}/${p.id}`,
           softwareVersion:
             (versions as Record<string, string>)[p.id] || undefined,
           programmingLanguage: "TypeScript",
@@ -305,7 +229,7 @@ export default function Home() {
                 <InstallChip command={`npm i ${p.id}`} accent={p.accent} />
               </div>
               <div className="mt-1 hidden flex-wrap items-center gap-2 md:flex">
-                <ExtLink href={p.site} label="demo" accent={p.accent} />
+                <DemoLink pkg={p} />
                 <ExtLink href={p.npm} label="npm" accent={p.accent} />
                 <ExtLink href={p.github} label="github" accent={p.accent} />
               </div>
@@ -336,9 +260,9 @@ export default function Home() {
                   ))}
                 </div>
               </div>
-              <CodeAnimation fn={p.id} accent={p.accent} presets={p.presets} />
+              <CodeAnimation fn={p.id} accent={p.accent} presets={PRESETS_BY_ID[p.id]} />
               <div className="mt-2 flex flex-wrap items-center gap-2 md:hidden">
-                <ExtLink href={p.site} label="demo" accent={p.accent} />
+                <DemoLink pkg={p} />
                 <ExtLink href={p.npm} label="npm" accent={p.accent} />
                 <ExtLink href={p.github} label="github" accent={p.accent} />
               </div>

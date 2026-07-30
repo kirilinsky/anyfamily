@@ -9,7 +9,12 @@ import {
   type ReactNode,
 } from "react";
 
-import { anyamount, type AnyamountOptions } from "anyamount";
+import {
+  anyamount,
+  anyamountSymbol,
+  type AnyamountOptions,
+  type SymbolOptions as AnyamountSymbolOptions,
+} from "anyamount";
 import { anymany, type AnymanyOptions } from "anymany";
 import { anyaround, type AnyaroundOptions } from "anyaround";
 import {
@@ -30,6 +35,7 @@ import {
 } from "anyword";
 
 export type { AnyamountOptions } from "anyamount";
+export type { AnyamountSymbolOptions };
 export type { AnymanyOptions } from "anymany";
 export type { AnyaroundOptions } from "anyaround";
 export type { AnylongOptions, DurationInput } from "anylong";
@@ -119,6 +125,15 @@ export function useAnywhen(date: DateInput, options?: UseAnywhenOptions): string
 export function useAnyamount(value: number, options?: AnyamountOptions): string {
   const locale = useAnyfamilyLocale();
   return anyamount(value, withLocale(options, locale));
+}
+
+/** Like `anyamountSymbol`, reading `locale` from the nearest {@linkcode AnyfamilyProvider} when not set explicitly. */
+export function useAnyamountSymbol(
+  currency: string,
+  options?: AnyamountSymbolOptions,
+): string {
+  const locale = useAnyfamilyLocale();
+  return anyamountSymbol(currency, withLocale(options, locale));
 }
 
 /** Like `anymany`, reading `locale` from the nearest {@linkcode AnyfamilyProvider} when not set explicitly. */

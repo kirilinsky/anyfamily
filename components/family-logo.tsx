@@ -3,17 +3,21 @@
  * The cream italic "any" stays fixed; the mono suffix takes the package's
  * accent color. `mark` swaps the divider: "bar" (default) for per-package
  * logos, "star" for the anyfamily hero flourish (the "any*" asterisk).
+ * `animate` staggers the three pieces in on mount — used on the demo routes,
+ * where the wordmark is the page's opening beat rather than a section label.
  */
 export function FamilyLogo({
   suffix,
   accent,
   className,
   mark = "bar",
+  animate = false,
 }: {
   suffix: string;
   accent: string;
   className?: string;
   mark?: "bar" | "star";
+  animate?: boolean;
 }) {
   const CHAR = 56; // approx mono glyph advance at fontSize 100
   const suffixLen = suffix.length * CHAR;
@@ -43,6 +47,7 @@ export function FamilyLogo({
         fill="#e9e4d4"
         textLength="180"
         lengthAdjust="spacingAndGlyphs"
+        className={animate ? "logo-intro-any" : undefined}
       >
         any
       </text>
@@ -55,11 +60,20 @@ export function FamilyLogo({
           fontWeight="800"
           fontSize="64"
           fill="#c4b5fd"
+          className={animate ? "logo-intro-mark" : undefined}
         >
           *
         </text>
       ) : (
-        <rect x="208" y="32" width="4" height="60" rx="1" fill={accent} />
+        <rect
+          x="208"
+          y="32"
+          width="4"
+          height="60"
+          rx="1"
+          fill={accent}
+          className={animate ? "logo-intro-mark" : undefined}
+        />
       )}
 
       <text
@@ -71,6 +85,7 @@ export function FamilyLogo({
         fill={accent}
         textLength={suffixLen}
         lengthAdjust="spacingAndGlyphs"
+        className={animate ? "logo-intro-suffix" : undefined}
       >
         {suffix}
       </text>

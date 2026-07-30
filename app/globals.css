@@ -8,6 +8,10 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  /* Resolved per element, not at build time — a route sets `--accent` on its
+     wrapper and every `text-accent` / `border-accent` / `accent-accent` under
+     it picks up that package's color. */
+  --color-accent: var(--accent);
 }
 
 body {
@@ -32,4 +36,64 @@ body {
 
 .animate-scroll-cue-dot {
   animation: scroll-cue-dot 1.8s ease-in-out infinite;
+}
+
+/* Terminal caret that settles into a blink once the typewriter finishes. */
+@keyframes caret-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+.animate-caret-blink {
+  animation: caret-blink 1s step-end infinite;
+}
+
+/* Wordmark intro on the demo routes: "any", then the divider, then the mono
+   suffix. Lives here rather than in a <style> inside each SVG — an SVG style
+   block in an HTML document is global anyway, so one copy avoids several
+   instances redeclaring the same keyframes. */
+@keyframes logo-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.logo-intro-any,
+.logo-intro-mark,
+.logo-intro-suffix {
+  opacity: 0;
+  transform-box: fill-box;
+  animation: logo-fade-up 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.logo-intro-any {
+  animation-delay: 0.05s;
+}
+
+.logo-intro-mark {
+  animation-duration: 0.4s;
+  animation-delay: 0.25s;
+}
+
+.logo-intro-suffix {
+  animation-delay: 0.4s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .logo-intro-any,
+  .logo-intro-mark,
+  .logo-intro-suffix {
+    animation: none;
+    opacity: 1;
+  }
 }

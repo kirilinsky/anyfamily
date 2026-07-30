@@ -11,7 +11,12 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://anyfamily.site"),
-  title: "anyfamily — micro Intl tools for any locale",
+  // Per-package demo and docs routes set their own title; the template keeps
+  // the family name on the end of each without repeating it in every route.
+  title: {
+    default: "anyfamily — micro Intl tools for any locale",
+    template: "%s · anyfamily",
+  },
   description:
     "The any* family: seven micro, zero-dependency JavaScript tools built on native Intl. Names & flags, money, dates, durations, lists, plurals, and words — in any locale.",
   keywords: [

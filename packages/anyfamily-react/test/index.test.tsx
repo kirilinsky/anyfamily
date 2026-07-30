@@ -10,6 +10,7 @@ import {
   useAnyfamilyLocale,
   useAnylong,
   useAnyamount,
+  useAnyamountSymbol,
   useAnymany,
   useAnyplural,
   useAnywhen,
@@ -58,6 +59,11 @@ describe("hooks wrap their underlying formatters", () => {
   it("useAnymany joins lists", () => {
     const { result } = renderHook(() => useAnymany(["a", "b", "c"], { locale: "en" }));
     expect(result.current).toBe("a, b, and c");
+  });
+
+  it("useAnyamountSymbol resolves a bare currency symbol", () => {
+    const { result } = renderHook(() => useAnyamountSymbol("EUR", { locale: "en" }));
+    expect(result.current).toBe("€");
   });
 
   it("useAnyaround resolves region names", () => {
