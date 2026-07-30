@@ -13,6 +13,7 @@ import {
   MANY_PRESETS,
   LONG_PRESETS,
   PLURAL_PRESETS,
+  WORD_PRESETS,
   FAMILY_PRESETS,
   REACT_PRESETS,
 } from "@/components/examples";
@@ -116,6 +117,20 @@ const PACKAGES: Pkg[] = [
     presets: PLURAL_PRESETS,
     navLabel: "a | p",
   },
+  {
+    id: "anyword",
+    suffix: "word",
+    accent: colors.anyword,
+    tagline: "words & graphemes",
+    description:
+      "Text into locale-correct words, graphemes and sentences — count and truncate without ripping an emoji in half. One function over Intl.Segmenter.",
+    tags: ["segmenter", "grapheme", "truncate"],
+    npm: "https://www.npmjs.com/package/anyword",
+    site: "https://anyword.vercel.app",
+    github: "https://github.com/kirilinsky/anyword",
+    presets: WORD_PRESETS,
+    navLabel: "a | wd",
+  },
 ];
 
 function ExtLink({
@@ -163,7 +178,7 @@ const jsonLd = {
       "@type": "SoftwareApplication",
       name: "anyfamily",
       description:
-        "The whole any* family in one install — anywhen, anyamount, anymany, anyaround, anylong and anyplural behind a single import.",
+        "The whole any* family in one install — anywhen, anyamount, anymany, anyaround, anylong, anyplural and anyword behind a single import.",
       applicationCategory: "DeveloperApplication",
       operatingSystem: "Any",
       url: BASE,
@@ -177,7 +192,7 @@ const jsonLd = {
       "@type": "SoftwareApplication",
       name: "anyfamily-react",
       description:
-        "React hooks for the any* family — useAnywhen, useAnyamount, useAnymany, useAnyaround, useAnylong and useAnyplural, sharing one locale provider.",
+        "React hooks for the any* family — useAnywhen, useAnyamount, useAnymany, useAnyaround, useAnylong, useAnyplural and useAnyword, sharing one locale provider.",
       applicationCategory: "DeveloperApplication",
       operatingSystem: "Any",
       url: BASE,
@@ -256,8 +271,8 @@ export default function Home() {
           className="h-auto w-56 sm:w-[26rem] lg:w-[32rem]"
         />
         <p className="mt-4 max-w-xl text-sm text-white/45 sm:mt-6 sm:text-base">
-          Six formatters, zero dependencies — because the dependency is your
-          browser. Dates, money, lists, names, durations, plurals:{" "}
+          Seven tools, zero dependencies — because the dependency is your
+          browser. Dates, money, lists, names, durations, plurals, words:{" "}
           <span className="text-white/70">one function each, any locale</span>.
         </p>
         <div className="mt-10 flex h-9 w-5 justify-center rounded-full border border-white/15 pt-2 sm:mt-16">
@@ -341,9 +356,9 @@ export default function Home() {
           {/* Left: identity */}
           <div className="flex flex-col items-start gap-3 md:gap-5">
             <h2 className="sr-only">
-              anyfamily — all six any* packages in one install: anywhen,
-              anyamount, anymany, anyaround, anylong and anyplural behind a
-              single import.
+              anyfamily — all seven any* packages in one install: anywhen,
+              anyamount, anymany, anyaround, anylong, anyplural and anyword
+              behind a single import.
             </h2>
             <FamilyLogo
               suffix="family"
@@ -351,7 +366,7 @@ export default function Home() {
               className="h-auto w-32 sm:w-40 md:w-48"
             />
             <p className="max-w-sm text-sm leading-relaxed text-white/55">
-              One install, all six — named re-exports, fully typed,
+              One install, all seven — named re-exports, fully typed,
               tree-shakeable.
             </p>
             <div className="mt-1">
@@ -423,8 +438,8 @@ export default function Home() {
           <div className="flex flex-col items-start gap-3 md:gap-5">
             <h2 className="sr-only">
               anyfamily-react — React hooks for the any* family: useAnywhen,
-              useAnyamount, useAnymany, useAnyaround, useAnylong and
-              useAnyplural, sharing one locale provider.
+              useAnyamount, useAnymany, useAnyaround, useAnylong, useAnyplural
+              and useAnyword, sharing one locale provider.
             </h2>
             <FamilyLogo
               suffix="react"

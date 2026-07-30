@@ -11,7 +11,16 @@ const PKGS = [
   { name: "anyaround", tagline: "names & flags", accent: "#be2740" },
   { name: "anylong", tagline: "durations", accent: "#2cc2c9" },
   { name: "anyplural", tagline: "plurals", accent: "#e879c5" },
+  { name: "anyword", tagline: "words & graphemes", accent: "#c9f53c" },
 ];
+
+// Seven cards wrap unevenly on their own, so the rows are split by hand into a
+// centered 4 / 3 pyramid. CARD_W is fixed to keep the columns aligned; it holds
+// the widest content (the "anyamount" name row, "words & graphemes" tagline)
+// with room to spare, and four of them plus gaps stay inside ROW_MAX.
+const CARD_W = 232;
+const ROW_MAX = 1040;
+const ROWS = [PKGS.slice(0, 4), PKGS.slice(4)];
 
 export default function OpengraphImage() {
   return new ImageResponse(
@@ -44,42 +53,56 @@ export default function OpengraphImage() {
         <div
           style={{
             display: "flex",
-            flexWrap: "wrap",
-            justifyContent: "center",
-            maxWidth: 1000,
-            marginTop: 48,
+            flexDirection: "column",
+            alignItems: "center",
+            marginTop: 44,
             gap: 18,
           }}
         >
-          {PKGS.map((p) => (
+          {ROWS.map((row, i) => (
             <div
-              key={p.name}
+              key={i}
               style={{
                 display: "flex",
-                flexDirection: "column",
-                alignItems: "flex-start",
-                padding: "20px 26px",
-                borderRadius: 18,
-                background: "#ffffff08",
-                border: `1px solid ${p.accent}55`,
+                justifyContent: "center",
+                maxWidth: ROW_MAX,
+                gap: 18,
               }}
             >
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              {row.map((p) => (
                 <div
+                  key={p.name}
                   style={{
-                    width: 12,
-                    height: 12,
-                    borderRadius: 12,
-                    background: p.accent,
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "flex-start",
+                    width: CARD_W,
+                    padding: "20px 26px",
+                    borderRadius: 18,
+                    background: "#ffffff08",
+                    border: `1px solid ${p.accent}55`,
                   }}
-                />
-                <span style={{ fontSize: 26, fontWeight: 700, color: "#ffffff" }}>
-                  {p.name}
-                </span>
-              </div>
-              <span style={{ marginTop: 8, fontSize: 18, color: "#8a8590" }}>
-                {p.tagline}
-              </span>
+                >
+                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                    <div
+                      style={{
+                        width: 12,
+                        height: 12,
+                        borderRadius: 12,
+                        background: p.accent,
+                      }}
+                    />
+                    <span
+                      style={{ fontSize: 26, fontWeight: 700, color: "#ffffff" }}
+                    >
+                      {p.name}
+                    </span>
+                  </div>
+                  <span style={{ marginTop: 8, fontSize: 18, color: "#8a8590" }}>
+                    {p.tagline}
+                  </span>
+                </div>
+              ))}
             </div>
           ))}
         </div>

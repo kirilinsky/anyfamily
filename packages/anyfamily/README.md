@@ -1,16 +1,16 @@
 # a\*
 
-[![anyfamily — anywhen · anyamount · anymany · anyaround · anylong · anyplural](https://anyfamily.site/opengraph-image?v6)](https://anyfamily.site)
+[![anyfamily — anywhen · anyamount · anymany · anyaround · anylong · anyplural · anyword](https://anyfamily.site/opengraph-image?v7)](https://anyfamily.site)
 
-**anyfamily — install one, get six.** The whole **any\*** family — micro `Intl`-powered
-formatters, each with zero dependencies of its own — behind a single import.
+**anyfamily — install one, get seven.** The whole **any\*** family — micro `Intl`-powered
+tools, each with zero dependencies of its own — behind a single import.
 
 ```bash
 npm install anyfamily
 ```
 
 ```ts
-import { anywhen, anyamount, anymany, anyaround, anylong, anyplural } from "anyfamily";
+import { anywhen, anyamount, anymany, anyaround, anylong, anyplural, anyword } from "anyfamily";
 ```
 
 ESM + CJS, fully typed, `sideEffects: false` — bundlers tree-shake away
@@ -81,20 +81,36 @@ anyplural(5, { one: "item", other: "items" }, { locale: "en" });
 // "5 items"
 ```
 
+## anyword — words, graphemes & sentences
+
+Locale-correct text segmentation over `Intl.Segmenter`: finds words in scripts
+without spaces, counts the characters users actually see, and truncates without
+ripping an emoji in half. [npm](https://www.npmjs.com/package/anyword)
+
+```ts
+anyword("don't stop 世界");                       // ["don't", "stop", "世界"]
+anywordCount("👨‍👩‍👧", { by: "grapheme" });          // 1  ("👨‍👩‍👧".length is 8)
+anywordTruncate("héllo 👨‍👩‍👧", 5, { ellipsis: "…" }); // "héllo…"
+```
+
+`anywordSupported` mirrors anyword's own `supported` flag — `Intl.Segmenter` is
+missing on older runtimes, so branch on it if you target them.
+
 ## types
 
-Every public type from all six packages is re-exported. Names that collide
-across packages (`Mode`, `Style`, `SmartOptions`, `CurrencyOptions`) carry
-their package prefix — `AnywhenMode`, `AnyamountStyle`,
-`AnyaroundCurrencyOptions`, … `Locale` is structurally identical in
-anywhen/anyamount/anymany/anyaround/anylong/anyplural and exported once.
+Every public type from all seven packages is re-exported. Names that collide
+across packages (`Mode`, `Style`, `SmartOptions`, `CurrencyOptions`,
+`supported`) carry their package prefix — `AnywhenMode`, `AnyamountStyle`,
+`AnyaroundCurrencyOptions`, `anywordSupported`, … `Locale` is structurally
+identical in anywhen/anyamount/anymany/anyaround/anylong/anyplural/anyword and
+exported once.
 
 ## react
 
 Using React? [**anyfamily-react**](https://www.npmjs.com/package/anyfamily-react)
-wraps every formatter as a hook — `useAnywhen`, `useAnyamount`, `useAnymany`,
-`useAnyaround`, `useAnylong`, `useAnyplural` — sharing one locale via
-`AnyfamilyProvider`, with relative time that keeps itself fresh.
+wraps every package as a hook — `useAnywhen`, `useAnyamount`, `useAnymany`,
+`useAnyaround`, `useAnylong`, `useAnyplural`, `useAnyword` — sharing one locale
+via `AnyfamilyProvider`, with relative time that keeps itself fresh.
 
 ```bash
 npm install anyfamily-react

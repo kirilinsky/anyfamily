@@ -7,16 +7,21 @@ import {
   anylong,
   anylongSupported,
   anyplural,
+  anyword,
+  anywordCount,
+  anywordTruncate,
+  anywordSupported,
 } from "../src/index";
 
 describe("anyfamily", () => {
-  it("re-exports all six as functions", () => {
+  it("re-exports all seven as functions", () => {
     expect(typeof anywhen).toBe("function");
     expect(typeof anyamount).toBe("function");
     expect(typeof anymany).toBe("function");
     expect(typeof anyaround).toBe("function");
     expect(typeof anylong).toBe("function");
     expect(typeof anyplural).toBe("function");
+    expect(typeof anyword).toBe("function");
   });
 
   it("anywhen formats relative time", () => {
@@ -49,5 +54,17 @@ describe("anyfamily", () => {
     expect(anyplural(5, { one: "item", other: "items" }, { locale: "en" })).toBe(
       "5 items",
     );
+  });
+
+  it.skipIf(!anywordSupported)("anyword segments words without spaces", () => {
+    expect(anyword("世界 test", { locale: "en" })).toEqual(["世界", "test"]);
+  });
+
+  it.skipIf(!anywordSupported)("anywordCount counts graphemes, not code units", () => {
+    expect(anywordCount("👨‍👩‍👧", { by: "grapheme" })).toBe(1);
+  });
+
+  it.skipIf(!anywordSupported)("anywordTruncate cuts on a grapheme boundary", () => {
+    expect(anywordTruncate("héllo 👨‍👩‍👧", 5, { ellipsis: "…" })).toBe("héllo…");
   });
 });

@@ -1,14 +1,15 @@
 # anyfamily-react
 
-[![anyfamily — anywhen · anyamount · anymany · anyaround · anylong · anyplural](https://anyfamily.site/opengraph-image?v6)](https://anyfamily.site)
+[![anyfamily — anywhen · anyamount · anymany · anyaround · anylong · anyplural · anyword](https://anyfamily.site/opengraph-image?v7)](https://anyfamily.site)
 
 React hooks for the **any\*** family:
 [anywhen](https://www.npmjs.com/package/anywhen),
 [anyamount](https://www.npmjs.com/package/anyamount),
 [anymany](https://www.npmjs.com/package/anymany),
 [anyaround](https://www.npmjs.com/package/anyaround),
-[anylong](https://www.npmjs.com/package/anylong) and
-[anyplural](https://www.npmjs.com/package/anyplural) as hooks, sharing one
+[anylong](https://www.npmjs.com/package/anylong),
+[anyplural](https://www.npmjs.com/package/anyplural) and
+[anyword](https://www.npmjs.com/package/anyword) as hooks, sharing one
 locale and keeping relative time fresh without hand-rolled `setInterval`
 plumbing.
 
@@ -61,6 +62,13 @@ function Post({ publishedAt, price }: { publishedAt: Date; price: number }) {
 - `useAnylong(input, options?)` — see `anylong`. `anylongSupported` is
   re-exported for the same feature-detection anylong itself provides.
 - `useAnyplural(count, forms, options?)` — see `anyplural`.
+- `useAnyword(text, options?)` — see `anyword`. Returns `string[]`, memoized on
+  the text and the options' contents, so the array keeps its reference between
+  renders and is safe as an effect dependency.
+- `useAnywordCount(text, options?)` — see `anywordCount`.
+- `useAnywordTruncate(text, limit, options?)` — see `anywordTruncate`.
+  `anywordSupported` is re-exported for feature-detecting `Intl.Segmenter`,
+  which all three anyword hooks require.
 
 `useAnyfamilyLocale()` reads the locale from the nearest provider directly,
 for anything not covered by the hooks above.

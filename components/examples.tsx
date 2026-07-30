@@ -7,6 +7,7 @@ import { anywhen } from "anywhen";
 import { anymany } from "anymany";
 import { anylong } from "anylong";
 import { anyplural } from "anyplural";
+import { anyword, anywordCount, anywordTruncate } from "anyword";
 
 /**
  * A canned demo. `call` is the source shown typing out; `run` invokes the real
@@ -72,6 +73,20 @@ export const PLURAL_PRESETS: Preset[] = [
   { call: `anyplural(12480, { one: "email", other: "emails" })`, run: () => anyplural(12480, { one: "email", other: "emails" }, { locale: "en" }) },
 ];
 
+// anyword returns arrays, not strings — render them as the array literal a
+// reader would have typed, so the segment boundaries stay visible.
+const arr = (segments: string[]) =>
+  `[${segments.map((s) => JSON.stringify(s)).join(", ")}]`;
+
+export const WORD_PRESETS: Preset[] = [
+  { call: `anyword("don't stop 世界")`, run: () => arr(anyword("don't stop 世界", { locale: "en" })) },
+  { call: `anyword("สวัสดีตอนเช้า", { locale: "th" })`, run: () => arr(anyword("สวัสดีตอนเช้า", { locale: "th" })) },
+  { call: `anyword("👨‍👩‍👧‍👦!", { by: "grapheme" })`, run: () => arr(anyword("👨‍👩‍👧‍👦!", { by: "grapheme", locale: "en" })) },
+  { call: `anyword("Hi. Go now!", { by: "sentence" })`, run: () => arr(anyword("Hi. Go now!", { by: "sentence", locale: "en" })) },
+  { fn: `anywordCount`, call: `anywordCount("👨‍👩‍👧‍👦", { by: "grapheme" })`, run: () => String(anywordCount("👨‍👩‍👧‍👦", { by: "grapheme", locale: "en" })) },
+  { fn: `anywordTruncate`, call: `anywordTruncate("héllo 👨‍👩‍👧", 5, { ellipsis: "…" })`, run: () => anywordTruncate("héllo 👨‍👩‍👧", 5, { ellipsis: "…", locale: "en" }) },
+];
+
 // Meta-package tour: cycles one import + call per any* package, all from
 // "anyfamily" — `fn` overrides the accent-colored prefix per preset since it
 // varies (the import clause), unlike the single-package demos above.
@@ -105,6 +120,11 @@ export const FAMILY_PRESETS: Preset[] = [
     fn: `import { anyplural } from "anyfamily";`,
     call: `import { anyplural } from "anyfamily";\n\nanyplural(5, { one: "item", other: "items" })`,
     run: () => anyplural(5, { one: "item", other: "items" }, { locale: "en" }),
+  },
+  {
+    fn: `import { anyword } from "anyfamily";`,
+    call: `import { anyword } from "anyfamily";\n\nanyword("don't stop 世界")`,
+    run: () => arr(anyword("don't stop 世界", { locale: "en" })),
   },
 ];
 
@@ -141,6 +161,11 @@ export const REACT_PRESETS: Preset[] = [
     fn: `useAnyplural`,
     call: `useAnyplural(5, { one: "item", other: "items" })`,
     run: () => anyplural(5, { one: "item", other: "items" }, { locale: "en" }),
+  },
+  {
+    fn: `useAnyword`,
+    call: `useAnyword("don't stop 世界")`,
+    run: () => arr(anyword("don't stop 世界", { locale: "en" })),
   },
 ];
 

@@ -1,11 +1,11 @@
 /**
  * anyfamily — the whole any* family in one install.
  *
- * Named re-exports of anywhen, anyamount, anymany, anyaround, anylong and
- * anyplural, plus every public type from each. Types whose names collide
- * across packages (`Mode`, `Style`, `SmartOptions`, `CurrencyOptions`) are
- * aliased with their package prefix; `Locale` is structurally identical
- * across the six Intl-formatter packages, so it is exported once.
+ * Named re-exports of anywhen, anyamount, anymany, anyaround, anylong,
+ * anyplural and anyword, plus every public type from each. Types whose names
+ * collide across packages (`Mode`, `Style`, `SmartOptions`, `CurrencyOptions`,
+ * `supported`) are aliased with their package prefix; `Locale` is structurally
+ * identical across the seven Intl packages, so it is exported once.
  */
 
 // anywhen — dates, times, relative phrasing (Intl.DateTimeFormat)
@@ -76,3 +76,18 @@ export type {
   PluralCategory,
   PluralType,
 } from "anyplural";
+
+// anyword — words / graphemes / sentences (Intl.Segmenter)
+export {
+  anyword,
+  anywordCount,
+  anywordParts,
+  anywordTruncate,
+  supported as anywordSupported,
+} from "anyword";
+export type {
+  AnywordOptions,
+  AnywordPart,
+  AnywordTruncateOptions,
+  Granularity,
+} from "anyword";

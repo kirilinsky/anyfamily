@@ -29,6 +29,9 @@ importers:
       anywhen:
         specifier: ^1.0.3
         version: 1.0.3
+      anyword:
+        specifier: ^1.0.0
+        version: 1.0.0
       next:
         specifier: 16.2.1
         version: 16.2.1(@babel/core@7.29.7)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -824,6 +827,10 @@ packages:
 
   anywhen@1.0.3:
     resolution: {integrity: sha512-0m1bvmPqWy1aIxnAMs7spsX4rJzp7ORlP1QkOrZpXHXOMHDs8xj7Zmpi3UrEowbLgJpwaQFdAPBssPDlIHyrgw==}
+    engines: {node: '>=18'}
+
+  anyword@1.0.0:
+    resolution: {integrity: sha512-MpYSGoRSwyL/yuyS1gGniLKHeHWMajCIPiM1X09CLvCUaDYglwcAyKuVBXGCm/a6vwxjbnRS13nkayOE3LqrTg==}
     engines: {node: '>=18'}
 
   argparse@2.0.1:
@@ -2706,6 +2713,8 @@ snapshots:
   anyplural@1.0.0: {}
 
   anywhen@1.0.3: {}
+
+  anyword@1.0.0: {}
 
   argparse@2.0.1: {}
 

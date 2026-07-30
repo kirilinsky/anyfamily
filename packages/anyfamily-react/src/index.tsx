@@ -4,6 +4,7 @@ import {
   createContext,
   useContext,
   useEffect,
+  useMemo,
   useState,
   type ReactNode,
 } from "react";
@@ -19,6 +20,14 @@ import {
 } from "anylong";
 import { anywhen, type AnywhenOptions, type DateInput, type Locale } from "anywhen";
 import { anyplural, type AnypluralOptions, type Forms } from "anyplural";
+import {
+  anyword,
+  anywordCount,
+  anywordTruncate,
+  supported as anywordSupported,
+  type AnywordOptions,
+  type AnywordTruncateOptions,
+} from "anyword";
 
 export type { AnyamountOptions } from "anyamount";
 export type { AnymanyOptions } from "anymany";
@@ -26,7 +35,8 @@ export type { AnyaroundOptions } from "anyaround";
 export type { AnylongOptions, DurationInput } from "anylong";
 export type { AnywhenOptions, DateInput } from "anywhen";
 export type { AnypluralOptions, Forms } from "anyplural";
-export { anylongSupported };
+export type { AnywordOptions, AnywordTruncateOptions, Granularity } from "anyword";
+export { anylongSupported, anywordSupported };
 
 /**
  * A BCP 47 locale tag, or a fallback chain. Structurally identical across
@@ -133,4 +143,37 @@ export function useAnylong(input: DurationInput, options?: AnylongOptions): stri
 export function useAnyplural(count: number, forms: Forms, options?: AnypluralOptions): string {
   const locale = useAnyfamilyLocale();
   return anyplural(count, forms, withLocale(options, locale));
+}
+
+/**
+ * Like `anyword`, reading `locale` from the nearest {@linkcode AnyfamilyProvider}
+ * when not set explicitly. Unlike the other hooks this one returns an array, so
+ * the result is memoized — the same segments keep the same reference until the
+ * text or the options actually change, and passing it to a `useEffect` or a
+ * `memo`'d child doesn't retrigger on every render.
+ */
+export function useAnyword(text: string, options?: AnywordOptions): string[] {
+  const locale = useAnyfamilyLocale();
+  const merged = withLocale(options, locale);
+  // Inline option objects are a fresh reference every render, so key the memo on
+  // the options' contents rather than their identity.
+  const key = JSON.stringify(merged ?? null);
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- `key` stands in for `merged`
+  return useMemo(() => anyword(text, merged), [text, key]);
+}
+
+/** Like `anywordCount`, reading `locale` from the nearest {@linkcode AnyfamilyProvider} when not set explicitly. */
+export function useAnywordCount(text: string, options?: AnywordOptions): number {
+  const locale = useAnyfamilyLocale();
+  return anywordCount(text, withLocale(options, locale));
+}
+
+/** Like `anywordTruncate`, reading `locale` from the nearest {@linkcode AnyfamilyProvider} when not set explicitly. */
+export function useAnywordTruncate(
+  text: string,
+  limit: number,
+  options?: AnywordTruncateOptions,
+): string {
+  const locale = useAnyfamilyLocale();
+  return anywordTruncate(text, limit, withLocale(options, locale));
 }

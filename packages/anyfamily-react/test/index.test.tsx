@@ -5,6 +5,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   AnyfamilyProvider,
   anylongSupported,
+  anywordSupported,
   useAnyaround,
   useAnyfamilyLocale,
   useAnylong,
@@ -12,6 +13,9 @@ import {
   useAnymany,
   useAnyplural,
   useAnywhen,
+  useAnyword,
+  useAnywordCount,
+  useAnywordTruncate,
 } from "../src/index";
 
 afterEach(cleanup);
@@ -71,6 +75,36 @@ describe("hooks wrap their underlying formatters", () => {
       useAnyplural(5, { one: "item", other: "items" }, { locale: "en" }),
     );
     expect(result.current).toBe("5 items");
+  });
+
+  it.skipIf(!anywordSupported)("useAnyword segments words without spaces", () => {
+    const { result } = renderHook(() => useAnyword("世界 test", { locale: "en" }));
+    expect(result.current).toEqual(["世界", "test"]);
+  });
+
+  it.skipIf(!anywordSupported)("useAnywordCount counts graphemes, not code units", () => {
+    const { result } = renderHook(() =>
+      useAnywordCount("👨‍👩‍👧", { by: "grapheme", locale: "en" }),
+    );
+    expect(result.current).toBe(1);
+  });
+
+  it.skipIf(!anywordSupported)("useAnywordTruncate cuts on a grapheme boundary", () => {
+    const { result } = renderHook(() =>
+      useAnywordTruncate("héllo 👨‍👩‍👧", 5, { ellipsis: "…", locale: "en" }),
+    );
+    expect(result.current).toBe("héllo…");
+  });
+
+  it.skipIf(!anywordSupported)("useAnyword keeps the same array across re-renders", () => {
+    // Options are a fresh object literal every render — the memo has to key on
+    // their contents, not their identity, or the reference churns.
+    const { result, rerender } = renderHook(() =>
+      useAnyword("one two three", { locale: "en" }),
+    );
+    const first = result.current;
+    rerender();
+    expect(result.current).toBe(first);
   });
 });
 
