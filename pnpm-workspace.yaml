@@ -1,0 +1,16 @@
+# The seven any* packages under packages/ are their own git repositories —
+# they are gitignored here and pushed/published from their own folders. This
+# workspace only makes pnpm resolve them locally, so the landing app and the
+# meta packages build against the sources sitting next to them instead of the
+# last version published to npm.
+#
+# Consequence worth knowing: local resolution uses each package's `dist/`, not
+# its `src/`. After editing a package, rebuild it or the consumer sees stale
+# output.
+packages:
+  - packages/*
+
+# pnpm 10 does not link workspace packages for plain semver ranges unless asked.
+# The consumers here declare ordinary ranges like "^1.0.3" (they have to — those
+# are what gets published), so this is what makes the local link happen.
+linkWorkspacePackages: true
