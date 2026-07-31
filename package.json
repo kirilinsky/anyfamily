@@ -17,7 +17,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "changeset": "changeset",
+    "version-packages": "changeset version && pnpm install --lockfile-only",
+    "release": "pnpm -r --filter './packages/*' build && changeset publish"
   },
   "dependencies": {
     "@dateforge/react-calendar": "^1.6.0",
@@ -34,6 +37,7 @@
     "react-dom": "19.2.4"
   },
   "devDependencies": {
+    "@changesets/cli": "^2.31.1",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
