@@ -56,9 +56,37 @@ by hand.**
 anywhen(date) now returns … ; anywhenParts is gone, use anywhen.parts(date).
 ```
 
-The same applies to the planned v2 API unification — that is one changeset
-naming all nine packages, one PR, one coordinated wave. Not nine separate
-releases.
+## migrating the family to v2, one package at a time
+
+The v2 shape lands package by package, but the two metas get **one** major at
+the end rather than a major per package. That only works if each migration keeps
+the metas non-breaking, so the rule is:
+
+**When a package drops an export, the meta keeps it as a deprecated alias.**
+
+```ts
+// packages/anyfamily/src/index.ts
+export { anywhen } from "anywhen";
+
+import { anywhen as anywhenFn } from "anywhen";
+
+/** @deprecated Use `anywhen.parts` instead. Removed in anyfamily 2.0. */
+export const anywhenParts = anywhenFn.parts;
+```
+
+Cover each bridge with a test — that it still resolves, and that its output
+matches the new call — so the aliases cannot rot while they exist.
+
+Version levels for a single package's migration:
+
+| Package | Level | Why |
+| --- | --- | --- |
+| the migrated package | `major` | its exports changed |
+| `anyfamily` | `minor` | gains a bridge, loses nothing |
+| `anyfamily-react` | `patch` or nothing | it calls the bare function, which never changes shape |
+
+When the seventh package lands, one final changeset takes both metas to `2.0.0`
+and deletes every bridge at once.
 
 ## picking a bump level
 

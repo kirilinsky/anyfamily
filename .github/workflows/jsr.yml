@@ -1,0 +1,67 @@
+name: jsr
+
+# Publishes a single package to JSR when changesets tags its release.
+#
+# Each package used to carry its own copy of this workflow, triggered on a bare
+# `v*` tag. Those tags no longer exist — in the monorepo changesets tags
+# releases as `<package>@<version>` — and nested .github directories are never
+# read by Actions anyway, so JSR publishing was dead until this replaced it.
+
+on:
+  push:
+    tags:
+      - "*@*"
+  workflow_dispatch:
+    inputs:
+      package:
+        description: "Package directory under packages/ to publish"
+        required: true
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: resolve package from the tag
+        id: pkg
+        run: |
+          if [ -n "${{ inputs.package }}" ]; then
+            name="${{ inputs.package }}"
+          else
+            # refs/tags/anywhen@2.0.0 -> anywhen
+            name="${GITHUB_REF_NAME%@*}"
+          fi
+          if [ ! -f "packages/$name/jsr.json" ]; then
+            echo "packages/$name has no jsr.json — nothing to publish"
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "name=$name" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: pnpm/action-setup@v4
+        if: steps.pkg.outputs.skip != 'true'
+        with:
+          version: 10.32.1
+
+      - uses: actions/setup-node@v5
+        if: steps.pkg.outputs.skip != 'true'
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+        if: steps.pkg.outputs.skip != 'true'
+
+      # jsr.json publishes src/index.ts directly, but building first keeps the
+      # package honest — a source that cannot compile should not reach JSR.
+      - run: pnpm --filter "${{ steps.pkg.outputs.name }}" build
+        if: steps.pkg.outputs.skip != 'true'
+
+      - run: npx jsr publish
+        if: steps.pkg.outputs.skip != 'true'
+        working-directory: packages/${{ steps.pkg.outputs.name }}

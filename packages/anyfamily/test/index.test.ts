@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   anywhen,
+  anywhenParts,
   anyamount,
   anyamountSymbol,
   anymany,
@@ -71,5 +72,16 @@ describe("anyfamily", () => {
 
   it.skipIf(!anywordSupported)("anywordTruncate cuts on a grapheme boundary", () => {
     expect(anywordTruncate("héllo 👨‍👩‍👧", 5, { ellipsis: "…" })).toBe("héllo…");
+  });
+});
+
+describe("1.x bridges", () => {
+  it("anywhenParts still works as a deprecated alias for anywhen.parts", () => {
+    const now = new Date("2026-01-01T12:00:00Z");
+    const opts = { mode: "relative", locale: "en", now } as const;
+    const via = anywhenParts(new Date("2026-01-01T09:00:00Z"), opts);
+    expect(via.map((p) => p.value).join("")).toBe(
+      anywhen(new Date("2026-01-01T09:00:00Z"), opts),
+    );
   });
 });

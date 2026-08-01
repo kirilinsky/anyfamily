@@ -9,8 +9,17 @@
  */
 
 // anywhen — dates, times, relative phrasing (Intl.DateTimeFormat)
-// v2 shape: one export, extras hang off it (`anywhen.parts`).
+// On the v2 shape: one export, extras hang off it (`anywhen.parts`).
 export { anywhen } from "anywhen";
+
+import { anywhen as anywhenFn } from "anywhen";
+
+/**
+ * @deprecated Use `anywhen.parts` instead. Kept so anyfamily 1.x keeps working
+ * while the family migrates to the v2 shape one package at a time — every
+ * bridge like this one is removed together in anyfamily 2.0.
+ */
+export const anywhenParts = anywhenFn.parts;
 export type {
   AnywhenOptions,
   AnywhenPart,

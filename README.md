@@ -3,8 +3,6 @@
 <p>
   <a href="https://anyfamily.site"><img src="https://img.shields.io/website?url=https%3A%2F%2Fanyfamily.site&style=flat-square&label=anyfamily.site" alt="website" /></a>
   <a href="https://github.com/kirilinsky/anyfamily/actions/workflows/ci.yml"><img src="https://github.com/kirilinsky/anyfamily/actions/workflows/ci.yml/badge.svg" alt="CI" /></a>
-  <img src="https://img.shields.io/badge/Next.js-16-black?style=flat-square" alt="Next.js 16" />
-  <img src="https://img.shields.io/badge/Tailwind-v4-black?style=flat-square" alt="Tailwind v4" />
   <a href="./LICENSE"><img src="https://img.shields.io/badge/license-MIT-black?style=flat-square" alt="MIT" /></a>
 </p>
 

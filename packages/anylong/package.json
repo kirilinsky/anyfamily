@@ -35,8 +35,7 @@
     "publint": "publint",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
-    "typecheck": "tsc --noEmit",
-    "release": "npm version patch && git push --follow-tags"
+    "typecheck": "tsc --noEmit"
   },
   "keywords": [
     "duration",
