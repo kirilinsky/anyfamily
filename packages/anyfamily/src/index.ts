@@ -9,7 +9,8 @@
  */
 
 // anywhen — dates, times, relative phrasing (Intl.DateTimeFormat)
-export { anywhen, anywhenParts } from "anywhen";
+// v2 shape: one export, extras hang off it (`anywhen.parts`).
+export { anywhen } from "anywhen";
 export type {
   AnywhenOptions,
   AnywhenPart,

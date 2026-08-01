@@ -11,7 +11,47 @@ permissions:
   contents: read
 
 jobs:
-  build:
+  packages:
+    name: packages (node ${{ matrix.node }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # Node 24 carries Intl.DurationFormat, which anylong needs; 20 and 22 do
+        # not, so its suite skips those cases there. Keep all three.
+        node: [20, 22, 24]
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.32.1
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: ${{ matrix.node }}
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: typecheck
+        run: pnpm --filter "./packages/*" --if-present typecheck
+
+      - name: test
+        run: pnpm --filter "./packages/*" test
+
+      - name: build
+        run: pnpm --filter "./packages/*" build
+
+      # Validates the published shape — exports map, types resolution, files.
+      # More important now than per-repo: changesets publishes automatically, so
+      # a broken exports map would ship without anyone looking at it.
+      - name: publint
+        if: matrix.node == 24
+        run: pnpm --filter "./packages/*" --if-present publint
+
+  site:
+    name: landing site
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -22,17 +62,16 @@ jobs:
 
       - uses: actions/setup-node@v5
         with:
-          node-version: 22
+          node-version: 24
           cache: pnpm
 
       - run: pnpm install --frozen-lockfile
 
+      # The site resolves the workspace packages through their dist/, so they
+      # have to be built before Next can import them.
+      - name: build packages
+        run: pnpm --filter "./packages/*" build
+
       - run: pnpm lint
 
       - run: pnpm build
-
-      - run: pnpm --dir packages/anyfamily install --frozen-lockfile
-      - run: pnpm --dir packages/anyfamily test
-
-      - run: pnpm --dir packages/anyfamily-react install --frozen-lockfile
-      - run: pnpm --dir packages/anyfamily-react test

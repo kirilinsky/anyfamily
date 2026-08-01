@@ -19,7 +19,7 @@
     "start": "next start",
     "lint": "eslint",
     "changeset": "changeset",
-    "version-packages": "changeset version && pnpm install --lockfile-only",
+    "version-packages": "changeset version && node scripts/sync-jsr.mjs && pnpm install --lockfile-only",
     "release": "pnpm -r --filter './packages/*' build && changeset publish"
   },
   "dependencies": {

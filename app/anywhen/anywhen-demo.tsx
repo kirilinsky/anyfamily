@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { anywhen, anywhenParts } from "anywhen";
+import { anywhen } from "anywhen";
 import { Calendar } from "@dateforge/react-calendar";
 import { CalendarDays, CalendarNav } from "@dateforge/react-calendar/modules";
 
@@ -92,7 +92,7 @@ export function AnywhenDemo() {
   const parts = (() => {
     if (!validDate) return null;
     try {
-      return anywhenParts(dateStr, { mode, locale });
+      return anywhen.parts(dateStr, { mode, locale });
     } catch {
       return null;
     }
@@ -219,7 +219,7 @@ export function AnywhenDemo() {
           <div
             className={`flex max-w-full flex-wrap items-center justify-center gap-x-1.5 gap-y-1 px-2 font-mono text-[11px] transition-opacity duration-200 ${done ? "opacity-100" : "opacity-0"}`}
           >
-            <span className="text-white/25">anywhenParts →</span>
+            <span className="text-white/25">anywhen.parts →</span>
             {parts.map((p, i) => (
               <span
                 key={i}

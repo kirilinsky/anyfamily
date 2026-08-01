@@ -14,13 +14,17 @@ const NAV: DocsNavItem[] = [
   { id: "overview", label: "Overview" },
   { id: "install", label: "Install" },
   { id: "anywhen", label: "anywhen()" },
-  { id: "parts", label: "anywhenParts()" },
+  { id: "migrating", label: "From 1.x" },
+  { id: "parts", label: "anywhen.parts()" },
   { id: "modes", label: "Modes" },
   { id: "options", label: "Options" },
   { id: "thresholds", label: "Thresholds" },
+  { id: "recipes", label: "Recipes" },
+  { id: "react", label: "React / Next.js" },
   { id: "ssr", label: "SSR" },
   { id: "input-types", label: "Input types" },
   { id: "locales", label: "Locales" },
+  { id: "calendars", label: "Calendars & eras" },
   { id: "compatibility", label: "Compatibility" },
   { id: "limitations", label: "Limitations" },
 ];
@@ -85,8 +89,11 @@ export function DocsClient() {
         <p>
           <strong style={{ color: "var(--text-primary)" }}>anywhen</strong> is a
           tiny date formatter built entirely on the native <Mono>Intl</Mono>{" "}
-          browser API. One function, one options object, three modes. Stable
-          since 1.0 — the public API follows semver.
+          browser API. One export, one options object, three modes. The bare
+          call returns the string; <Mono>anywhen.parts</Mono> hangs off the same
+          name. Follows semver — see{" "}
+          <Mono>Migrating from 1.x</Mono> if you are coming from the old
+          two-export API.
         </p>
         <p>
           The browser already knows how to format dates in 200+ languages.
@@ -138,23 +145,42 @@ anywhen(date, {
 // "Friday, February 5, 2016"`}</Code>
       </Section>
 
-      <Section id="parts" title="anywhenParts()">
+      <Section id="migrating" title="Migrating from 1.x">
         <p>
-          Same arguments as <Mono>anywhen()</Mono>, but returns the output as{" "}
-          <Mono>{"{ type, value, unit? }"}</Mono> parts instead of a string —
-          style the number apart from the unit, or rebuild the output your own
-          way. New in 1.0.
+          2.0 removed the separate <Mono>anywhenParts</Mono> export. It is the
+          same function, reached through the one name the package exports.
         </p>
-        <Code>{`import { anywhenParts } from 'anywhen'
+        <Code>{`- import { anywhen, anywhenParts } from 'anywhen'
++ import { anywhen } from 'anywhen'
 
-anywhenParts(date, { mode: 'relative', locale: 'en' })
+- anywhenParts(date, { mode: 'relative' })
++ anywhen.parts(date, { mode: 'relative' })`}</Code>
+        <p>
+          Arguments, return value and throwing behaviour are unchanged, and
+          nothing else in the API moved. Every <Mono>any*</Mono> package follows
+          this shape from 2.0 on: the bare call does the job, everything else
+          hangs off the same name.
+        </p>
+      </Section>
+
+      <Section id="parts" title="anywhen.parts()">
+        <p>
+          Same arguments as calling <Mono>anywhen()</Mono> directly, but returns
+          the output as <Mono>{"{ type, value, unit? }"}</Mono> parts instead of
+          a string — style the number apart from the unit, or rebuild the output
+          your own way. Joining every part&apos;s <Mono>value</Mono> reproduces
+          the plain call&apos;s output.
+        </p>
+        <Code>{`import { anywhen } from 'anywhen'
+
+anywhen.parts(date, { mode: 'relative', locale: 'en' })
 // [
 //   { type: 'integer', value: '3', unit: 'hour' },
 //   { type: 'literal', value: ' hours ago' },
 // ]
 
 // React: bold the number
-anywhenParts(date, { mode: 'relative' }).map((p, i) =>
+anywhen.parts(date, { mode: 'relative' }).map((p, i) =>
   p.type === 'integer' ? <b key={i}>{p.value}</b> : p.value,
 )`}</Code>
         <p style={{ color: "var(--text-muted)" }} className="text-xs">
@@ -341,6 +367,67 @@ anywhen(date, { locale: 'en', thresholds: { second: 120 } })
         </p>
       </Section>
 
+      <Section id="recipes" title="Recipes">
+        <p>Copy, paste, move on.</p>
+        <Code>{`// Blog post date
+<time dateTime={post.createdAt}>
+  {anywhen(post.createdAt, { locale: 'en', time: false })}
+</time>
+
+// Chat message
+<time dateTime={message.sentAt}>
+  {anywhen(message.sentAt, { locale: 'en' })}
+</time>
+
+// Notification
+anywhen(notification.createdAt, { mode: 'relative', locale: 'en' })
+// "3 minutes ago"
+
+// Settings screen / invoice date
+anywhen(invoice.date, {
+  mode: 'absolute',
+  locale: 'en',
+  format: { month: 'long', day: 'numeric', year: 'numeric' },
+})
+// "February 5, 2016"
+
+// Compact UI — label without the clock
+anywhen(date, { locale: 'en', time: false })
+// "yesterday"
+
+// SSR-safe: freeze the anchor and the zone
+anywhen(createdAt, { locale: 'en', now: requestTime, timeZone: 'Europe/Belgrade' })`}</Code>
+      </Section>
+
+      <Section id="react" title="React / Next.js">
+        <p>
+          Wrap the output in <Mono>&lt;time&gt;</Mono> so machines still get the
+          exact timestamp while people get the readable one.
+        </p>
+        <Code>{`import { anywhen } from 'anywhen'
+
+export function PostMeta({ createdAt }: { createdAt: string }) {
+  return <time dateTime={createdAt}>{anywhen(createdAt)}</time>
+}`}</Code>
+        <p>
+          Relative output goes stale the moment the component stops re-rendering
+          — &quot;3 minutes ago&quot; stays frozen at three minutes.{" "}
+          <Mono>anyfamily-react</Mono> solves that with <Mono>useAnywhen</Mono>,
+          which re-renders on an interval and reads the locale from a shared
+          provider.
+        </p>
+        <Code>{`import { AnyfamilyProvider, useAnywhen } from 'anyfamily-react'
+
+function PostMeta({ createdAt }: { createdAt: string }) {
+  const when = useAnywhen(createdAt, { mode: 'relative' })  // ticks itself
+  return <time dateTime={createdAt}>{when}</time>
+}
+
+<AnyfamilyProvider locale="en">
+  <PostMeta createdAt={post.createdAt} />
+</AnyfamilyProvider>`}</Code>
+      </Section>
+
       <Section id="ssr" title="SSR">
         <p>
           By default, smart and relative modes use the current time. In React SSR
@@ -420,6 +507,79 @@ anywhen(date, { mode: 'relative', locale: 'tr' })   // "3 saat önce"`}</Code>
           omitted, native <Mono>Intl</Mono> uses the runtime locale. Fallback
           arrays like <Mono>[&apos;sr-Latn-RS&apos;, &apos;en&apos;]</Mono> also
           work.
+        </p>
+      </Section>
+
+      <Section id="calendars" title="Calendars & eras">
+        <p>
+          Non-Gregorian calendars need no extra API. Pick the calendar with the
+          BCP 47 <Mono>-u-ca-</Mono> extension on <Mono>locale</Mono>, and ask
+          for the era through <Mono>format</Mono> — both go straight to{" "}
+          <Mono>Intl.DateTimeFormat</Mono>.
+        </p>
+        <Code>{`anywhen(date, {
+  mode: 'absolute',
+  locale: 'ja-JP-u-ca-japanese',
+  format: { era: 'short', year: 'numeric', month: 'short', day: 'numeric' },
+})
+// "平成28年2月5日"
+
+anywhen(date, { mode: 'absolute', locale: 'th-TH-u-ca-buddhist' })
+// "5 ก.พ. 2559"
+
+anywhen(date, { mode: 'absolute', locale: 'en-US-u-ca-islamic-umalqura' })
+// "Rab. II 26, 1437 AH"
+
+anywhen(date, {
+  mode: 'absolute',
+  locale: 'zh-TW-u-ca-roc',
+  format: { era: 'short', year: 'numeric', month: 'short', day: 'numeric' },
+})
+// "民國105年2月5日"`}</Code>
+        <p>
+          <Mono>anywhen.parts</Mono> reports the era as its own part, so it can
+          be styled apart from the year:
+        </p>
+        <Code>{`anywhen.parts(date, {
+  mode: 'absolute',
+  locale: 'en-u-ca-gregory',
+  format: { era: 'short', day: 'numeric', month: 'short', year: 'numeric' },
+})
+// [… { type: 'year', value: '2016' }, { type: 'literal', value: ' ' }, { type: 'era', value: 'AD' }]`}</Code>
+        <p>Two limits worth knowing:</p>
+        <div className="space-y-3">
+          {[
+            {
+              title: "Absolute mode only",
+              body: "Smart mode uses its own fixed date shape and ignores format, so eras never appear in its absolute fallback.",
+            },
+            {
+              title: "eraDisplay is not usable yet",
+              body: "The option is still Stage 2 and current engines ignore it silently — it never reaches resolvedOptions(). Once it ships it will work through format with no change to anywhen.",
+            },
+          ].map(({ title, body }) => (
+            <div
+              key={title}
+              style={{ borderColor: "var(--border)" }}
+              className="rounded-xl border p-4"
+            >
+              <p
+                style={{ color: "var(--text-primary)" }}
+                className="mb-1 text-sm font-medium"
+              >
+                {title}
+              </p>
+              <p style={{ color: "var(--text-muted)" }} className="text-sm">
+                {body}
+              </p>
+            </div>
+          ))}
+        </div>
+        <p>
+          Smart-mode day boundaries (today, yesterday, weekday) are computed on
+          Gregorian days. Every calendar <Mono>Intl</Mono> ships switches days at
+          local midnight too, so the boundaries line up — only the printed labels
+          differ.
         </p>
       </Section>
 
