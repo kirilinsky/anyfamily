@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="./logo.png" alt="anyword" width="420" />
+  <img src="https://raw.githubusercontent.com/kirilinsky/anyfamily/main/packages/anyword/logo.png" alt="anyword" width="420" />
 </p>
 
 <h1 align="center">anyword</h1>

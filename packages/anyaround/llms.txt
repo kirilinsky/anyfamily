@@ -61,8 +61,7 @@ anyaroundInfo("US");
 - npm: https://www.npmjs.com/package/anyaround
 - JSR: https://jsr.io/@kirilinsky/anyaround
 - Repository: https://github.com/kirilinsky/anyaround
-- Live demo: https://anyaround.vercel.app
-
+ 
 ## The any* family
 
 Sibling zero-dependency Intl tools, same philosophy (one function, any locale, native Intl):

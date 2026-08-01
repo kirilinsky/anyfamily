@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="./logo.png" alt="anyaround" width="420" />
+  <img src="https://raw.githubusercontent.com/kirilinsky/anyfamily/main/packages/anyaround/logo.png" alt="anyaround" width="420" />
 </p>
 
 <h1 align="center">anyaround</h1>

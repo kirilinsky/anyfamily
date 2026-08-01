@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="./logo.png" alt="anywhen" width="420" />
+  <img src="https://raw.githubusercontent.com/kirilinsky/anyfamily/main/packages/anywhen/logo.png" alt="anywhen" width="420" />
 </p>
 
 <h1 align="center">anywhen</h1>

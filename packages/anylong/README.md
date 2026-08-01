@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="./logo.png" alt="anylong" width="420" />
+  <img src="https://raw.githubusercontent.com/kirilinsky/anyfamily/main/packages/anylong/logo.png" alt="anylong" width="420" />
 </p>
 
 <h1 align="center">anylong</h1>

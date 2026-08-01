@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="./logo.png" alt="anyplural" width="420" />
+  <img src="https://raw.githubusercontent.com/kirilinsky/anyfamily/main/packages/anyplural/logo.png" alt="anyplural" width="420" />
 </p>
 
 <h1 align="center">anyplural</h1>
