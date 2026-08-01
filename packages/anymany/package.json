@@ -1,7 +1,7 @@
 {
   "name": "anymany",
-  "version": "1.0.1",
-  "description": "Smart list formatter \u2014 sort and join arrays of strings in any Intl locale, one function.",
+  "version": "2.0.0",
+  "description": "Smart list formatter — sort and join arrays of strings in any Intl locale, one function.",
   "type": "module",
   "sideEffects": false,
   "main": "./dist/index.cjs",

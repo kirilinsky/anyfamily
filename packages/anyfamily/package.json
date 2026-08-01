@@ -1,6 +1,6 @@
 {
   "name": "anyfamily",
-  "version": "1.3.0",
+  "version": "2.0.0",
   "description": "The whole any* family in one install — anywhen, anyamount, anymany, anyaround, anylong, anyplural and anyword: micro Intl tools with zero dependencies of their own.",
   "type": "module",
   "sideEffects": false,

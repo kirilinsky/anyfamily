@@ -1,7 +1,7 @@
 {
   "name": "anyword",
-  "version": "1.0.0",
-  "description": "Micro text segmenter \u2014 locale-correct words, graphemes and sentences, safe counting and truncation, one native Intl wrapper.",
+  "version": "2.0.0",
+  "description": "Micro text segmenter — locale-correct words, graphemes and sentences, safe counting and truncation, one native Intl wrapper.",
   "type": "module",
   "sideEffects": false,
   "main": "./dist/index.cjs",

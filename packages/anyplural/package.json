@@ -1,7 +1,7 @@
 {
   "name": "anyplural",
-  "version": "1.0.0",
-  "description": "Micro smart pluralizer \u2014 pick the plural form and interpolate the count in any Intl locale, one function.",
+  "version": "2.0.0",
+  "description": "Micro smart pluralizer — pick the plural form and interpolate the count in any Intl locale, one function.",
   "type": "module",
   "sideEffects": false,
   "main": "./dist/index.cjs",

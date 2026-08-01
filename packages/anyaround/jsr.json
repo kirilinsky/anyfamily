@@ -1,9 +1,16 @@
 {
   "name": "@kirilinsky/anyaround",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "exports": "./src/index.ts",
   "publish": {
-    "include": ["src/index.ts", "README.md", "LICENSE", "llms.txt"],
-    "exclude": ["src/index.test.ts"]
+    "include": [
+      "src/index.ts",
+      "README.md",
+      "LICENSE",
+      "llms.txt"
+    ],
+    "exclude": [
+      "src/index.test.ts"
+    ]
   }
 }

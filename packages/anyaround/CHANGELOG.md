@@ -1,5 +1,24 @@
 # Changelog
 
+## 2.0.0
+
+### Major Changes
+
+- 0be5676: anyaround now exports a single name. anyaroundInfo are gone — the same functionality is
+  reached as `anyaround.info`.
+
+  ```diff
+  - import { anyaround, ... } from "anyaround";
+  + import { anyaround } from "anyaround";
+
+  - anyaroundInfo("US");
+  + anyaround.info("US");
+  ```
+
+  Arguments, return values and throwing behaviour are unchanged; nothing else in
+  the API moved. Part of the family-wide v2 shape: the bare call does the job,
+  everything else hangs off the same name.
+
 ## 1.0.0
 
 First stable release. The API is now under semver — no breaking changes until 2.0.

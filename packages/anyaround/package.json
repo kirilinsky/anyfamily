@@ -1,7 +1,7 @@
 {
   "name": "anyaround",
-  "version": "1.0.0",
-  "description": "Micro smart locale display \u2014 one function, any region, language, script, currency or calendar code to its localized name, with country flags. Any Intl locale.",
+  "version": "2.0.0",
+  "description": "Micro smart locale display — one function, any region, language, script, currency or calendar code to its localized name, with country flags. Any Intl locale.",
   "type": "module",
   "sideEffects": false,
   "main": "./dist/index.cjs",
