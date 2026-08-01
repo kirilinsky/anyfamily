@@ -41,7 +41,7 @@ export type ThresholdUnit =
  */
 export type Thresholds = Partial<Record<ThresholdUnit, number>>;
 
-/** One piece of formatted output returned by {@linkcode anywhenParts}. */
+/** One piece of formatted output returned by {@linkcode anywhen.parts}. */
 export interface AnywhenPart {
   /** Part kind as reported by `Intl` — `"integer"`, `"literal"`, `"month"`, `"hour"`, … */
   type: string;
@@ -51,7 +51,7 @@ export interface AnywhenPart {
   unit?: string;
 }
 
-/** Options for {@linkcode anywhen} and {@linkcode anywhenParts}. Each mode reads only the options that apply to it. */
+/** Options for {@linkcode anywhen} and {@linkcode anywhen.parts}. Each mode reads only the options that apply to it. */
 export interface AnywhenOptions {
   /** Rendering strategy. Defaults to `"smart"`. */
   mode?: Mode;
@@ -258,47 +258,13 @@ function plan(input: DateInput, options: AnywhenOptions): Seg[] {
   throw new RangeError(`Invalid mode: ${String(mode)}`);
 }
 
-/**
- * Formats a date as a human-readable, localized string using native `Intl`.
- *
- * @example
- * ```ts
- * anywhen(date);                                    // "yesterday, 2:35 PM"
- * anywhen(date, { mode: "absolute", locale: "ja" }); // "2016年2月5日"
- * anywhen(date, { mode: "relative", locale: "en" }); // "3 hours ago"
- * ```
- *
- * @param input A `Date`, unix timestamp in milliseconds, or ISO 8601 string.
- * @param options See {@linkcode AnywhenOptions}.
- * @returns The formatted string.
- * @throws {RangeError} If `input` or `options.now` is not a valid date, or `options.mode` is unknown.
- */
-export function anywhen(input: DateInput, options: AnywhenOptions = {}): string {
+function format(input: DateInput, options: AnywhenOptions = {}): string {
   return plan(input, options)
     .map((s) => ("t" in s ? s.t : "d" in s ? s.f.format(s.d) : s.f.format(s.v, s.u)))
     .join("");
 }
 
-/**
- * Like {@linkcode anywhen}, but returns the output as `{ type, value, unit? }`
- * parts instead of a string — style the number apart from the unit, or
- * rebuild the output your own way.
- *
- * @example
- * ```ts
- * anywhenParts(date, { mode: "relative", locale: "en" });
- * // [
- * //   { type: "integer", value: "3", unit: "hour" },
- * //   { type: "literal", value: " hours ago" },
- * // ]
- * ```
- *
- * @param input A `Date`, unix timestamp in milliseconds, or ISO 8601 string.
- * @param options See {@linkcode AnywhenOptions} — same options as {@linkcode anywhen}.
- * @returns The formatted output as an array of parts.
- * @throws {RangeError} If `input` or `options.now` is not a valid date, or `options.mode` is unknown.
- */
-export function anywhenParts(
+function parts(
   input: DateInput,
   options: AnywhenOptions = {},
 ): AnywhenPart[] {
@@ -310,3 +276,52 @@ export function anywhenParts(
         : s.f.formatToParts(s.v, s.u),
   );
 }
+
+/**
+ * Formats a date as a human-readable, localized string using native `Intl`.
+ *
+ * The package exports this one name. Anything beyond the plain call hangs off
+ * it — currently {@linkcode anywhen.parts}.
+ *
+ * @example
+ * ```ts
+ * anywhen(date);                                    // "yesterday, 2:35 PM"
+ * anywhen(date, { mode: "absolute", locale: "ja" }); // "2016年2月5日"
+ * anywhen(date, { mode: "relative", locale: "en" }); // "3 hours ago"
+ *
+ * anywhen.parts(date, { mode: "relative", locale: "en" });
+ * // [
+ * //   { type: "integer", value: "3", unit: "hour" },
+ * //   { type: "literal", value: " hours ago" },
+ * // ]
+ * ```
+ *
+ * @param input A `Date`, unix timestamp in milliseconds, or ISO 8601 string.
+ * @param options See {@linkcode AnywhenOptions}.
+ * @returns The formatted string.
+ * @throws {RangeError} If `input` or `options.now` is not a valid date, or `options.mode` is unknown.
+ */
+export const anywhen = Object.assign(format, {
+  /**
+   * Like calling {@linkcode anywhen} directly, but returns the output as
+   * `{ type, value, unit? }` parts instead of a string — style the number
+   * apart from the unit, or rebuild the output your own way.
+   *
+   * Takes the same arguments and throws on the same inputs.
+   *
+   * @example
+   * ```ts
+   * anywhen.parts(date, { mode: "relative", locale: "en" });
+   * // [
+   * //   { type: "integer", value: "3", unit: "hour" },
+   * //   { type: "literal", value: " hours ago" },
+   * // ]
+   *
+   * // React: bold the number
+   * anywhen.parts(date, { mode: "relative" }).map((p, i) =>
+   *   p.type === "integer" ? <b key={i}>{p.value}</b> : p.value,
+   * );
+   * ```
+   */
+  parts,
+});

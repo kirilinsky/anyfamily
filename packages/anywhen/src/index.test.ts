@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { anywhen, anywhenParts } from "./index";
+import { anywhen } from "./index";
 
 const NOW = new Date("2016-02-05T14:00:00.000Z").getTime();
 
@@ -579,7 +579,7 @@ describe("thresholds option", () => {
   });
 });
 
-describe("anywhenParts", () => {
+describe("anywhen.parts", () => {
   it("joined parts equal the anywhen string in every mode", () => {
     const cases: Parameters<typeof anywhen>[] = [
       [NOW - 3_600_000, { mode: "relative", locale: "en" }],
@@ -597,7 +597,7 @@ describe("anywhenParts", () => {
     // keeps the originals — normalize both sides before comparing.
     const norm = (s: string) => s.replace(/[  ]/g, " ");
     for (const [input, options] of cases) {
-      const parts = anywhenParts(input, options);
+      const parts = anywhen.parts(input, options);
       expect(norm(parts.map((p) => p.value).join(""))).toBe(
         norm(anywhen(input, options)),
       );
@@ -605,7 +605,7 @@ describe("anywhenParts", () => {
   });
 
   it("exposes the unit on relative numeric parts", () => {
-    const parts = anywhenParts(NOW - 3_600_000, {
+    const parts = anywhen.parts(NOW - 3_600_000, {
       mode: "relative",
       locale: "en",
     });
@@ -615,7 +615,7 @@ describe("anywhenParts", () => {
   });
 
   it("returns typed date parts in absolute mode", () => {
-    const parts = anywhenParts(NOW, { mode: "absolute", locale: "en" });
+    const parts = anywhen.parts(NOW, { mode: "absolute", locale: "en" });
     expect(parts.map((p) => p.type)).toEqual([
       "month",
       "literal",
@@ -626,7 +626,7 @@ describe("anywhenParts", () => {
   });
 
   it("splits smart calendar labels into label, separator, and clock", () => {
-    const parts = anywhenParts(NOW - 2 * 3_600_000, {
+    const parts = anywhen.parts(NOW - 2 * 3_600_000, {
       locale: "en",
       timeZone: "UTC",
     });
@@ -637,7 +637,7 @@ describe("anywhenParts", () => {
   });
 
   it("drops the clock parts with time: false", () => {
-    const parts = anywhenParts(NOW - 2 * 3_600_000, {
+    const parts = anywhen.parts(NOW - 2 * 3_600_000, {
       locale: "en",
       timeZone: "UTC",
       time: false,
@@ -646,6 +646,26 @@ describe("anywhenParts", () => {
   });
 
   it("throws the same RangeError as anywhen on invalid input", () => {
-    expect(() => anywhenParts("not a date")).toThrow(RangeError);
+    expect(() => anywhen.parts("not a date")).toThrow(RangeError);
+  });
+});
+
+describe("public surface", () => {
+  it("exports exactly one name, with extras hanging off it", async () => {
+    const mod = await import("./index");
+    expect(Object.keys(mod)).toEqual(["anywhen"]);
+  });
+
+  it("anywhen is callable and carries parts", () => {
+    expect(typeof anywhen).toBe("function");
+    expect(typeof anywhen.parts).toBe("function");
+  });
+
+  it("parts join back into the plain call's output", () => {
+    const opts = { mode: "relative", locale: "en" } as const;
+    const joined = anywhen.parts(NOW - 3_600_000, opts)
+      .map((p) => p.value)
+      .join("");
+    expect(joined).toBe(anywhen(NOW - 3_600_000, opts));
   });
 });

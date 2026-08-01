@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://i.ibb.co/hRbGtqjM/gt.png" alt="anywhen logo" width="230" />
+  <img src="./logo.png" alt="anywhen" width="420" />
 </p>
 
 <h1 align="center">anywhen</h1>
@@ -7,8 +7,7 @@
 <p align="center">
   <a href="https://www.npmjs.com/package/anywhen"><img src="https://img.shields.io/npm/v/anywhen?style=flat-square&color=black" alt="npm" /></a>
   <a href="https://bundlephobia.com/package/anywhen"><img src="https://img.shields.io/bundlephobia/minzip/anywhen?style=flat-square&color=black&label=gzip" /></a>
-  <a href="https://github.com/kirilinsky/anywhen/actions/workflows/ssr.yml"><img src="https://github.com/kirilinsky/anywhen/actions/workflows/ssr.yml/badge.svg" alt="SSR Ready" /></a>
-  <a href="https://codecov.io/github/kirilinsky/anywhen"><img src="https://codecov.io/github/kirilinsky/anywhen/graph/badge.svg" alt="codecov" /></a>
+  <a href="https://github.com/kirilinsky/anyfamily/actions/workflows/ci.yml"><img src="https://github.com/kirilinsky/anyfamily/actions/workflows/ci.yml/badge.svg" alt="CI" /></a>
   <a href="./LICENSE"><img src="https://img.shields.io/npm/l/anywhen?style=flat-square&color=black" alt="license" /></a>
 </p>
 
@@ -19,38 +18,29 @@
 </p>
 
 <p align="center">
-  <a href="https://anywhen-kappa.vercel.app/">▸ live demo</a>
-  &nbsp;·&nbsp; 
+  <a href="https://anyfamily.site/anywhen">▸ live demo</a>
+  &nbsp;·&nbsp;
+  <a href="https://anyfamily.site/docs/anywhen">▸ full docs</a>
+  &nbsp;·&nbsp;
   <a href="https://anyfamily.site/">▸ any family</a>
 </p>
 
 ---
 
-**One function. Smart defaults. Any locale. ~1.3kb gzip. Zero dependencies.**
+**One export. Smart defaults. Any locale. ~1.3kb gzip. Zero dependencies.**
 
-`Intl` is powerful. anywhen makes it usable.
-
-Built for feeds, chats, notifications, dashboards, and docs — anywhere a raw
-timestamp should read like a person wrote it. No locale files. No plugins. No
-config.
+`Intl` is powerful. anywhen makes it usable. Built for feeds, chats,
+notifications, dashboards and docs — anywhere a raw timestamp should read like a
+person wrote it. No locale files, no plugins, no config.
 
 ```ts
 import { anywhen } from "anywhen";
 
-anywhen(date);
-// "yesterday, 2:35 PM"  — smart mode (default)
-
-anywhen(date, { mode: "absolute", locale: "en" });
-// "Feb 5, 2016"
-
-anywhen(date, { mode: "relative", locale: "en" });
-// "3 hours ago"
-
-anywhen(date, { mode: "relative", locale: "ru" });
-// "3 часа назад"
-
-anywhen(date, { mode: "absolute", locale: "ja" });
-// "2016年2月5日"
+anywhen(date);                                     // "yesterday, 2:35 PM"  — smart (default)
+anywhen(date, { mode: "absolute", locale: "en" }); // "Feb 5, 2016"
+anywhen(date, { mode: "relative", locale: "en" }); // "3 hours ago"
+anywhen(date, { mode: "relative", locale: "ru" }); // "3 часа назад"
+anywhen(date, { mode: "absolute", locale: "ja" }); // "2016年2月5日"
 ```
 
 ---
@@ -70,12 +60,25 @@ anywhen(input);
 anywhen(input, options);
 ```
 
-`input` is a `Date`, unix timestamp, or ISO string.
+`input` is a `Date`, a unix timestamp in milliseconds, or an ISO 8601 string.
 
 ```ts
 anywhen(new Date());
 anywhen(Date.now());
 anywhen("2016-02-05T14:00:00Z");
+```
+
+`anywhen.parts()` takes the same arguments and returns
+`{ type, value, unit? }` parts instead of a string — style the number apart from
+the unit, or rebuild the output your own way.
+
+```tsx
+anywhen.parts(date, { mode: "relative", locale: "en" });
+// [{ type: "integer", value: "3", unit: "hour" }, { type: "literal", value: " hours ago" }]
+
+anywhen.parts(date, { mode: "relative" }).map((p, i) =>
+  p.type === "integer" ? <b key={i}>{p.value}</b> : p.value,
+);
 ```
 
 ---
@@ -107,26 +110,30 @@ anywhen(invoice.date, {
 });
 // "February 5, 2016"
 
-// SSR-safe Next.js / React Server Components
-anywhen(createdAt, {
-  locale: "en",
-  now: requestTime,
-  timeZone: "Europe/Belgrade",
-});
+// SSR-safe: freeze the anchor and the zone
+anywhen(createdAt, { locale: "en", now: requestTime, timeZone: "Europe/Belgrade" });
 ```
+
+In React, `now` is what keeps server and client output identical across the
+hydration boundary. `timeZone` controls both the printed clock and the smart
+calendar boundaries. If you would rather have relative output refresh itself,
+[`anyfamily-react`](https://www.npmjs.com/package/anyfamily-react)'s `useAnywhen`
+ticks so `"3 minutes ago"` never goes stale.
 
 ---
 
 ## modes
 
-The `mode` option picks the rendering strategy. Default is `"smart"`.
+`mode` picks the rendering strategy. Each mode reads only the options that apply
+to it; the rest are ignored.
 
-### smart
+| Mode | Does | Reads |
+| --- | --- | --- |
+| `"smart"` (default) | relative when near, calendar labels for nearby days, absolute when far | `locale`, `now`, `time`, `timeZone`, `style`, `thresholds` |
+| `"absolute"` | plain `Intl.DateTimeFormat` output, shaped by `format` | `locale`, `format`, `timeZone` |
+| `"relative"` | always relative, past and future, never falls back | `locale`, `now`, `numeric`, `style`, `thresholds` |
 
-Context-aware. Picks the most readable format based on distance from now —
-covers past and future.
-
-Calendar labels are symmetric — past and future read the same way:
+Smart mode is symmetric — past and future read the same way:
 
 ```ts
 anywhen(date, { locale: "en" });
@@ -135,269 +142,91 @@ anywhen(date, { locale: "en" });
 // same day         → "today, 14:35"
 // yesterday        → "yesterday, 09:00"
 // tomorrow         → "tomorrow, 09:00"
-// within 7 days    → "Wednesday, 11:20"  (past or future)
+// within 7 days    → "Wednesday, 11:20"
 // older / further  → "Feb 5, 2016"
-
-anywhen(date, { locale: "en", time: false });
-// "yesterday"  — clock removed
-
-anywhen(date, { locale: "en", now: requestTime, timeZone: "Europe/Belgrade" });
-// SSR-safe with stable anchor + timezone
-
-anywhen(date, { locale: "en", style: "short" });
-// "10 min. ago"  — shortens relative wording, calendar labels keep their clock
 ```
 
-Reads: `locale`, `now`, `time`, `timeZone`, `style`, `thresholds`.
-
-`style` maps to `Intl.RelativeTimeFormat` and only changes the relative
-phrasing (`"now"`, `"10 min. ago"`, `"in 3 hr."`). Calendar labels
-(`today`, `yesterday`, weekday) and the absolute fallback are unaffected.
-
-By default, `smart` mode uses `time: true`, so nearby past dates stay useful in
-feeds, chats, and activity logs: `"today, 2:35 PM"`,
-`"yesterday, 09:00"`, `"Wednesday, 11:20"`. Use `time: false` for compact UI
-where the label is enough: `"today"`, `"yesterday"`, `"Wednesday"`.
-
-### absolute
-
-Plain date formatting via `Intl.DateTimeFormat`. Pass `format` to control the
-output shape.
-
-```ts
-anywhen(date, { mode: "absolute", locale: "en" });
-// "Feb 5, 2016"
-
-anywhen(date, {
-  mode: "absolute",
-  locale: "en",
-  format: { hour: "2-digit", minute: "2-digit" },
-});
-// "2:35 PM"
-
-anywhen(date, {
-  mode: "absolute",
-  locale: "en",
-  format: { weekday: "long", month: "long", day: "numeric", year: "numeric" },
-});
-// "Friday, February 5, 2016"
-```
-
-Reads: `locale`, `format`, `timeZone`.
-
-### relative
-
-Always relative. Past and future. Never falls back to absolute.
-
-```ts
-anywhen(date, { mode: "relative", locale: "en" });
-// "3 hours ago"
-// "yesterday"
-// "in 2 weeks"
-
-anywhen(date, { mode: "relative", locale: "en", numeric: true });
-// "1 day ago"   — disables auto-phrases like "yesterday"
-// "1 week ago"
-
-anywhen(date, { mode: "relative", locale: "en", style: "short" });
-// "3 hr. ago"
-
-anywhen(date, { mode: "relative", locale: "en", style: "narrow" });
-// "3h ago"
-```
-
-Reads: `locale`, `now`, `numeric`, `style`, `thresholds`.
+→ [Full breakdown of every mode](https://anyfamily.site/docs/anywhen#modes)
 
 ---
 
 ## options
 
-| Option       | Type                                  | Default                | Used by         |
-| ------------ | ------------------------------------- | ---------------------- | --------------- |
-| `mode`       | `"smart" \| "absolute" \| "relative"` | `"smart"`              | —               |
-| `locale`     | `string \| string[]`                  | runtime locale         | all             |
-| `now`        | `Date \| number \| string`            | current time           | smart, relative |
-| `timeZone`   | `string`                              | runtime timezone       | smart, absolute |
-| `time`       | `boolean`                             | `true`                 | smart           |
-| `numeric`    | `boolean`                             | `false`                | relative        |
-| `style`      | `"long" \| "short" \| "narrow"`       | `"long"`               | smart, relative |
-| `format`     | `Intl.DateTimeFormatOptions`          | `{ day, month, year }` | absolute        |
-| `thresholds` | `Partial<Record<unit, number>>`       | built-in table         | smart, relative |
+| Option | Type | Default | Used by |
+| --- | --- | --- | --- |
+| `mode` | `"smart" \| "absolute" \| "relative"` | `"smart"` | — |
+| `locale` | `string \| string[]` | runtime locale | all |
+| `now` | `Date \| number \| string` | current time | smart, relative |
+| `timeZone` | `string` | runtime timezone | smart, absolute |
+| `time` | `boolean` | `true` | smart |
+| `numeric` | `boolean` | `false` | relative |
+| `style` | `"long" \| "short" \| "narrow"` | `"long"` | smart, relative |
+| `format` | `Intl.DateTimeFormatOptions` | `{ day, month, year }` | absolute |
+| `thresholds` | `Partial<Record<unit, number>>` | built-in table | smart, relative |
 
-Each mode reads only the options that apply to it. The rest are ignored.
-
-### thresholds
-
-Each unit (`second`, `minute`, `hour`, `day`, `week`, `month`) is shown while
-the distance from `now` is below its cutoff, in seconds. Override any subset —
-the rest keep their defaults (`second: 45`, `minute: 2700`, `hour: 79200`,
-`day: 518400`, `week: 2160000`, `month: 28512000`).
-
-```ts
-anywhen(date, { mode: "relative", locale: "en", thresholds: { minute: 5400 } });
-// 50 minutes ago → "50 minutes ago" instead of "1 hour ago"
-
-anywhen(date, { locale: "en", thresholds: { second: 120 } });
-// smart mode: "now" covers the first 2 minutes
-```
-
-In smart mode `thresholds.second` widens the `"now"` window and
-`thresholds.minute` the sub-hour minutes window, symmetrically in both
-directions. Calendar labels (`today`, `yesterday`, `tomorrow`, weekday) and the
-absolute fallback are not affected.
-
----
-
-## parts
-
-`anywhenParts()` accepts the same arguments as `anywhen()` and returns the
-output as `{ type, value, unit? }` parts — style the number apart from the
-unit, or rebuild the string your own way.
-
-```tsx
-import { anywhenParts } from "anywhen";
-
-anywhenParts(date, { mode: "relative", locale: "en" });
-// [
-//   { type: "integer", value: "3", unit: "hour" },
-//   { type: "literal", value: " hours ago" },
-// ]
-
-// React: bold the number
-anywhenParts(date, { mode: "relative" }).map((p, i) =>
-  p.type === "integer" ? <b key={i}>{p.value}</b> : p.value,
-);
-```
-
----
-
-## React / Next.js
-
-Wrap output in `<time>` so machines still get the exact timestamp.
-
-```tsx
-import { anywhen } from "anywhen";
-
-export function PostMeta({ createdAt }: { createdAt: string }) {
-  return <time dateTime={createdAt}>{anywhen(createdAt)}</time>;
-}
-```
-
-For SSR, pass `now` to keep server and client output stable across the
-hydration boundary.
-
-```tsx
-export function PostMeta({
-  createdAt,
-  requestTime,
-}: {
-  createdAt: string;
-  requestTime: string;
-}) {
-  return (
-    <time dateTime={createdAt}>
-      {anywhen(createdAt, {
-        locale: "en",
-        now: requestTime,
-        timeZone: "Europe/Belgrade",
-      })}
-    </time>
-  );
-}
-```
-
-`now` freezes the relative anchor. `timeZone` controls both the displayed
-clock and the smart calendar boundaries (`today`, `yesterday`, weekday).
+→ [What each option does, with examples](https://anyfamily.site/docs/anywhen#options)
 
 ---
 
 ## locales
 
-Pass any valid BCP 47 tag — including regional variants like `en-GB`, `zh-TW`,
-`pt-BR`. Fallback arrays also work.
+Any valid BCP 47 tag, including regional variants and fallback arrays. When
+omitted, native `Intl` uses the runtime locale.
 
 ```ts
-anywhen(date, { locale: "de" }); // "gestern, 14:35"
-anywhen(date, { locale: "ru" }); // "вчера, 14:35"
-anywhen(date, { locale: "fr" }); // "hier, 14:35"
+anywhen(date, { locale: "de" });                    // "gestern, 14:35"
+anywhen(date, { locale: "ru" });                    // "вчера, 14:35"
 anywhen(date, { locale: ["sr-Latn-RS", "en"] });
-
-anywhen(date, { mode: "absolute", locale: "ja" }); // "2016年2月5日"
-anywhen(date, { mode: "absolute", locale: "ar" }); // "٥ فبراير ٢٠١٦"
-
-anywhen(date, { mode: "relative", locale: "tr" }); // "3 saat önce"
+anywhen(date, { mode: "absolute", locale: "ja" });  // "2016年2月5日"
 ```
 
-When omitted, native `Intl` uses the runtime locale.
-
-### calendars and eras
-
-Non-Gregorian calendars need no extra API. Pick the calendar with the BCP 47
-`-u-ca-` extension on `locale`, and ask for the era through `format` — both are
-passed straight to `Intl.DateTimeFormat`.
+Non-Gregorian calendars need no extra API — pick one with the `-u-ca-` extension
+on `locale`, and ask for the era through `format`.
 
 ```ts
-anywhen(date, {
-  mode: "absolute",
-  locale: "ja-JP-u-ca-japanese",
-  format: { era: "short", year: "numeric", month: "short", day: "numeric" },
-});
-// "平成28年2月5日"
-
 anywhen(date, { mode: "absolute", locale: "th-TH-u-ca-buddhist" });
 // "5 ก.พ. 2559"
-
-anywhen(date, { mode: "absolute", locale: "en-US-u-ca-islamic-umalqura" });
-// "Rab. II 26, 1437 AH"
-
-anywhen(date, { mode: "absolute", locale: "zh-TW-u-ca-roc", format: { era: "short", year: "numeric", month: "short", day: "numeric" } });
-// "民國105年2月5日"
 ```
 
-`anywhenParts` reports the era as its own part, so it can be styled apart from
-the year:
-
-```ts
-anywhenParts(date, {
-  mode: "absolute",
-  locale: "en-u-ca-gregory",
-  format: { era: "short", day: "numeric", month: "short", year: "numeric" },
-});
-// [… { type: "year", value: "2016" }, { type: "literal", value: " " }, { type: "era", value: "AD" }]
-```
-
-Two limits worth knowing:
-
-- **Absolute mode only.** Smart mode uses its own fixed date shape and ignores
-  `format`, so eras do not appear in its absolute fallback.
-- **`eraDisplay` is not usable yet.** The option is still Stage 2 and current
-  engines ignore it silently — it never reaches `resolvedOptions()`. Once it
-  ships it will work through `format` with no change to anywhen.
-
-Smart-mode day boundaries (`today`, `yesterday`, weekday) are computed on
-Gregorian days. Every calendar `Intl` ships switches days at local midnight too,
-so the boundaries line up — only the printed labels differ.
+→ [Calendars, eras and their limits](https://anyfamily.site/docs/anywhen#calendars)
 
 ---
 
 ## vs the alternatives
 
-|                     |  anywhen   | dayjs | date-fns |
-| ------------------- | :--------: | :---: | :------: |
-| gzip                | **~1.3kb** | ~7kb  |  ~20kb   |
-| locale data bundled |   **no**   |  yes  |   yes    |
-| locales             |  **200+**  |  140  |   100    |
-| dependencies        |   **0**    |   0   |    0     |
+| | anywhen | dayjs | date-fns |
+| --- | :---: | :---: | :---: |
+| gzip | **~1.3kb** | ~7kb | ~20kb |
+| locale data bundled | **no** | yes | yes |
+| locales | **200+** | 140 | 100 |
+| dependencies | **0** | 0 | 0 |
 
 ---
 
 ## stability
 
-anywhen follows [semver](https://semver.org/). Since 1.0.0 the public API —
-`anywhen`, `anywhenParts`, `AnywhenOptions`, and the exported types — only
-changes shape in a major release. New options arrive in minors; exact
-formatted strings come from `Intl` and may vary between ICU versions, so
-never assert on them across environments.
+anywhen follows [semver](https://semver.org/). The public API is a single
+export — `anywhen`, with `anywhen.parts` on it — plus `AnywhenOptions` and the
+exported types. It only changes shape in a major release. New options arrive in
+minors; exact formatted strings come from `Intl` and may vary between ICU
+versions, so never assert on them across environments.
+
+### migrating from 1.x
+
+2.0 removed the separate `anywhenParts` export. It is the same function, now
+reached through the one name the package exports:
+
+```diff
+- import { anywhen, anywhenParts } from "anywhen";
++ import { anywhen } from "anywhen";
+
+- anywhenParts(date, { mode: "relative" });
++ anywhen.parts(date, { mode: "relative" });
+```
+
+Arguments, return value and throwing behaviour are unchanged, and nothing else
+in the API moved. Every `any*` package follows this shape from 2.0 on: the bare
+call does the job, everything else hangs off the same name.
 
 ---
 
@@ -406,15 +235,33 @@ never assert on them across environments.
 Node.js 18+ · Chrome 71+ · Firefox 65+ · Safari 14+ · Edge Runtime · Cloudflare
 Workers · Deno
 
-CI runs the full suite on Node 20, 22, and 24. Older runtimes down to
-Node 18 work but are not tested on every release.
+CI runs the full suite on Node 20, 22 and 24.
 
 ---
 
 ## the any family
 
-anywhen is part of **any family** — a set of tiny, zero-dependency,
-native-first utilities.
+anywhen is part of **any family** — tiny, zero-dependency wrappers over native
+`Intl`, one API per package.
 
-- [any family site](https://anyfamily.site/)
-- [anyfamily on npm](https://www.npmjs.com/package/anyfamily)
+| | | |
+| --- | --- | --- |
+| [**anywhen**](https://anyfamily.site/anywhen) | dates & relative time | `Intl.DateTimeFormat` |
+| [anyamount](https://anyfamily.site/anyamount) | numbers, currency, units | `Intl.NumberFormat` |
+| [anymany](https://anyfamily.site/anymany) | lists | `Intl.ListFormat` |
+| [anyaround](https://anyfamily.site/anyaround) | names & flags | `Intl.DisplayNames` |
+| [anylong](https://anyfamily.site/anylong) | durations | `Intl.DurationFormat` |
+| [anyplural](https://anyfamily.site/anyplural) | plurals | `Intl.PluralRules` |
+| [anyword](https://anyfamily.site/anyword) | words & graphemes | `Intl.Segmenter` |
+
+Want all of them? [`anyfamily`](https://www.npmjs.com/package/anyfamily) is one
+install for the lot, and [`anyfamily-react`](https://www.npmjs.com/package/anyfamily-react)
+wraps each as a hook with a shared locale provider.
+
+```bash
+npm install anyfamily
+```
+
+---
+
+MIT © [kirilinsky](https://github.com/kirilinsky)
