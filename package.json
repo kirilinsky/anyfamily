@@ -12,15 +12,16 @@
   "license": "MIT",
   "scripts": {
     "versions": "node scripts/versions.mjs",
-    "predev": "node scripts/versions.mjs",
-    "prebuild": "node scripts/versions.mjs",
+    "predev": "pnpm run build:packages && node scripts/versions.mjs",
+    "prebuild": "pnpm run build:packages && node scripts/versions.mjs",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
     "changeset": "changeset",
     "version-packages": "changeset version && node scripts/sync-jsr.mjs && pnpm install --lockfile-only",
-    "release": "pnpm -r --filter './packages/*' build && changeset publish"
+    "release": "pnpm run build:packages && changeset publish",
+    "build:packages": "pnpm --filter \"./packages/*\" build"
   },
   "dependencies": {
     "@dateforge/react-calendar": "^1.6.0",
@@ -46,5 +47,8 @@
     "eslint-config-next": "16.2.1",
     "tailwindcss": "^4",
     "typescript": "^5"
+  },
+  "engines": {
+    "node": ">=22.18.0"
   }
 }

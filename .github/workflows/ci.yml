@@ -106,11 +106,10 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
-      # The site resolves the workspace packages through their dist/, so they
-      # have to be built before Next can import them.
-      - name: build packages
-        run: pnpm --filter "./packages/*" build
-
       - run: pnpm lint
 
+      # Deliberately the same two commands Vercel runs, with no extra build
+      # step: the site resolves the workspace packages through their dist/, and
+      # `prebuild` is what builds them. Keeping this identical means a deploy
+      # can't break in a way CI passed over.
       - run: pnpm build
