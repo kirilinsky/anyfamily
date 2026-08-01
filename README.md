@@ -19,20 +19,21 @@ demo sites have been folded in.
 
 | Package | Does | Intl API | Links |
 | --- | --- | --- | --- |
-| **anyaround** | region / language / script / currency / calendar names + flags | `Intl.DisplayNames` | [demo](https://anyfamily.site/anyaround) · [docs](https://anyfamily.site/docs/anyaround) · [npm](https://www.npmjs.com/package/anyaround) · [repo](https://github.com/kirilinsky/anyaround) |
-| **anyamount** | numbers, currency, units | `Intl.NumberFormat` | [demo](https://anyfamily.site/anyamount) · [docs](https://anyfamily.site/docs/anyamount) · [npm](https://www.npmjs.com/package/anyamount) · [repo](https://github.com/kirilinsky/anyamount) |
-| **anywhen** | dates, times, relative phrasing | `Intl.DateTimeFormat` | [demo](https://anyfamily.site/anywhen) · [docs](https://anyfamily.site/docs/anywhen) · [npm](https://www.npmjs.com/package/anywhen) · [repo](https://github.com/kirilinsky/anywhen) |
-| **anymany** | string lists | `Intl.ListFormat` | [demo](https://anyfamily.site/anymany) · [docs](https://anyfamily.site/docs/anymany) · [npm](https://www.npmjs.com/package/anymany) · [repo](https://github.com/kirilinsky/anymany) |
-| **anylong** | durations | `Intl.DurationFormat` | [demo](https://anyfamily.site/anylong) · [docs](https://anyfamily.site/docs/anylong) · [npm](https://www.npmjs.com/package/anylong) · [repo](https://github.com/kirilinsky/anylong) |
-| **anyplural** | cardinal / ordinal plurals | `Intl.PluralRules` | [demo](https://anyfamily.site/anyplural) · [docs](https://anyfamily.site/docs/anyplural) · [npm](https://www.npmjs.com/package/anyplural) · [repo](https://github.com/kirilinsky/anyplural) |
-| **anyword** | words / graphemes / sentences, count + truncate | `Intl.Segmenter` | [demo](https://anyfamily.site/anyword) · [docs](https://anyfamily.site/docs/anyword) · [npm](https://www.npmjs.com/package/anyword) · [repo](https://github.com/kirilinsky/anyword) |
+| **anyaround** | region / language / script / currency / calendar names + flags | `Intl.DisplayNames` | [demo](https://anyfamily.site/anyaround) · [docs](https://anyfamily.site/docs/anyaround) · [npm](https://www.npmjs.com/package/anyaround) · [source](https://github.com/kirilinsky/anyfamily/tree/main/packages/anyaround) |
+| **anyamount** | numbers, currency, units | `Intl.NumberFormat` | [demo](https://anyfamily.site/anyamount) · [docs](https://anyfamily.site/docs/anyamount) · [npm](https://www.npmjs.com/package/anyamount) · [source](https://github.com/kirilinsky/anyfamily/tree/main/packages/anyamount) |
+| **anywhen** | dates, times, relative phrasing | `Intl.DateTimeFormat` | [demo](https://anyfamily.site/anywhen) · [docs](https://anyfamily.site/docs/anywhen) · [npm](https://www.npmjs.com/package/anywhen) · [source](https://github.com/kirilinsky/anyfamily/tree/main/packages/anywhen) |
+| **anymany** | string lists | `Intl.ListFormat` | [demo](https://anyfamily.site/anymany) · [docs](https://anyfamily.site/docs/anymany) · [npm](https://www.npmjs.com/package/anymany) · [source](https://github.com/kirilinsky/anyfamily/tree/main/packages/anymany) |
+| **anylong** | durations | `Intl.DurationFormat` | [demo](https://anyfamily.site/anylong) · [docs](https://anyfamily.site/docs/anylong) · [npm](https://www.npmjs.com/package/anylong) · [source](https://github.com/kirilinsky/anyfamily/tree/main/packages/anylong) |
+| **anyplural** | cardinal / ordinal plurals | `Intl.PluralRules` | [demo](https://anyfamily.site/anyplural) · [docs](https://anyfamily.site/docs/anyplural) · [npm](https://www.npmjs.com/package/anyplural) · [source](https://github.com/kirilinsky/anyfamily/tree/main/packages/anyplural) |
+| **anyword** | words / graphemes / sentences, count + truncate | `Intl.Segmenter` | [demo](https://anyfamily.site/anyword) · [docs](https://anyfamily.site/docs/anyword) · [npm](https://www.npmjs.com/package/anyword) · [source](https://github.com/kirilinsky/anyfamily/tree/main/packages/anyword) |
 
 ## how it works
 
-- **Honest examples.** Each demo imports the real published package and runs it
-  in the browser — the revealed output is the genuine return value, never
-  hardcoded. Presets are ordered simplest-first so the essence reads before the
-  option-rich variants.
+- **Honest examples.** Each demo imports the real package — workspace-linked to
+  the source in `packages/`, so what you see is what the next release ships —
+  and runs it in the browser. The revealed output is the genuine return value,
+  never hardcoded. Presets are ordered simplest-first so the essence reads
+  before the option-rich variants.
 - **Live version badges.** `scripts/versions.mjs` (a `prebuild` / `predev` step)
   pulls each package's latest version from the npm registry into
   `data/versions.json`, so every deploy shows current versions. It falls back to
@@ -46,13 +47,28 @@ demo sites have been folded in.
 
 ## dev
 
+This is a pnpm workspace: the landing app at the root, and all nine packages
+under `packages/`.
+
 ```bash
 pnpm install
+
+# the site
 pnpm dev          # refreshes versions, then next dev
 pnpm build        # refreshes versions, then next build
 pnpm lint
-pnpm versions     # refresh data/versions.json only
+
+# the packages
+pnpm --filter "./packages/*" test
+pnpm --filter "./packages/*" build
+pnpm --filter anywhen test        # just one
 ```
+
+The site resolves the packages through their `dist/`, so **rebuild a package
+after editing it** or the demos keep showing the old output.
+
+Releases go through changesets — see [RELEASING.md](RELEASING.md). Package
+layout and conventions are in [PACKAGE-STANDARD.md](PACKAGE-STANDARD.md).
 
 Next.js 16 · React 19 · Tailwind v4 · TypeScript.
 

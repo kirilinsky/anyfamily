@@ -20,6 +20,7 @@ export type Pkg = {
   description: string;
   tags: string[];
   npm: string;
+  /** Source directory inside this monorepo — the old per-package repos are archived. */
   github: string;
   /** Scroll-rail label on the landing page. */
   navLabel: string;
@@ -51,7 +52,7 @@ export const PACKAGES: Pkg[] = [
       "Dates and times into localized strings and relative phrasing. Built on native Intl, no data files.",
     tags: ["dates", "datetimeformat", "relative"],
     npm: "https://www.npmjs.com/package/anywhen",
-    github: "https://github.com/kirilinsky/anywhen",
+    github: "https://github.com/kirilinsky/anyfamily/tree/main/packages/anywhen",
     navLabel: "a | w",
     hasDocs: true,
     footerLine: "Intl is powerful. anywhen makes it usable.",
@@ -65,7 +66,7 @@ export const PACKAGES: Pkg[] = [
       "Numbers, currency, and units into localized, human-readable strings. One function, three modes, any locale.",
     tags: ["currency", "numberformat", "units"],
     npm: "https://www.npmjs.com/package/anyamount",
-    github: "https://github.com/kirilinsky/anyamount",
+    github: "https://github.com/kirilinsky/anyfamily/tree/main/packages/anyamount",
     navLabel: "a | a",
     hasDocs: true,
     footerLine: "Intl is powerful. anyamount makes it usable.",
@@ -79,7 +80,7 @@ export const PACKAGES: Pkg[] = [
       "String arrays into localized lists — sort and join in any locale with the native list formatter.",
     tags: ["lists", "listformat", "sort"],
     npm: "https://www.npmjs.com/package/anymany",
-    github: "https://github.com/kirilinsky/anymany",
+    github: "https://github.com/kirilinsky/anyfamily/tree/main/packages/anymany",
     navLabel: "a | m",
     hasDocs: true,
     footerLine: "Intl is powerful. anymany makes it usable.",
@@ -93,7 +94,7 @@ export const PACKAGES: Pkg[] = [
       "Region, language, script, currency, and calendar codes into their localized names — decorated with country flags. Any Intl locale.",
     tags: ["flags", "displaynames", "ssr"],
     npm: "https://www.npmjs.com/package/anyaround",
-    github: "https://github.com/kirilinsky/anyaround",
+    github: "https://github.com/kirilinsky/anyfamily/tree/main/packages/anyaround",
     navLabel: "a | r",
     hasDocs: true,
     footerLine: "Intl knows every name. anyaround adds the flag.",
@@ -107,7 +108,7 @@ export const PACKAGES: Pkg[] = [
       "Any duration in — a number, two Dates, an ISO 8601 string, shorthand, or a duration record — into a localized string. One function over Intl.DurationFormat.",
     tags: ["duration", "durationformat", "elapsed"],
     npm: "https://www.npmjs.com/package/anylong",
-    github: "https://github.com/kirilinsky/anylong",
+    github: "https://github.com/kirilinsky/anyfamily/tree/main/packages/anylong",
     navLabel: "a | l",
     hasDocs: true,
     footerLine: "Intl is powerful. anylong makes it usable.",
@@ -121,7 +122,7 @@ export const PACKAGES: Pkg[] = [
       "Any count into its correct plural form — cardinal or ordinal, in any locale. One function over Intl.PluralRules, no rule tables.",
     tags: ["plurals", "pluralrules", "ordinal"],
     npm: "https://www.npmjs.com/package/anyplural",
-    github: "https://github.com/kirilinsky/anyplural",
+    github: "https://github.com/kirilinsky/anyfamily/tree/main/packages/anyplural",
     navLabel: "a | p",
     hasDocs: true,
     footerLine: "Intl knows the rules. anyplural makes them one call.",
@@ -135,7 +136,7 @@ export const PACKAGES: Pkg[] = [
       "Text into locale-correct words, graphemes and sentences — count and truncate without ripping an emoji in half. One function over Intl.Segmenter.",
     tags: ["segmenter", "grapheme", "truncate"],
     npm: "https://www.npmjs.com/package/anyword",
-    github: "https://github.com/kirilinsky/anyword",
+    github: "https://github.com/kirilinsky/anyfamily/tree/main/packages/anyword",
     navLabel: "a | wd",
     hasDocs: true,
     footerLine: "Intl knows the boundaries. anyword hands them to you.",
