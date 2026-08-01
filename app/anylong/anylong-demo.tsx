@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { anylong, anylongParts, type AnylongPart } from "anylong";
+import { anylong, type AnylongPart } from "anylong";
 
 type Style = "long" | "short" | "narrow" | "digital";
 
@@ -61,7 +61,7 @@ export function AnylongDemo() {
   let error: string | null = null;
   try {
     result = anylong(value, { style, locale });
-    parts = anylongParts(value, { style, locale });
+    parts = anylong.parts(value, { style, locale });
   } catch (e) {
     error = e instanceof Error ? e.message : String(e);
   }
@@ -196,7 +196,7 @@ export function AnylongDemo() {
           <div
             className={`flex max-w-full flex-wrap items-center justify-center gap-x-1.5 gap-y-1 px-2 font-mono text-[11px] transition-opacity duration-200 ${done ? "opacity-100" : "opacity-0"}`}
           >
-            <span className="text-white/25">anylongParts →</span>
+            <span className="text-white/25">anylong.parts →</span>
             {parts.map((p, i) => (
               <span
                 key={i}

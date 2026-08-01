@@ -14,13 +14,15 @@ const NAV: DocsNavItem[] = [
   { id: "overview", label: "Overview" },
   { id: "install", label: "Install" },
   { id: "anyplural", label: "anyplural()" },
-  { id: "parts", label: "anypluralParts()" },
+  { id: "migrating", label: "From 1.x" },
+  { id: "parts", label: "anyplural.parts()" },
   { id: "forms", label: "Forms" },
   { id: "categories", label: "Categories" },
   { id: "zero", label: "The zero form" },
   { id: "options", label: "Options" },
-  { id: "locales", label: "Locales" },
+  { id: "recipes", label: "Recipes" },
   { id: "react", label: "React" },
+  { id: "locales", label: "Locales" },
   { id: "ssr", label: "SSR" },
   { id: "compatibility", label: "Compatibility" },
   { id: "limitations", label: "Limitations" },
@@ -141,22 +143,42 @@ anyplural(5, { one: 'plik', few: 'pliki', many: 'plików' }, { locale: 'pl' })
         </p>
       </Section>
 
-      <Section id="parts" title="anypluralParts()">
+      <Section id="migrating" title="Migrating from 1.x">
+        <p>
+          2.0 removed the separate <Mono>anypluralParts</Mono> 
+           — they are the
+          same functions and values, reached through the one name the package
+          exports.
+        </p>
+        <Code>{`- import { anyplural, anypluralParts } from 'anyplural'
++ import { anyplural } from 'anyplural'
+
+- anypluralParts(5, forms)
++ anyplural.parts(5, forms)`}</Code>
+        <p>
+          Arguments, return values and throwing behaviour are unchanged, and
+          nothing else in the API moved. Every <Mono>any*</Mono> package follows
+          this shape from 2.0 on: the bare call does the job, everything else
+          hangs off the same name.
+        </p>
+      </Section>
+
+      <Section id="parts" title="anyplural.parts()">
         <p>
           Same arguments as <Mono>anyplural()</Mono>, but returns{" "}
           <Mono>{"{ type, value }"}</Mono> parts instead of a string — style the
           number apart from the word, or rebuild the output your own way.
         </p>
-        <Code>{`import { anypluralParts } from 'anyplural'
+        <Code>{`import { anyplural } from 'anyplural'
 
-anypluralParts(5, { one: 'item', other: 'items' }, { locale: 'en' })
+anyplural.parts(5, { one: 'item', other: 'items' }, { locale: 'en' })
 // [
 //   { type: 'integer', value: '5' },
 //   { type: 'literal', value: ' items' },
 // ]
 
 // React: bold the number
-anypluralParts(count, forms).map((p, i) =>
+anyplural.parts(count, forms).map((p, i) =>
   p.type === 'integer' ? <b key={i}>{p.value}</b> : p.value,
 )`}</Code>
         <p>
@@ -247,7 +269,7 @@ anyplural(0, { one: 'message', other: 'messages' }, { locale: 'en' })
 anyplural(2, { zero: 'No messages', one: 'message', other: 'messages' }, { locale: 'en' })
 // "2 messages"         — zero only applies at 0`}</Code>
         <p>
-          <Mono>anypluralParts</Mono> reports this as a single{" "}
+          <Mono>anyplural.parts</Mono> reports this as a single{" "}
           <Mono>literal</Mono> part, since there is no number to split out.
         </p>
         <p>
@@ -277,6 +299,46 @@ anyplural(2, { zero: 'No messages', one: 'message', other: 'messages' }, { local
         />
       </Section>
 
+      <Section id="recipes" title="Recipes">
+        <p>Copy, paste, move on.</p>
+        <Code>{`// Item counter
+anyplural(cart.length, { one: 'item', other: 'items' })
+// "3 items"
+
+// Localized "N years"
+anyplural(age, { one: 'год', few: 'года', many: 'лет' }, { locale: 'ru' })
+// "5 лет"
+
+// Ranking / leaderboard position
+anyplural(rank, { one: 'st', two: 'nd', few: 'rd', other: 'th' }, { type: 'ordinal' })
+// "1st"
+
+// Empty state — the zero form replaces the whole output, number included
+anyplural(count, { zero: 'No messages', one: 'message', other: 'messages' })
+// 0 → "No messages", 1 → "1 message", 9 → "9 messages"
+
+// Big numbers, grouped
+anyplural(inbox, { one: 'email', other: 'emails' }, { locale: 'en' })
+// "12,480 emails" `}</Code>
+      </Section>
+
+      <Section id="react" title="React">
+        <p>
+          <Mono>anyfamily-react</Mono> exposes the same function as{" "}
+          <Mono>useAnyplural</Mono>, reading the locale from a shared{" "}
+          <Mono>AnyfamilyProvider</Mono> so you do not thread it through every
+          call.
+        </p>
+        <Code>{`import { AnyfamilyProvider, useAnyplural } from 'anyfamily-react'
+
+function Inbox({ count }: { count: number }) {
+  return <p>{useAnyplural(count, { one: 'message', other: 'messages' })}</p>
+}
+
+<AnyfamilyProvider locale="ru">
+  <Inbox count={5} />
+</AnyfamilyProvider>`}</Code>
+      </Section>
       <Section id="locales" title="Locales">
         <p>
           Same call, different rules — no locale files, no rule tables of your
@@ -313,23 +375,6 @@ anyplural(1999, { one: 'euro', other: 'euros' }, {
 // "€1,999.00 euros"`}</Code>
       </Section>
 
-      <Section id="react" title="React">
-        <p>
-          <Mono>anyfamily-react</Mono> exposes the same function as{" "}
-          <Mono>useAnyplural</Mono>, reading the locale from a shared{" "}
-          <Mono>AnyfamilyProvider</Mono> so you do not thread it through every
-          call.
-        </p>
-        <Code>{`import { AnyfamilyProvider, useAnyplural } from 'anyfamily-react'
-
-function Inbox({ count }: { count: number }) {
-  return <p>{useAnyplural(count, { one: 'message', other: 'messages' })}</p>
-}
-
-<AnyfamilyProvider locale="ru">
-  <Inbox count={5} />
-</AnyfamilyProvider>`}</Code>
-      </Section>
 
       <Section id="ssr" title="SSR">
         <p>

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { anyaround, anyaroundInfo } from "./index";
+import { anyaround } from "./index";
 
 describe("anyaround — smart detection", () => {
   it("resolves an alpha-2 region to its name", () => {
@@ -80,9 +80,9 @@ describe("anyaround — explicit modes", () => {
   });
 });
 
-describe("anyaroundInfo", () => {
+describe("anyaround.info", () => {
   it("returns the structured record for a region", () => {
-    expect(anyaroundInfo("US", { locale: "en" })).toEqual({
+    expect(anyaround.info("US", { locale: "en" })).toEqual({
       code: "US",
       type: "region",
       name: "United States",
@@ -92,15 +92,15 @@ describe("anyaroundInfo", () => {
   });
 
   it("returns an empty flag for non-regions", () => {
-    const info = anyaroundInfo("en", { locale: "fr" });
+    const info = anyaround.info("en", { locale: "fr" });
     expect(info.type).toBe("language");
     expect(info.flag).toBe("");
     expect(info.name).toBe("anglais");
   });
 
   it("canonicalizes the code casing", () => {
-    expect(anyaroundInfo("us", { mode: "region", locale: "en" }).code).toBe("US");
-    expect(anyaroundInfo("LATN", { mode: "script", locale: "en" }).code).toBe("Latn");
+    expect(anyaround.info("us", { mode: "region", locale: "en" }).code).toBe("US");
+    expect(anyaround.info("LATN", { mode: "script", locale: "en" }).code).toBe("Latn");
   });
 });
 
@@ -115,8 +115,8 @@ describe("fallback", () => {
   });
 
   it("reports found=false on a miss and found=true on a hit", () => {
-    expect(anyaroundInfo("QZ", { mode: "region", locale: "en" }).found).toBe(false);
-    expect(anyaroundInfo("US", { mode: "region", locale: "en" }).found).toBe(true);
+    expect(anyaround.info("QZ", { mode: "region", locale: "en" }).found).toBe(false);
+    expect(anyaround.info("US", { mode: "region", locale: "en" }).found).toBe(true);
   });
 });
 
@@ -158,5 +158,18 @@ describe("options union (compile-time)", () => {
     // @ts-expect-error display is not valid in currency mode
     anyaround("USD", { mode: "currency", display: "flag" });
     expect(true).toBe(true);
+  });
+});
+
+describe("public surface", () => {
+  it("exports exactly one name, with extras hanging off it", async () => {
+    const mod = await import("./index");
+    expect(Object.keys(mod)).toEqual(["anyaround"]);
+  });
+
+  it("info backs the string form", () => {
+    const opts = { locale: "en", display: "flag-name" } as const;
+    const { name, flag } = anyaround.info("US", opts);
+    expect(anyaround("US", opts)).toBe(`${flag} ${name}`);
   });
 });

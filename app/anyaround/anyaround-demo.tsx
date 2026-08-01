@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { anyaround, anyaroundInfo } from "anyaround";
+import { anyaround } from "anyaround";
 import type { AnyaroundOptions, Display, Mode } from "anyaround";
 
 const LOCALES = ["en", "de", "ru", "ja", "ar", "hi", "pt-BR", "fr"];
@@ -77,7 +77,7 @@ export function AnyaroundDemo() {
   const info = (() => {
     if (codeStr.trim() === "") return null;
     try {
-      return anyaroundInfo(codeStr, options);
+      return anyaround.info(codeStr, options);
     } catch {
       return null;
     }
@@ -253,7 +253,7 @@ export function AnyaroundDemo() {
         >
           {info && (
             <>
-              <span className="text-white/25">anyaroundInfo →</span>
+              <span className="text-white/25">anyaround.info →</span>
               {(
                 [
                   ["code", info.code],

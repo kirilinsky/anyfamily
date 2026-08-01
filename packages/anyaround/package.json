@@ -1,7 +1,7 @@
 {
   "name": "anyaround",
   "version": "1.0.0",
-  "description": "Micro smart locale display — one function, any region, language, script, currency or calendar code to its localized name, with country flags. Any Intl locale.",
+  "description": "Micro smart locale display \u2014 one function, any region, language, script, currency or calendar code to its localized name, with country flags. Any Intl locale.",
   "type": "module",
   "sideEffects": false,
   "main": "./dist/index.cjs",
@@ -75,11 +75,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/kirilinsky/anyaround.git"
+    "url": "git+https://github.com/kirilinsky/anyfamily.git",
+    "directory": "packages/anyaround"
   },
   "author": "Kirilinsky (https://github.com/kirilinsky)",
   "bugs": {
-    "url": "https://github.com/kirilinsky/anyaround/issues"
+    "url": "https://github.com/kirilinsky/anyfamily/issues"
   },
-  "homepage": "https://anyaround.vercel.app"
+  "homepage": "https://anyfamily.site/anyaround"
 }

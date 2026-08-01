@@ -77,7 +77,7 @@ export type SingleUnit =
 /** A sanctioned unit: either a single unit or a compound `"<unit>-per-<unit>"` pair (`"kilometer-per-hour"`). */
 export type Unit = SingleUnit | `${SingleUnit}-per-${SingleUnit}`;
 
-/** One piece of formatted output returned by {@linkcode anyamountParts} — `Intl.NumberFormat.formatToParts` output, unchanged. */
+/** One piece of formatted output returned by {@linkcode anyamount.parts} — `Intl.NumberFormat.formatToParts` output, unchanged. */
 export type AnyamountPart = Intl.NumberFormatPart;
 
 /** Options every mode understands. */
@@ -124,7 +124,7 @@ export interface UnitOptions extends BaseOptions {
 }
 
 /**
- * Options for {@linkcode anyamount} and {@linkcode anyamountParts} — a
+ * Options for {@linkcode anyamount} and {@linkcode anyamount.parts} — a
  * discriminated union on `mode`. TypeScript requires `currency` in currency
  * mode and `unit` in unit mode at compile time; plain JavaScript callers get
  * the same guarantees as runtime `TypeError`s.
@@ -231,7 +231,7 @@ function plan(value: number | bigint, options: AnyamountOptions): Intl.NumberFor
  * @throws {TypeError} If `value` is not a number or bigint, is `NaN`, currency mode is missing `currency`, or unit mode is missing `unit`.
  * @throws {RangeError} If `options.mode` is unknown.
  */
-export function anyamount(value: number | bigint, options: AnyamountOptions = {}): string {
+function format(value: number | bigint, options: AnyamountOptions = {}): string {
   return plan(value, options).format(value);
 }
 
@@ -260,14 +260,14 @@ export function anyamount(value: number | bigint, options: AnyamountOptions = {}
  * @throws {TypeError} If `value` is not a number or bigint, is `NaN`, currency mode is missing `currency`, or unit mode is missing `unit`.
  * @throws {RangeError} If `options.mode` is unknown.
  */
-export function anyamountParts(
+function parts(
   value: number | bigint,
   options: AnyamountOptions = {},
 ): AnyamountPart[] {
   return plan(value, options).formatToParts(value);
 }
 
-/** Options for {@linkcode anyamountSymbol}. */
+/** Options for {@linkcode anyamount.symbol}. */
 export interface SymbolOptions {
   /** Output locale. Defaults to the runtime locale. */
   locale?: Locale;
@@ -297,9 +297,9 @@ export interface SymbolOptions {
  * @throws {TypeError} If `currency` is missing or not a string.
  * @throws {RangeError} If `currency` is not a well-formed ISO 4217 code — `Intl` decides.
  */
-export function anyamountSymbol(currency: string, options: SymbolOptions = {}): string {
+function symbol(currency: string, options: SymbolOptions = {}): string {
   if (!currency || typeof currency !== "string")
-    throw new TypeError('anyamount: anyamountSymbol requires an ISO 4217 currency code, e.g. "USD"');
+    throw new TypeError('anyamount: anyamount.symbol requires an ISO 4217 currency code, e.g. "USD"');
 
   const { locale, display = "narrowSymbol" } = options;
   const parts = nf(locale, {
@@ -310,3 +310,47 @@ export function anyamountSymbol(currency: string, options: SymbolOptions = {}): 
 
   return parts.find((p) => p.type === "currency")!.value;
 }
+
+/**
+ * Formats a number as a localized string using native `Intl.NumberFormat` —
+ * compact for big values, currency, or sanctioned units.
+ *
+ * The package exports this one name. Anything beyond the plain call hangs off
+ * it: {@linkcode anyamount.parts} and {@linkcode anyamount.symbol}.
+ *
+ * @example
+ * ```ts
+ * anyamount(1234567);                                        // "1.2M"
+ * anyamount(1999, { mode: "currency", currency: "EUR" });     // "€1,999.00"
+ * anyamount(3.2, { mode: "unit", unit: "gigabyte" });         // "3.2 GB"
+ * ```
+ */
+export const anyamount = Object.assign(format, {
+  /**
+   * Like calling {@linkcode anyamount} directly, but returns the
+   * `Intl.NumberFormat.formatToParts` output instead of a string — style the
+   * number apart from the currency symbol or unit.
+   *
+   * @example
+   * ```ts
+   * anyamount.parts(1999, { mode: "currency", currency: "EUR", locale: "en" });
+   * // [{ type: "currency", value: "€" }, { type: "integer", value: "1" }, …]
+   * ```
+   */
+  parts,
+
+  /**
+   * Resolves an ISO 4217 currency code to its localized symbol, with no number
+   * attached — for labels, currency pickers and input affixes.
+   *
+   * Takes a currency code rather than an amount, so it is a static on the
+   * package name instead of hanging off a formatted result.
+   *
+   * @example
+   * ```ts
+   * anyamount.symbol("USD", { locale: "en" });                    // "$"
+   * anyamount.symbol("USD", { locale: "en", display: "name" });   // "US dollars"
+   * ```
+   */
+  symbol,
+});

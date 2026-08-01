@@ -14,10 +14,13 @@ const NAV: DocsNavItem[] = [
   { id: "overview", label: "Overview" },
   { id: "install", label: "Install" },
   { id: "anymany", label: "anymany()" },
-  { id: "parts", label: "anymanyParts()" },
+  { id: "migrating", label: "From 1.x" },
+  { id: "parts", label: "anymany.parts()" },
+  { id: "sort", label: "sort" },
+  { id: "max", label: "max" },
   { id: "options", label: "Options" },
-  { id: "sort", label: "Sorting" },
-  { id: "max", label: "Max + overflow" },
+  { id: "recipes", label: "Recipes" },
+  { id: "react", label: "React / Next.js" },
   { id: "locales", label: "Locales" },
   { id: "ssr", label: "SSR" },
   { id: "compatibility", label: "Compatibility" },
@@ -120,15 +123,35 @@ anymany(['cherry', 'apple', 'Banana'], { sort: true })
 // "apple, Banana, and cherry"`}</Code>
       </Section>
 
-      <Section id="parts" title="anymanyParts()">
+      <Section id="migrating" title="Migrating from 1.x">
+        <p>
+          2.0 removed the separate <Mono>anymanyParts</Mono> 
+           — they are the
+          same functions and values, reached through the one name the package
+          exports.
+        </p>
+        <Code>{`- import { anymany, anymanyParts } from 'anymany'
++ import { anymany } from 'anymany'
+
+- anymanyParts(items)
++ anymany.parts(items)`}</Code>
+        <p>
+          Arguments, return values and throwing behaviour are unchanged, and
+          nothing else in the API moved. Every <Mono>any*</Mono> package follows
+          this shape from 2.0 on: the bare call does the job, everything else
+          hangs off the same name.
+        </p>
+      </Section>
+
+      <Section id="parts" title="anymany.parts()">
         <p>
           Same arguments as <Mono>anymany()</Mono>, but returns the output as{" "}
           <Mono>{"{ type, value }"}</Mono> parts instead of a string — style the
           items apart from the separators, or rebuild the output your own way.
         </p>
-        <Code>{`import { anymanyParts } from 'anymany'
+        <Code>{`import { anymany } from 'anymany'
 
-anymanyParts(['a', 'b'])
+anymany.parts(['a', 'b'])
 // [
 //   { type: 'element', value: 'a' },
 //   { type: 'literal', value: ' and ' },
@@ -136,11 +159,45 @@ anymanyParts(['a', 'b'])
 // ]
 
 // React: bold the items
-anymanyParts(tags).map((p, i) =>
+anymany.parts(tags).map((p, i) =>
   p.type === 'element' ? <b key={i}>{p.value}</b> : p.value,
 )`}</Code>
       </Section>
 
+      <Section id="sort" title="Sorting">
+        <p>
+          <Mono>sort</Mono> runs the items through <Mono>Intl.Collator</Mono>{" "}
+          before joining — real language-aware collation, not code-point order.
+          The input array is never mutated.
+        </p>
+        <Code>{`anymany(['cherry', 'apple', 'Banana'], { sort: true })
+// "apple, Banana, and cherry"   ← plain .sort() puts "Banana" first
+
+anymany(['file10', 'file2'], { sort: 'numeric' })
+// "file2 and file10"            ← numbers compared by value
+
+anymany(['a', 'A'], { sort: { caseFirst: 'upper' } })
+// "A and a"                     ← any Intl.CollatorOptions`}</Code>
+      </Section>
+      <Section id="max" title="Max + overflow">
+        <p>
+          <Mono>max</Mono> caps the visible items; the rest collapse into a
+          trailing <Mono>&quot;+N&quot;</Mono> counter. Digits come from{" "}
+          <Mono>Intl.NumberFormat</Mono>, so they localize — no words,
+          locale-safe.
+        </p>
+        <Code>{`anymany(['x', 'y', 'z', 'a', 'b', 'c', 'd'], { max: 3 })
+// "x, y, z, and +4"
+
+anymany(['x', 'y', 'z', 'a', 'b'], { max: 3, overflow: (n) => \`\${n} more\` })
+// "x, y, z, and 2 more"`}</Code>
+        <p>
+          The overflow item is just another list element, so the default{" "}
+          <Mono>type</Mono> places an &quot;and&quot; before it. That is
+          intentional — no hidden joiner magic. Prefer a plain comma list?
+          Combine <Mono>max</Mono> with <Mono>type: &apos;unit&apos;</Mono>.
+        </p>
+      </Section>
       <Section id="options" title="Options">
         <Prop
           name="locale"
@@ -180,41 +237,56 @@ anymanyParts(tags).map((p, i) =>
         />
       </Section>
 
-      <Section id="sort" title="Sorting">
-        <p>
-          <Mono>sort</Mono> runs the items through <Mono>Intl.Collator</Mono>{" "}
-          before joining — real language-aware collation, not code-point order.
-          The input array is never mutated.
-        </p>
-        <Code>{`anymany(['cherry', 'apple', 'Banana'], { sort: true })
-// "apple, Banana, and cherry"   ← plain .sort() puts "Banana" first
+      <Section id="recipes" title="Recipes">
+        <p>Copy, paste, move on.</p>
+        <Code>{`// Tag list
+anymany(post.tags, { locale: 'en' })
+// "design, typography, and color"
 
-anymany(['file10', 'file2'], { sort: 'numeric' })
-// "file2 and file10"            ← numbers compared by value
+// Sizes / options — "or" instead of "and"
+anymany(product.sizes, { type: 'disjunction' })
+// "S, M, or L"
 
-anymany(['a', 'A'], { sort: { caseFirst: 'upper' } })
-// "A and a"                     ← any Intl.CollatorOptions`}</Code>
+// Plain comma list, no joiner word
+anymany(['4 kg', '2 m'], { type: 'unit' })
+// "4 kg, 2 m"
+
+// Alphabetical the way the language actually orders letters
+anymany(names, { sort: true, locale: 'de' })
+// "Apfel, Öl und Zebra"
+
+// Filenames with numbers, ordered by value
+anymany(files, { sort: 'numeric' })
+// "file2 and file10"
+
+// Cap a long list
+anymany(participants, { max: 3 })
+// "Ann, Bob, Cy, and +4"
+
+// …with your own overflow wording
+anymany(participants, { max: 3, overflow: (n) => \`\${n} more\` })
+// "Ann, Bob, Cy, and 2 more" `}</Code>
       </Section>
 
-      <Section id="max" title="Max + overflow">
+      <Section id="react" title="React / Next.js">
         <p>
-          <Mono>max</Mono> caps the visible items; the rest collapse into a
-          trailing <Mono>&quot;+N&quot;</Mono> counter. Digits come from{" "}
-          <Mono>Intl.NumberFormat</Mono>, so they localize — no words,
-          locale-safe.
+          anymany is pure and synchronous, so it works in a component as-is. What 
+          <Mono>anyfamily-react</Mono> adds is a shared locale: set it once on 
+          <Mono>AnyfamilyProvider</Mono> and every hook below picks it up, so you
+          do not thread <Mono>locale</Mono> through every call.
         </p>
-        <Code>{`anymany(['x', 'y', 'z', 'a', 'b', 'c', 'd'], { max: 3 })
-// "x, y, z, and +4"
+        <Code>{`import { AnyfamilyProvider, useAnymany } from 'anyfamily-react'
 
-anymany(['x', 'y', 'z', 'a', 'b'], { max: 3, overflow: (n) => \`\${n} more\` })
-// "x, y, z, and 2 more"`}</Code>
-        <p>
-          The overflow item is just another list element, so the default{" "}
-          <Mono>type</Mono> places an &quot;and&quot; before it. That is
-          intentional — no hidden joiner magic. Prefer a plain comma list?
-          Combine <Mono>max</Mono> with <Mono>type: &apos;unit&apos;</Mono>.
-        </p>
+function Tags({ tags }: { tags: string[] }) {
+  return <p>{useAnymany(tags, { sort: true, max: 5 })}</p>
+}
+
+<AnyfamilyProvider locale="en">
+  <Tags tags={post.tags} />
+</AnyfamilyProvider>`}</Code>
       </Section>
+
+
 
       <Section id="locales" title="Locales">
         <p>Same calls in a few languages — no extra setup, no locale files.</p>

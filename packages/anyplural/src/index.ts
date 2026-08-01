@@ -128,9 +128,32 @@ function plan(count: number, forms: Forms, options: AnypluralOptions): Seg[] {
   return [{ f: nf(locale, format), n: count }, { t: separator + word }];
 }
 
+function format(
+  count: number,
+  forms: Forms,
+  options: AnypluralOptions = {},
+): string {
+  return plan(count, forms, options)
+    .map((s) => ("t" in s ? s.t : s.f.format(s.n)))
+    .join("");
+}
+
+function parts(
+  count: number,
+  forms: Forms,
+  options: AnypluralOptions = {},
+): AnypluralPart[] {
+  return plan(count, forms, options).flatMap((s) =>
+    "t" in s ? { type: "literal", value: s.t } : s.f.formatToParts(s.n),
+  );
+}
+
 /**
  * Picks the correct plural form for `count` in the given locale, formats the
  * count via native `Intl.NumberFormat`, and interpolates the two.
+ *
+ * The package exports this one name. Anything beyond the plain call hangs off
+ * it — currently {@linkcode anyplural.parts}.
  *
  * @example
  * ```ts
@@ -147,42 +170,22 @@ function plan(count: number, forms: Forms, options: AnypluralOptions): Seg[] {
  * @returns The formatted string.
  * @throws {RangeError} If `count` is not a finite number.
  */
-export function anyplural(
-  count: number,
-  forms: Forms,
-  options: AnypluralOptions = {},
-): string {
-  return plan(count, forms, options)
-    .map((s) => ("t" in s ? s.t : s.f.format(s.n)))
-    .join("");
-}
-
-/**
- * Like {@linkcode anyplural}, but returns the output as `{ type, value }` parts
- * instead of a string — style the number apart from the word, or rebuild the
- * output your own way.
- *
- * @example
- * ```ts
- * anypluralParts(5, { one: "item", other: "items" }, { locale: "en" });
- * // [
- * //   { type: "integer", value: "5" },
- * //   { type: "literal", value: " items" },
- * // ]
- * ```
- *
- * @param count The number to pluralize.
- * @param forms Word forms keyed by plural category — `other` is required.
- * @param options See {@linkcode AnypluralOptions} — same options as {@linkcode anyplural}.
- * @returns The formatted output as an array of parts.
- * @throws {RangeError} If `count` is not a finite number.
- */
-export function anypluralParts(
-  count: number,
-  forms: Forms,
-  options: AnypluralOptions = {},
-): AnypluralPart[] {
-  return plan(count, forms, options).flatMap((s) =>
-    "t" in s ? { type: "literal", value: s.t } : s.f.formatToParts(s.n),
-  );
-}
+export const anyplural = Object.assign(format, {
+  /**
+   * Like calling {@linkcode anyplural} directly, but returns the output as
+   * `{ type, value }` parts instead of a string — style the number apart from
+   * the word, or rebuild the output your own way.
+   *
+   * Takes the same arguments and throws on the same inputs.
+   *
+   * @example
+   * ```ts
+   * anyplural.parts(5, { one: "item", other: "items" }, { locale: "en" });
+   * // [
+   * //   { type: "integer", value: "5" },
+   * //   { type: "literal", value: " items" },
+   * // ]
+   * ```
+   */
+  parts,
+});

@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/kirilinsky/anyamount/main/logo.png" alt="anyamount logo" width="420" />
+  <img src="./logo.png" alt="anyamount" width="420" />
 </p>
 
 <h1 align="center">anyamount</h1>
@@ -7,48 +7,40 @@
 <p align="center">
   <a href="https://www.npmjs.com/package/anyamount"><img src="https://img.shields.io/npm/v/anyamount?style=flat-square&color=black" alt="npm" /></a>
   <a href="https://bundlephobia.com/package/anyamount"><img src="https://img.shields.io/bundlephobia/minzip/anyamount?style=flat-square&color=black&label=gzip" /></a>
-  <a href="https://github.com/kirilinsky/anyamount/actions/workflows/flow.yml"><img src="https://github.com/kirilinsky/anyamount/actions/workflows/flow.yml/badge.svg" alt="CI" /></a>
-  <a href="https://codecov.io/gh/kirilinsky/anyamount"><img src="https://img.shields.io/codecov/c/github/kirilinsky/anyamount?style=flat-square&color=black" alt="coverage" /></a>
+  <a href="https://github.com/kirilinsky/anyfamily/actions/workflows/ci.yml"><img src="https://github.com/kirilinsky/anyfamily/actions/workflows/ci.yml/badge.svg" alt="CI" /></a>
   <a href="./LICENSE"><img src="https://img.shields.io/npm/l/anyamount?style=flat-square&color=black" alt="license" /></a>
 </p>
 
 <p align="center">
   <strong>Tiny human-readable number formatter built on native <code>Intl</code>.</strong>
   <br />
-  Turn numbers into <code>"1.2M"</code>, <code>"€1,999.00"</code>, <code>"3.2 GB"</code>, or <code>"120 km/h"</code>.
+  Turn numbers into <code>"1.2M"</code>, <code>"€1,999.00"</code>, <code>"3.2 GB"</code>, or <code>"120 км/ч"</code>.
 </p>
 
 <p align="center">
-  <a href="https://anyamount.vercel.app/">▸ live demo</a>
+  <a href="https://anyfamily.site/anyamount">▸ live demo</a>
+  &nbsp;·&nbsp;
+  <a href="https://anyfamily.site/docs/anyamount">▸ full docs</a>
+  &nbsp;·&nbsp;
+  <a href="https://anyfamily.site/">▸ any family</a>
 </p>
 
 ---
 
-**One function. Smart defaults. Any locale. ~0.7kb gzip. Zero dependencies.**
+**One export. Three modes. Any locale. ~1kb gzip. Zero dependencies.**
 
-`Intl.NumberFormat` is powerful. anyamount makes it usable.
-
-Built for dashboards, feeds, pricing pages, file lists, and stats — anywhere a
-raw number should read like a person wrote it. No locale files. No plugins. No
-config.
+`Intl.NumberFormat` is powerful. anyamount makes it usable. Built for
+dashboards, pricing, storage meters and stats — anywhere a raw number should
+read like a person wrote it. No locale files, no plugins, no config.
 
 ```ts
 import { anyamount } from "anyamount";
 
-anyamount(1234567);
-// "1.2M"  — smart mode (default)
-
-anyamount(42);
-// "42"
-
-anyamount(1999, { mode: "currency", currency: "EUR" });
-// "€1,999.00"
-
-anyamount(3.2, { mode: "unit", unit: "gigabyte" });
-// "3.2 GB"
-
-anyamount(120, { mode: "unit", unit: "kilometer-per-hour", locale: "ru" });
-// "120 км/ч"
+anyamount(1234567);                                     // "1.2M"  — smart (default)
+anyamount(1999, { mode: "currency", currency: "EUR" }); // "€1,999.00"
+anyamount(3.2, { mode: "unit", unit: "gigabyte" });     // "3.2 GB"
+anyamount(1234567, { locale: "ru" });                   // "1,2 млн"
+anyamount.symbol("USD");                                // "$"
 ```
 
 ---
@@ -68,273 +60,187 @@ anyamount(value);
 anyamount(value, options);
 ```
 
-`value` is a number or a bigint — every mode accepts both. `±Infinity`
-formats as the locale's infinity symbol (`"∞"`); `NaN` throws.
+`value` is a `number` or a `bigint`.
+
+`anyamount.parts()` takes the same arguments and returns the
+`Intl.NumberFormat.formatToParts` output — style the number apart from the
+currency symbol or unit.
+
+```tsx
+anyamount.parts(1999, { mode: "currency", currency: "EUR", locale: "en" });
+// [{ type: "currency", value: "€" }, { type: "integer", value: "1" }, …]
+
+anyamount.parts(price, { mode: "currency", currency: "EUR" }).map((p, i) =>
+  p.type === "currency" ? <small key={i}>{p.value}</small> : p.value,
+);
+```
+
+`anyamount.symbol()` takes a **currency code** rather than an amount, and
+returns the bare symbol — for labels, currency pickers and input affixes.
 
 ```ts
-anyamount(1234567);
-anyamount(0.1234);
-anyamount(-42.5);
-anyamount(123456789012345678901n);   // beyond MAX_SAFE_INTEGER, no precision loss
+anyamount.symbol("USD", { locale: "en" });                  // "$"
+anyamount.symbol("JPY", { locale: "ja" });                  // "￥"
+anyamount.symbol("USD", { locale: "en", display: "code" }); // "USD"
+anyamount.symbol("USD", { locale: "en", display: "name" }); // "US dollars"
 ```
+
+---
+
+## recipes
+
+Copy, paste, move on.
+
+```ts
+// Dashboard stat
+anyamount(views, { locale: "en" });
+// "1.2M"
+
+// …spelled out
+anyamount(views, { locale: "en", style: "long" });
+// "1.2 million"
+
+// Price
+anyamount(product.cents / 100, { mode: "currency", currency: "EUR", locale: "de" });
+// "1.999,00 €"
+
+// Price with no cents
+anyamount(total, { mode: "currency", currency: "EUR", digits: 0 });
+// "€2,000"
+
+// Storage meter
+anyamount(file.gb, { mode: "unit", unit: "gigabyte" });
+// "3.2 GB"
+
+// Speed, compound unit
+anyamount(120, { mode: "unit", unit: "kilometer-per-hour", locale: "ru" });
+// "120 км/ч"
+
+// Currency affix inside an input, amount rendered separately
+anyamount.symbol(account.currency);
+// "$"
+```
+
+Output is pure — no clock reads, no environment sniffing — so server and client
+render identically. Pass an explicit `locale` to keep it that way.
 
 ---
 
 ## modes
 
-The `mode` option picks the rendering strategy. Default is `"smart"`.
+`mode` picks the rendering strategy. Each mode reads only the options that apply
+to it; the rest are ignored.
 
-### smart
-
-Context-aware. Compact notation for big numbers, plain formatting for small
-ones — the cutoff is `|value| >= 10000`.
-
-```ts
-anyamount(1234567, { locale: "en" });   // "1.2M"
-anyamount(10000, { locale: "en" });     // "10K"
-anyamount(9999, { locale: "en" });      // "9,999"
-anyamount(42, { locale: "en" });        // "42"
-anyamount(0.1234, { locale: "en" });    // "0.12"
-
-anyamount(1234567, { locale: "en", style: "long" });
-// "1.2 million"
-
-anyamount(1234567, { locale: "en", digits: 2 });
-// "1.23M"
-```
-
-Fraction digits default to 2 for plain numbers and 1 for compact ones.
-
-Reads: `locale`, `style`, `digits`.
-
-### currency
-
-Money via the `Intl.NumberFormat` currency style. `currency` is required —
-any ISO 4217 code.
+| Mode | Does | Reads |
+| --- | --- | --- |
+| `"smart"` (default) | compact from `10000` up, plain below | `locale`, `style`, `digits` |
+| `"currency"` | money; `currency` required | `locale`, `currency`, `currencyDisplay`, `digits` |
+| `"unit"` | measurements; `unit` required | `locale`, `unit`, `style`, `digits` |
 
 ```ts
-anyamount(1999, { mode: "currency", currency: "EUR", locale: "en" });
-// "€1,999.00"
-
-anyamount(1999, { mode: "currency", currency: "RSD", locale: "sr" });
-// "1.999,00 RSD"
-
-anyamount(1999, { mode: "currency", currency: "JPY", locale: "ja" });
-// "￥1,999"  — JPY has no minor unit, Intl knows
-
-anyamount(1999.99, { mode: "currency", currency: "EUR", locale: "en", digits: 0 });
-// "€2,000"
+anyamount(1234567);  // "1.2M"
+anyamount(10000);    // "10K"
+anyamount(9999);     // "9,999"   — below the compact cutoff
+anyamount(0.1234);   // "0.12"
 ```
 
-Fraction digits default to the currency's own (2 for EUR, 0 for JPY).
+A missing `currency` or `unit` throws a `TypeError`. The options type is a
+discriminated union on `mode`, so TypeScript requires them at compile time.
 
-`currencyDisplay` picks how the currency itself is spelled — symbol by
-default, opt into anything else:
-
-```ts
-anyamount(1999, { mode: "currency", currency: "USD", locale: "en" });
-// "$1,999.00"  — "symbol" (default)
-
-anyamount(1999, { mode: "currency", currency: "USD", locale: "en-CA", currencyDisplay: "narrowSymbol" });
-// "$1,999.00"  — bare symbol, where the locale would otherwise print "US$"
-
-anyamount(1999, { mode: "currency", currency: "USD", locale: "en", currencyDisplay: "code" });
-// "USD 1,999.00"
-
-anyamount(1999, { mode: "currency", currency: "USD", locale: "en", currencyDisplay: "name" });
-// "1,999.00 US dollars"
-```
-
-Reads: `locale`, `currency`, `currencyDisplay`, `digits`.
-
-### unit
-
-Measurements via the `Intl.NumberFormat` unit style. `unit` is required —
-any sanctioned identifier, including compound `"<unit>-per-<unit>"` pairs.
-The `unit` option is typed as a union, so your editor autocompletes it.
-
-```ts
-anyamount(3.2, { mode: "unit", unit: "gigabyte", locale: "en" });
-// "3.2 GB"
-
-anyamount(120, { mode: "unit", unit: "kilometer-per-hour", locale: "en" });
-// "120 km/h"
-
-anyamount(3.2, { mode: "unit", unit: "gigabyte", locale: "en", style: "long" });
-// "3.2 gigabytes"
-
-anyamount(5, { mode: "unit", unit: "kilometer", locale: "en", style: "narrow" });
-// "5km"
-```
-
-Fraction digits default to 2.
-
-Reads: `locale`, `unit`, `style`, `digits`.
+→ [Every mode broken down](https://anyfamily.site/docs/anyamount#modes)
 
 ---
 
 ## options
 
-| Option            | Type                                                | Default        | Used by     |
-| ----------------- | --------------------------------------------------- | -------------- | ----------- |
-| `mode`            | `"smart" \| "currency" \| "unit"`                    | `"smart"`      | —           |
-| `locale`          | `string \| string[]`                                 | runtime locale | all         |
-| `currency`        | `string` (ISO 4217)                                  | — (required)   | currency    |
-| `currencyDisplay` | `"symbol" \| "narrowSymbol" \| "code" \| "name"`     | `"symbol"`     | currency    |
-| `unit`            | sanctioned unit identifier                           | — (required)   | unit        |
-| `style`           | `"long" \| "short" \| "narrow"`                      | `"short"`      | smart, unit |
-| `digits`          | `number` → `maximumFractionDigits`                   | per mode       | all         |
+| Option | Type | Default | Used by |
+| --- | --- | --- | --- |
+| `mode` | `"smart" \| "currency" \| "unit"` | `"smart"` | — |
+| `locale` | `string \| string[]` | runtime locale | all |
+| `currency` | `string` (ISO 4217) | required | currency |
+| `currencyDisplay` | `"symbol" \| "narrowSymbol" \| "code" \| "name"` | `"symbol"` | currency |
+| `unit` | sanctioned unit identifier | required | unit |
+| `style` | `"long" \| "short" \| "narrow"` | `"short"` | smart, unit |
+| `digits` | `number` → `maximumFractionDigits` | per mode | all |
 
-### digits
+`digits` is a **ceiling, not a fixed width** — trailing zeros are never padded
+on, so `digits: 2` renders `2.5`, not `2.50`. Currency mode is the exception:
+the currency carries its own minimum (2 for EUR, 0 for JPY) and `Intl` keeps it.
 
-`digits` maps to `maximumFractionDigits` — a ceiling, not a fixed width. The
-fraction is rounded to at most that many digits, and trailing zeros are never
-padded on:
-
-```ts
-anyamount(2.5, { locale: "en", digits: 2 });     // "2.5"   — not "2.50"
-anyamount(2.567, { locale: "en", digits: 2 });   // "2.57"
-anyamount(3, { mode: "unit", unit: "gigabyte", locale: "en", digits: 2 });
-// "3 GB"  — not "3.00 GB"
-```
-
-Currency mode is the exception, because the currency carries its own minimum
-(2 for EUR, 0 for JPY) and `Intl` keeps it:
-
-```ts
-anyamount(2.5, { mode: "currency", currency: "EUR", locale: "en" });
-// "€2.50"  — padded to EUR's minimum
-
-anyamount(2.5, { mode: "currency", currency: "EUR", locale: "en", digits: 1 });
-// "€2.5"   — a digits below the minimum lowers both
-
-anyamount(2, { mode: "currency", currency: "EUR", locale: "en", digits: 4 });
-// "€2.00"  — raising the ceiling does not raise the minimum
-```
-
-Fixed-width output for every mode is not an option today — use
-`anyamountParts()` and pad the `fraction` part yourself if you need it.
-
-The options type is a discriminated union on `mode` — TypeScript requires
-`currency` in currency mode and `unit` in unit mode at compile time, and
-rejects options that don't belong to the mode. From plain JavaScript, the
-same rules hold at runtime: a missing `currency` or `unit` throws a clear
-`TypeError`, and stray options are ignored.
+→ [What each option does, including the digits rules](https://anyfamily.site/docs/anyamount#options)
 
 ---
 
-## parts
+## units
 
-`anyamountParts()` accepts the same arguments as `anyamount()` and returns the
-`Intl.NumberFormat.formatToParts` output unchanged — style the number apart
-from the currency symbol or unit, or rebuild the string your own way.
-
-```tsx
-import { anyamountParts } from "anyamount";
-
-anyamountParts(1999, { mode: "currency", currency: "EUR", locale: "en" });
-// [
-//   { type: "currency", value: "€" },
-//   { type: "integer", value: "1" },
-//   { type: "group", value: "," },
-//   { type: "integer", value: "999" },
-//   { type: "decimal", value: "." },
-//   { type: "fraction", value: "00" },
-// ]
-
-// React: shrink the currency symbol
-anyamountParts(price, { mode: "currency", currency: "EUR" }).map((p, i) =>
-  p.type === "currency" ? <small key={i}>{p.value}</small> : p.value,
-);
-```
-
----
-
-## symbol
-
-`anyamountSymbol()` resolves an ISO 4217 code to its localized symbol, with no
-number attached — for labels, currency pickers, and input affixes, where the
-amount is rendered separately (or not at all).
+`Intl` supports a fixed, sanctioned list of unit identifiers plus any
+`<unit>-per-<unit>` compound of them. anyamount ships the full list as a
+TypeScript union, so invalid units fail at compile time.
 
 ```ts
-import { anyamountSymbol } from "anyamount";
-
-anyamountSymbol("USD", { locale: "en" });   // "$"
-anyamountSymbol("EUR", { locale: "en" });   // "€"
-anyamountSymbol("GBP", { locale: "en" });   // "£"
-anyamountSymbol("JPY", { locale: "ja" });   // "￥"
-anyamountSymbol("RUB", { locale: "ru" });   // "₽"
-
-anyamountSymbol("USD", { locale: "en", display: "code" });   // "USD"
-anyamountSymbol("USD", { locale: "en", display: "name" });   // "US dollars"
+anyamount(120, { mode: "unit", unit: "kilometer-per-hour" });      // "120 km/h"
+anyamount(8.5, { mode: "unit", unit: "liter-per-kilometer" });     // "8.5 L/km"
+anyamount(3.2, { mode: "unit", unit: "gigabyte", style: "long" }); // "3.2 gigabytes"
 ```
 
-`display` defaults to `"narrowSymbol"` — the bare symbol, never the
-disambiguated `"US$"` some locales prefer. Codes with no symbol in the
-locale's data come back as the code itself (`"XAU"` → `"XAU"`), same as `Intl`
-renders them. A malformed code throws a `RangeError` from `Intl`.
-
-Formatting a full amount? Stay in currency mode with `currencyDisplay` — this
-is the escape hatch for when there is no amount.
+→ [The full sanctioned list](https://anyfamily.site/docs/anyamount#units)
 
 ---
 
 ## locales
 
-Pass any valid BCP 47 tag — including regional variants like `en-GB`, `zh-TW`,
-`pt-BR`. Fallback arrays also work.
+Any valid BCP 47 tag, including regional variants and fallback arrays. When
+omitted, native `Intl` uses the runtime locale.
 
 ```ts
 anyamount(1234567, { locale: "ru" });   // "1,2 млн"
 anyamount(1234567, { locale: "de" });   // "1,2 Mio."
 anyamount(1234567, { locale: "ja" });   // "123.5万"
-anyamount(1234567, { locale: ["sr-Latn-RS", "en"] });
 
-anyamount(1999, { mode: "currency", currency: "USD", locale: "de" });
-// "1.999,00 $"
+anyamount(1999, { mode: "currency", currency: "USD", locale: "de" }); // "1.999,00 $"
+anyamount(1999, { mode: "currency", currency: "INR", locale: "hi" }); // "₹1,999.00"
 ```
-
-When omitted, native `Intl` uses the runtime locale.
-
-Output is pure — no `Date.now()`, no environment reads — so server and client
-render identically. SSR-safe by construction.
-
----
-
-## vs the alternatives
-
-|                     | anyamount  | pretty-bytes | filesize | numeral |
-| ------------------- | :--------: | :----------: | :------: | :-----: |
-| gzip                | **~0.7kb** |     ~1kb     |   ~3kb   |  ~5kb   |
-| currency            |  **yes**   |      no      |    no    |   yes   |
-| units beyond bytes  |  **yes**   |      no      |    no    |   no    |
-| localized output    | **200+ locales** |  partial | partial | manual locale files |
-| dependencies        |   **0**    |      0       |    0     |    0    |
 
 ---
 
 ## limitations
 
-Honest ones:
-
 - **No byte auto-scaling yet.** `anyamount(3200000000, { mode: "unit", unit: "byte" })`
-  will not pick `GB` for you — pass the unit you want. Auto-scaling is planned
-  for a future minor.
-- **No percent mode, no ranges, no parsing.** Deliberately one function,
-  three modes.
-- **Exact output strings come from `Intl`** and may vary between ICU versions —
-  don't snapshot them across environments.
-- **Sanctioned units only.** `Intl` supports a fixed list of unit identifiers
-  (and `-per-` compounds of them) — no arbitrary custom units.
+  will not pick `GB` for you — pass the unit you want.
+- **No percent mode, no ranges, no parsing.** Deliberately one function, three
+  modes.
+- **Sanctioned units only** — an `Intl` constraint, not an anyamount one.
+- **Exact strings come from `Intl`** and vary between ICU versions; don't
+  snapshot them across environments.
 
 ---
 
 ## stability
 
-anyamount follows [semver](https://semver.org/). The `1.x` API is stable:
-new options arrive in minors, breaking changes only in majors. Exact
-formatted strings come from `Intl` and may vary between ICU versions, so
-never assert on them across environments.
+anyamount follows [semver](https://semver.org/). The public API is a single
+export — `anyamount`, with `anyamount.parts` and `anyamount.symbol` on it —
+plus `AnyamountOptions`, `Unit` and the exported types. It only changes shape in
+a major release. New options arrive in minors.
+
+### migrating from 1.x
+
+2.0 removed the separate `anyamountParts` and `anyamountSymbol` exports. Both
+are the same functions, now reached through the one name the package exports:
+
+```diff
+- import { anyamount, anyamountParts, anyamountSymbol } from "anyamount";
++ import { anyamount } from "anyamount";
+
+- anyamountParts(1999, opts);
++ anyamount.parts(1999, opts);
+
+- anyamountSymbol("USD");
++ anyamount.symbol("USD");
+```
+
+Arguments, return values and throwing behaviour are unchanged. Every `any*`
+package follows this shape from 2.0 on: the bare call does the job, everything
+else hangs off the same name.
 
 ---
 
@@ -343,12 +249,33 @@ never assert on them across environments.
 Node.js 18+ · Chrome 77+ · Firefox 78+ · Safari 14.1+ · Edge Runtime ·
 Cloudflare Workers · Deno
 
-CI runs the full suite on Node 20, 22, and 24.
+CI runs the full suite on Node 20, 22 and 24.
 
 ---
 
-## part of the any\* family
+## the any family
 
-- [anywhen](https://github.com/kirilinsky/anywhen) — tiny smart date formatter. One function, three modes, any locale.
-- [anymany](https://anymany.vercel.app/) — tiny Intl list formatter. Sort and join string arrays in any locale.
-- **anyamount** — you are here.
+anyamount is part of **any family** — tiny, zero-dependency wrappers over native
+`Intl`, one API per package.
+
+| | | |
+| --- | --- | --- |
+| [anywhen](https://anyfamily.site/anywhen) | dates & relative time | `Intl.DateTimeFormat` |
+| [**anyamount**](https://anyfamily.site/anyamount) | numbers, currency, units | `Intl.NumberFormat` |
+| [anymany](https://anyfamily.site/anymany) | lists | `Intl.ListFormat` |
+| [anyaround](https://anyfamily.site/anyaround) | names & flags | `Intl.DisplayNames` |
+| [anylong](https://anyfamily.site/anylong) | durations | `Intl.DurationFormat` |
+| [anyplural](https://anyfamily.site/anyplural) | plurals | `Intl.PluralRules` |
+| [anyword](https://anyfamily.site/anyword) | words & graphemes | `Intl.Segmenter` |
+
+Want all of them? [`anyfamily`](https://www.npmjs.com/package/anyfamily) is one
+install for the lot, and [`anyfamily-react`](https://www.npmjs.com/package/anyfamily-react)
+wraps each as a hook with a shared locale provider.
+
+```bash
+npm install anyfamily
+```
+
+---
+
+MIT © [kirilinsky](https://github.com/kirilinsky)

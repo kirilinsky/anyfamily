@@ -1,7 +1,7 @@
 {
   "name": "anyamount",
   "version": "1.1.0",
-  "description": "Tiny smart number formatter — one function, three modes (smart, currency, unit), any Intl locale.",
+  "description": "Tiny smart number formatter \u2014 one function, three modes (smart, currency, unit), any Intl locale.",
   "type": "module",
   "sideEffects": false,
   "main": "./dist/index.cjs",
@@ -70,11 +70,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/kirilinsky/anyamount.git"
+    "url": "git+https://github.com/kirilinsky/anyfamily.git",
+    "directory": "packages/anyamount"
   },
   "author": "Kirilinsky (https://github.com/kirilinsky)",
   "bugs": {
-    "url": "https://github.com/kirilinsky/anyamount/issues"
+    "url": "https://github.com/kirilinsky/anyfamily/issues"
   },
-  "homepage": "https://github.com/kirilinsky/anyamount#readme"
+  "homepage": "https://anyfamily.site/anyamount"
 }

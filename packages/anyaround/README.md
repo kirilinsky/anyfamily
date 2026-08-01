@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/kirilinsky/anyaround/main/logo.png" alt="anyaround logo" width="420" />
+  <img src="./logo.png" alt="anyaround" width="420" />
 </p>
 
 <h1 align="center">anyaround</h1>
@@ -7,8 +7,7 @@
 <p align="center">
   <a href="https://www.npmjs.com/package/anyaround"><img src="https://img.shields.io/npm/v/anyaround?style=flat-square&color=black" alt="npm" /></a>
   <a href="https://bundlephobia.com/package/anyaround"><img src="https://img.shields.io/bundlephobia/minzip/anyaround?style=flat-square&color=black&label=gzip" /></a>
-  <a href="https://github.com/kirilinsky/anyaround/actions/workflows/flow.yml"><img src="https://github.com/kirilinsky/anyaround/actions/workflows/flow.yml/badge.svg" alt="CI" /></a>
-  <a href="https://codecov.io/gh/kirilinsky/anyaround"><img src="https://img.shields.io/codecov/c/github/kirilinsky/anyaround?style=flat-square&color=black" alt="coverage" /></a>
+  <a href="https://github.com/kirilinsky/anyfamily/actions/workflows/ci.yml"><img src="https://github.com/kirilinsky/anyfamily/actions/workflows/ci.yml/badge.svg" alt="CI" /></a>
   <a href="./LICENSE"><img src="https://img.shields.io/npm/l/anyaround?style=flat-square&color=black" alt="license" /></a>
 </p>
 
@@ -19,41 +18,31 @@
 </p>
 
 <p align="center">
-  <strong><a href="https://anyaround.vercel.app">▶ Live demo</a></strong>
+  <a href="https://anyfamily.site/anyaround">▸ live demo</a>
+  &nbsp;·&nbsp;
+  <a href="https://anyfamily.site/docs/anyaround">▸ full docs</a>
+  &nbsp;·&nbsp;
+  <a href="https://anyfamily.site/">▸ any family</a>
 </p>
 
 ---
 
-**One function. Smart detection. Country flags. Any locale. Zero dependencies.**
+**One export. Smart detection. Country flags. Any locale. Zero dependencies.**
 
 `Intl.DisplayNames` already knows the name of every country, language, script,
-currency, and calendar — in 200+ locales. anyaround makes it a one-liner and
-adds the one thing `Intl` leaves out: **flags**.
-
-Built for country pickers, language switchers, profile pages, and tables —
-anywhere a bare code should read like a person wrote it. No data files. No
-hardcoded flag maps. No config.
+currency and calendar — in 200+ locales. anyaround makes it a one-liner and adds
+the one thing `Intl` leaves out: **flags**. No data files, no hardcoded flag
+maps, no config.
 
 ```ts
 import { anyaround } from "anyaround";
 
-anyaround("US");
-// "United States"  — smart mode (default)
-
-anyaround("US", { display: "flag-name" });
-// "🇺🇸 United States"
-
-anyaround("US", { locale: "ru" });
-// "Соединенные Штаты"
-
-anyaround("en");
-// "English"
-
-anyaround("Cyrl");
-// "Cyrillic"
-
-anyaround("EUR");
-// "Euro"  — the name, not a rate
+anyaround("US");                            // "United States"  — smart mode (default)
+anyaround("US", { display: "flag-name" });  // "🇺🇸 United States"
+anyaround("US", { locale: "ru" });          // "Соединенные Штаты"
+anyaround("en");                            // "English"
+anyaround("Cyrl");                          // "Cyrillic"
+anyaround("EUR");                           // "Euro"
 ```
 
 ---
@@ -73,177 +62,112 @@ anyaround(code);
 anyaround(code, options);
 ```
 
-`code` is a region, language, script, currency, or calendar identifier. In the
-default `smart` mode the kind is inferred from the code's shape; pass `mode` to
-pin it.
+`code` is a region, language, script, currency or calendar code. In the default
+`smart` mode the kind is inferred from its shape.
 
-```ts
-anyaround("FR");                          // "France"
-anyaround("fr");                          // "French"
-anyaround("419");                         // "Latin America and the Caribbean"
-anyaround("Latn");                        // "Latin"
-anyaround("JPY");                         // "Japanese Yen"
+`anyaround.info()` takes the same arguments and returns the structured record
+instead of a ready string — build your own output, or drive a `<select>`.
+
+```tsx
+anyaround.info("US", { locale: "en" });
+// { code: "US", type: "region", name: "United States", flag: "🇺🇸", found: true }
+
+anyaround.info("QZ", { mode: "region" });
+// { code: "QZ", type: "region", name: "QZ", flag: "🇶🇿", found: false }
 ```
+
+`flag` is `""` whenever the code is not a flag-bearing alpha-2 region. `found`
+is `false` when `Intl` had no name — `name` is then the code (`fallback: "code"`,
+the default) or `""`, so you can tell a real hit from a miss.
+
+---
+
+## recipes
+
+Copy, paste, move on.
+
+```tsx
+// Country picker with flags
+countries.map((cc) => {
+  const { code, name, flag } = anyaround.info(cc);
+  return <option key={code} value={code}>{flag} {name}</option>;
+});
+
+// Language switcher, each language in its own tongue
+anyaround("de", { mode: "language", locale: "de" });   // "Deutsch"
+anyaround("ja", { mode: "language", locale: "ja" });   // "日本語"
+
+// Profile location
+anyaround(user.country, { display: "flag-name", locale: "en" });
+// "🇩🇪 Germany"
+
+// Currency label next to an amount
+anyaround(order.currency, { mode: "currency", locale: "en" });
+// "Euro"
+
+// Flag only, for a compact table cell
+anyaround(row.country, { display: "flag" });
+// "🇺🇸"
+```
+
+Output is pure — no `Date.now()`, no environment reads — so server and client
+render identically. SSR-safe by construction.
 
 ---
 
 ## modes
 
-The `mode` option picks how the code is read. Default is `"smart"`.
+`mode` picks how the code is read. Default is `"smart"`, which auto-detects:
 
-### smart
+| Shape | Detected as | Example |
+| --- | --- | --- |
+| three digits | `region` | `"419"` |
+| four letters | `script` | `"Latn"` |
+| two uppercase letters | `region` | `"US"` |
+| three uppercase letters | `currency` | `"USD"` |
+| anything else | `language` | `"en"`, `"zh-Hant"` |
 
-Auto-detects the kind from the code's shape:
-
-| Shape                     | Detected as | Example             |
-| ------------------------- | ----------- | ------------------- |
-| three digits              | `region`    | `"419"`             |
-| four letters              | `script`    | `"Latn"`            |
-| two uppercase letters     | `region`    | `"US"`              |
-| three uppercase letters   | `currency`  | `"USD"`             |
-| anything else             | `language`  | `"en"`, `"zh-Hant"` |
-
-```ts
-anyaround("US", { locale: "en" });        // "United States"
-anyaround("en", { locale: "en" });        // "English"
-anyaround("Cyrl", { locale: "en" });      // "Cyrillic"
-anyaround("EUR", { locale: "en" });       // "Euro"
-```
-
-Case is the tiebreaker between region (`"IT"`) and language (`"it"`). When a
-code is ambiguous for you, pin it with `mode`. `calendar` is never
-auto-detected.
-
-Reads: `locale`, `style`, `display`, `fallback`.
-
-### region
-
-Countries and regions — ISO 3166-1 alpha-2 or UN M49 numeric. This is the only
-mode that carries a **flag**, surfaced via `display`.
+Case is the tiebreaker: `"IT"` is a region, `"it"` a language. Pin ambiguous
+codes with `mode`. `calendar` is never auto-detected.
 
 ```ts
-anyaround("DE", { mode: "region", locale: "en" });                      // "Germany"
-anyaround("DE", { mode: "region", display: "flag" });                   // "🇩🇪"
-anyaround("DE", { mode: "region", display: "flag-name", locale: "en" }); // "🇩🇪 Germany"
-anyaround("DE", { mode: "region", display: "name-flag", locale: "en" }); // "Germany 🇩🇪"
-anyaround("419", { mode: "region", locale: "en" }); // "Latin America and the Caribbean" (no flag)
+anyaround("DE", { mode: "region", display: "flag-name" }); // "🇩🇪 Germany"
+anyaround("en-US", { mode: "language" });                  // "American English"
+anyaround("Cyrl", { mode: "script" });                     // "Cyrillic"
+anyaround("EUR", { mode: "currency" });                    // "Euro"
+anyaround("gregory", { mode: "calendar" });                // "Gregorian Calendar"
 ```
 
-Flags are derived from the two-letter code via Unicode Regional Indicator
-Symbols — no image assets, no lookup table. Numeric M49 regions have no flag,
-so flag `display` values fall back to the name.
+Region is the only mode that carries a flag. Flags are derived from the
+two-letter code via Unicode Regional Indicator Symbols — no image assets, no
+lookup table.
 
-Reads: `locale`, `style`, `display`, `fallback`.
-
-### language
-
-Languages — BCP 47 / ISO 639.
-
-```ts
-anyaround("en", { mode: "language", locale: "en" });     // "English"
-anyaround("en-US", { mode: "language", locale: "en" });  // "American English"
-anyaround("en-US", { mode: "language", locale: "en", languageDisplay: "standard" });
-// "English (United States)"
-anyaround("de", { mode: "language", locale: "fr" });     // "allemand"
-```
-
-`languageDisplay` toggles `"dialect"` (default, `"American English"`) vs
-`"standard"` (`"English (United States)"`).
-
-Reads: `locale`, `style`, `languageDisplay`, `fallback`.
-
-### script
-
-Writing systems — ISO 15924.
-
-```ts
-anyaround("Latn", { mode: "script", locale: "en" });   // "Latin"
-anyaround("Cyrl", { mode: "script", locale: "en" });   // "Cyrillic"
-anyaround("Hant", { mode: "script", locale: "en" });   // "Traditional Han"
-```
-
-Reads: `locale`, `style`, `fallback`.
-
-### currency
-
-Currency **names** via `Intl.DisplayNames` — ISO 4217. (For formatting an
-*amount* like `"€1,999.00"`, reach for [anyamount](https://github.com/kirilinsky/anyamount).)
-
-```ts
-anyaround("EUR", { mode: "currency", locale: "en" });  // "Euro"
-anyaround("JPY", { mode: "currency", locale: "en" });  // "Japanese Yen"
-anyaround("USD", { mode: "currency", locale: "fr" });  // "dollar des États-Unis"
-```
-
-Reads: `locale`, `style`, `fallback`.
-
-### calendar
-
-Calendar systems. Never smart-detected — always explicit.
-
-```ts
-anyaround("gregory", { mode: "calendar", locale: "en" });   // "Gregorian Calendar"
-anyaround("islamic", { mode: "calendar", locale: "en" });   // "Islamic Calendar"
-```
-
-Reads: `locale`, `style`, `fallback`.
+→ [Every mode broken down](https://anyfamily.site/docs/anyaround#modes)
 
 ---
 
 ## options
 
-| Option            | Type                                                                        | Default        | Used by       |
-| ----------------- | --------------------------------------------------------------------------- | -------------- | ------------- |
-| `mode`            | `"smart" \| "region" \| "language" \| "script" \| "currency" \| "calendar"` | `"smart"`      | —             |
-| `locale`          | `string \| string[]`                                                        | runtime locale | all           |
-| `style`           | `"long" \| "short" \| "narrow"`                                             | `"long"`       | all           |
-| `display`         | `"name" \| "flag" \| "flag-name" \| "name-flag"`                            | `"name"`       | smart, region |
-| `fallback`        | `"code" \| "none"`                                                          | `"code"`       | all           |
-| `languageDisplay` | `"dialect" \| "standard"`                                                   | `"dialect"`    | language      |
+| Option | Type | Default | Used by |
+| --- | --- | --- | --- |
+| `mode` | `"smart" \| "region" \| "language" \| "script" \| "currency" \| "calendar"` | `"smart"` | — |
+| `locale` | `string \| string[]` | runtime locale | all |
+| `style` | `"long" \| "short" \| "narrow"` | `"long"` | all |
+| `display` | `"name" \| "flag" \| "flag-name" \| "name-flag"` | `"name"` | smart, region |
+| `fallback` | `"code" \| "none"` | `"code"` | all |
+| `languageDisplay` | `"dialect" \| "standard"` | `"dialect"` | language |
 
 The options type is a discriminated union on `mode` — TypeScript only offers
-`display` in `smart`/`region` mode and `languageDisplay` in `language` mode,
-and rejects options that don't belong. From plain JavaScript the same holds at
-runtime: stray options are ignored, and an unknown `mode` throws a clear
-`RangeError`.
+`display` in smart/region mode and `languageDisplay` in language mode.
 
----
-
-## info
-
-`anyaroundInfo()` accepts the same arguments and returns the structured record
-instead of a ready string — build your own output, or drive a `<select>`.
-
-```tsx
-import { anyaroundInfo } from "anyaround";
-
-anyaroundInfo("US", { locale: "en" });
-// { code: "US", type: "region", name: "United States", flag: "🇺🇸", found: true }
-
-anyaroundInfo("en", { locale: "fr" });
-// { code: "en", type: "language", name: "anglais", flag: "", found: true }
-
-anyaroundInfo("QZ", { mode: "region" });
-// { code: "QZ", type: "region", name: "QZ", flag: "🇶🇿", found: false }
-
-// React: a country dropdown with flags
-countries.map((cc) => {
-  const { code, name, flag } = anyaroundInfo(cc);
-  return <option key={code} value={code}>{flag} {name}</option>;
-});
-```
-
-`flag` is `""` whenever the code is not a flag-bearing alpha-2 region. `found`
-is `false` when `Intl` had no name for the code — `name` is then the code
-(`fallback: "code"`, the default) or `""` (`fallback: "none"`), so you can tell
-a real hit from a miss.
+→ [What each option does, with examples](https://anyfamily.site/docs/anyaround#options)
 
 ---
 
 ## locales
 
-Pass any valid BCP 47 tag — including regional variants like `en-GB`, `zh-TW`,
-`pt-BR`. Fallback arrays also work.
+Any valid BCP 47 tag, including regional variants and fallback arrays. When
+omitted, native `Intl` uses the runtime locale.
 
 ```ts
 anyaround("US", { locale: "ru" });   // "Соединенные Штаты"
@@ -252,54 +176,61 @@ anyaround("US", { locale: "ja" });   // "アメリカ合衆国"
 anyaround("US", { locale: ["sr-Latn-RS", "en"] });
 ```
 
-When omitted, native `Intl` uses the runtime locale.
-
-Output is pure — no `Date.now()`, no environment reads — so server and client
-render identically. SSR-safe by construction.
-
 ---
 
 ## vs the alternatives
 
-|                  |    anyaround    | i18n-iso-countries | emoji-flags | world-countries |
-| ---------------- | :-------------: | :----------------: | :---------: | :-------------: |
-| bundled data     | **none (Intl)** |   ~1 file / locale |    small    |    ~1MB JSON    |
-| localized names  | **200+ locales**|    bundled locales |     no      |       no        |
-| languages        |    **yes**      |         no         |     no      |       no        |
-| scripts          |    **yes**      |         no         |     no      |       no        |
-| currency names   |    **yes**      |         no         |     no      |    partial      |
-| flags            |    **yes**      |         no         |     yes     |     emoji       |
-| dependencies     |     **0**       |          0         |      0      |        0        |
+| | anyaround | i18n-iso-countries | emoji-flags | world-countries |
+| --- | :---: | :---: | :---: | :---: |
+| bundled data | **none (Intl)** | ~1 file / locale | small | ~1MB JSON |
+| localized names | **200+ locales** | bundled locales | no | no |
+| languages | **yes** | no | no | no |
+| scripts | **yes** | no | no | no |
+| currency names | **yes** | no | no | partial |
+| flags | **yes** | no | yes | emoji |
+| dependencies | **0** | 0 | 0 | 0 |
 
 anyaround carries no country data at all — it borrows the ICU tables already in
-your runtime. That means zero payload, but also that exact strings track the
-runtime's ICU version.
+your runtime. Zero payload, but exact strings track the runtime's ICU version.
 
 ---
 
 ## limitations
 
-Honest ones:
-
 - **No cities.** `Intl` has no city display names. Regions and countries only.
-- **Names come from `Intl`** and may vary between ICU versions — don't snapshot
-  them across environments.
-- **No reverse lookup.** Name → code is not provided; this maps codes to names,
-  not the other way.
-- **Flags are alpha-2 only.** Numeric M49 regions and non-region kinds have no
-  flag; those fall back to the name. Flags are derived from the code's shape,
-  not validated against a country list — any two-letter code yields a
-  Regional-Indicator pair (e.g. `"QZ"` → `🇶🇿`), even when `found` is `false`.
-- **Not every code is known everywhere.** Older runtimes have thinner ICU data;
-  `fallback: "code"` (the default) returns the code rather than throwing.
+- **Names come from `Intl`** and vary between ICU versions — don't snapshot them
+  across environments.
+- **No reverse lookup.** Code → name only.
+- **Flags are alpha-2 only,** and derived from the code's shape rather than
+  validated — any two-letter code yields a Regional-Indicator pair (`"QZ"` →
+  🇶🇿) even when `found` is `false`.
 
 ---
 
 ## stability
 
-anyaround follows [semver](https://semver.org/). The `1.x` API is stable —
-breaking changes wait for a major bump. Exact display strings come from `Intl`
-and may vary between ICU versions, so never assert on them across environments.
+anyaround follows [semver](https://semver.org/). The public API is a single
+export — `anyaround`, with `anyaround.info` on it — plus `AnyaroundOptions`,
+`AnyaroundInfo` and the exported types. It only changes shape in a major
+release. Exact display strings come from `Intl` and may vary between ICU
+versions, so never assert on them across environments.
+
+### migrating from 1.x
+
+2.0 removed the separate `anyaroundInfo` export. It is the same function, now
+reached through the one name the package exports:
+
+```diff
+- import { anyaround, anyaroundInfo } from "anyaround";
++ import { anyaround } from "anyaround";
+
+- anyaroundInfo("US");
++ anyaround.info("US");
+```
+
+Arguments, return value and throwing behaviour are unchanged. Every `any*`
+package follows this shape from 2.0 on: the bare call does the job, everything
+else hangs off the same name.
 
 ---
 
@@ -309,15 +240,33 @@ Node.js 18+ · Chrome 81+ · Firefox 86+ · Safari 14.1+ · Edge Runtime ·
 Cloudflare Workers · Deno
 
 `Intl.DisplayNames` is required (widely available since 2021). CI runs the full
-suite on Node 20, 22, and 24.
+suite on Node 20, 22 and 24.
 
 ---
 
-## part of the any\* family
+## the any family
 
-- [anyamount](https://github.com/kirilinsky/anyamount) — tiny smart number formatter. One function, three modes, any locale.
-- [anywhen](https://github.com/kirilinsky/anywhen) — tiny smart date formatter. One function, three modes, any locale.
-- [anymany](https://anymany.vercel.app/) — tiny Intl list formatter. Sort and join string arrays in any locale.
-- **anyaround** — you are here. [anyaround.vercel.app](https://anyaround.vercel.app)
+anyaround is part of **any family** — tiny, zero-dependency wrappers over native
+`Intl`, one API per package.
 
-See the whole family at **[anyfamily.site](https://anyfamily.site)**.
+| | | |
+| --- | --- | --- |
+| [anywhen](https://anyfamily.site/anywhen) | dates & relative time | `Intl.DateTimeFormat` |
+| [anyamount](https://anyfamily.site/anyamount) | numbers, currency, units | `Intl.NumberFormat` |
+| [anymany](https://anyfamily.site/anymany) | lists | `Intl.ListFormat` |
+| [**anyaround**](https://anyfamily.site/anyaround) | names & flags | `Intl.DisplayNames` |
+| [anylong](https://anyfamily.site/anylong) | durations | `Intl.DurationFormat` |
+| [anyplural](https://anyfamily.site/anyplural) | plurals | `Intl.PluralRules` |
+| [anyword](https://anyfamily.site/anyword) | words & graphemes | `Intl.Segmenter` |
+
+Want all of them? [`anyfamily`](https://www.npmjs.com/package/anyfamily) is one
+install for the lot, and [`anyfamily-react`](https://www.npmjs.com/package/anyfamily-react)
+wraps each as a hook with a shared locale provider.
+
+```bash
+npm install anyfamily
+```
+
+---
+
+MIT © [kirilinsky](https://github.com/kirilinsky)

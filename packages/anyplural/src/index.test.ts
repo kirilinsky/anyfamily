@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { anyplural, anypluralParts } from "./index";
+import { anyplural } from "./index";
 
 describe("anyplural — cardinal", () => {
   it("English one/other", () => {
@@ -100,34 +100,49 @@ describe("anyplural — validation", () => {
   });
 });
 
-describe("anypluralParts", () => {
+describe("anyplural.parts", () => {
   it("splits number from word", () => {
-    expect(anypluralParts(5, { one: "item", other: "items" }, { locale: "en" })).toEqual([
+    expect(anyplural.parts(5, { one: "item", other: "items" }, { locale: "en" })).toEqual([
       { type: "integer", value: "5" },
       { type: "literal", value: " items" },
     ]);
   });
 
   it("emits grouped number parts", () => {
-    const parts = anypluralParts(1500, { other: "items" }, { locale: "en" });
+    const parts = anyplural.parts(1500, { other: "items" }, { locale: "en" });
     expect(parts.map((p) => p.value).join("")).toBe("1,500 items");
     expect(parts.some((p) => p.type === "group")).toBe(true);
   });
 
   it("zero shortcut is a single literal", () => {
-    expect(anypluralParts(0, { zero: "нет писем", other: "письма" })).toEqual([
+    expect(anyplural.parts(0, { zero: "нет писем", other: "письма" })).toEqual([
       { type: "literal", value: "нет писем" },
     ]);
   });
 
   it("ordinal has no separator literal", () => {
     expect(
-      anypluralParts(3, { one: "st", two: "nd", few: "rd", other: "th" }, {
+      anyplural.parts(3, { one: "st", two: "nd", few: "rd", other: "th" }, {
         type: "ordinal",
       }),
     ).toEqual([
       { type: "integer", value: "3" },
       { type: "literal", value: "rd" },
     ]);
+  });
+});
+
+describe("public surface", () => {
+  it("exports exactly one name, with extras hanging off it", async () => {
+    const mod = await import("./index");
+    expect(Object.keys(mod)).toEqual(["anyplural"]);
+  });
+
+  it("parts join back into the plain call's output", () => {
+    const forms = { one: "item", other: "items" };
+    const opts = { locale: "en" } as const;
+    expect(anyplural.parts(5, forms, opts).map((p) => p.value).join("")).toBe(
+      anyplural(5, forms, opts),
+    );
   });
 });

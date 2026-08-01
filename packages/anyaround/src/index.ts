@@ -99,7 +99,7 @@ export interface CalendarOptions extends BaseOptions {
 }
 
 /**
- * Options accepted by {@linkcode anyaround} and {@linkcode anyaroundInfo}, a
+ * Options accepted by {@linkcode anyaround} and {@linkcode anyaround.info}, a
  * discriminated union on `mode`. `display` is only valid for `smart`/`region`;
  * `languageDisplay` only for `language`.
  */
@@ -119,7 +119,7 @@ type ResolvedOptions = BaseOptions & {
 
 /**
  * The structured result of resolving a code, returned by
- * {@linkcode anyaroundInfo}.
+ * {@linkcode anyaround.info}.
  */
 export interface AnyaroundInfo {
   /** The canonicalized input code. */
@@ -243,6 +243,20 @@ function resolve(code: string, options: AnyaroundOptions): AnyaroundInfo {
   return { code: c, type, name, flag, found };
 }
 
+function format(code: string, options: AnyaroundOptions = {}): string {
+  const { display = "name" } = options as ResolvedOptions;
+  const { name, flag } = resolve(code, options);
+  if (!flag) return name;
+  if (display === "flag") return flag;
+  if (display === "flag-name") return `${flag} ${name}`;
+  if (display === "name-flag") return `${name} ${flag}`;
+  return name;
+}
+
+function info(code: string, options: AnyaroundOptions = {}): AnyaroundInfo {
+  return resolve(code, options);
+}
+
 /**
  * Resolve a region / language / script / currency / calendar code to its
  * localized name, optionally decorated with a country flag emoji.
@@ -266,39 +280,26 @@ function resolve(code: string, options: AnyaroundOptions): AnyaroundInfo {
  * @throws {TypeError} If `code` is empty or not a string.
  * @throws {RangeError} If `mode` is not a recognized kind, or the code is
  * structurally invalid for its kind (propagated from {@linkcode Intl.DisplayNames}).
- * @see {@linkcode anyaroundInfo} for the structured `{ code, type, name, flag }` form.
+ * @see {@linkcode anyaround.info} for the structured `{ code, type, name, flag }` form.
  */
-export function anyaround(code: string, options: AnyaroundOptions = {}): string {
-  const { display = "name" } = options as ResolvedOptions;
-  const { name, flag } = resolve(code, options);
-  if (!flag) return name;
-  if (display === "flag") return flag;
-  if (display === "flag-name") return `${flag} ${name}`;
-  if (display === "name-flag") return `${name} ${flag}`;
-  return name;
-}
-
-/**
- * Like {@linkcode anyaround}, but returns the structured
- * {@linkcode AnyaroundInfo} — the canonical `code`, resolved `type`, localized
- * `name`, and `flag` (empty when not applicable) — so callers can compose their
- * own output.
- *
- * @example
- * anyaroundInfo("US");
- * // { code: "US", type: "region", name: "United States", flag: "🇺🇸", found: true }
- * anyaroundInfo("en", { locale: "fr" });
- * // { code: "en", type: "language", name: "anglais", flag: "", found: true }
- * anyaroundInfo("QZ", { mode: "region" });
- * // { code: "QZ", type: "region", name: "QZ", flag: "🇶🇿", found: false }
- *
- * @param code - A region, language, script, currency, or calendar code.
- * @param options - Interpretation and formatting options (`display` is ignored).
- * @returns The {@linkcode AnyaroundInfo} record.
- * @throws {TypeError} If `code` is empty or not a string.
- * @throws {RangeError} If `mode` is not a recognized kind.
- * @see {@linkcode anyaround} for the ready-to-render string form.
- */
-export function anyaroundInfo(code: string, options: AnyaroundOptions = {}): AnyaroundInfo {
-  return resolve(code, options);
-}
+export const anyaround = Object.assign(format, {
+  /**
+   * Like calling {@linkcode anyaround} directly, but returns the structured
+   * {@linkcode AnyaroundInfo} — the canonical `code`, resolved `type`,
+   * localized `name`, and `flag` (empty when not applicable) — so callers can
+   * compose their own output.
+   *
+   * Takes the same arguments; `display` is ignored.
+   *
+   * @example
+   * ```ts
+   * anyaround.info("US");
+   * // { code: "US", type: "region", name: "United States", flag: "🇺🇸", found: true }
+   * anyaround.info("en", { locale: "fr" });
+   * // { code: "en", type: "language", name: "anglais", flag: "", found: true }
+   * anyaround.info("QZ", { mode: "region" });
+   * // { code: "QZ", type: "region", name: "QZ", flag: "🇶🇿", found: false }
+   * ```
+   */
+  info,
+});

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { anyword, anywordCount, anywordTruncate } from "./index";
+import { anyword } from "./index";
 
 // anyword has no clock and no state, so its only SSR risk is the runtime locale
 // drifting between server and client. Passing `locale` pins output on both.
@@ -10,15 +10,15 @@ describe("SSR-safe segmentation", () => {
   });
 
   it("produces identical parts and counts across calls", () => {
-    const a = anywordCount("héllo 👨‍👩‍👧", { by: "grapheme", locale: "en" });
-    const b = anywordCount("héllo 👨‍👩‍👧", { by: "grapheme", locale: "en" });
+    const a = anyword.count("héllo 👨‍👩‍👧", { by: "grapheme", locale: "en" });
+    const b = anyword.count("héllo 👨‍👩‍👧", { by: "grapheme", locale: "en" });
     expect(a).toBe(b);
   });
 
   it("truncates identically on server and client", () => {
     const opts = { by: "grapheme", locale: "en", ellipsis: "…" } as const;
-    expect(anywordTruncate("héllo 👨‍👩‍👧", 5, opts)).toBe("héllo…");
-    expect(anywordTruncate("héllo 👨‍👩‍👧", 5, opts)).toBe("héllo…");
+    expect(anyword.truncate("héllo 👨‍👩‍👧", 5, opts)).toBe("héllo…");
+    expect(anyword.truncate("héllo 👨‍👩‍👧", 5, opts)).toBe("héllo…");
   });
 
   it("uses the given locale instead of the ambient one", () => {
@@ -27,6 +27,6 @@ describe("SSR-safe segmentation", () => {
     expect(anyword("日本語テスト", { locale: "ja" })).toEqual(
       anyword("日本語テスト", { locale: "ja" }),
     );
-    expect(anywordCount("日本語テスト", { locale: "ja" })).toBeGreaterThan(0);
+    expect(anyword.count("日本語テスト", { locale: "ja" })).toBeGreaterThan(0);
   });
 });

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { anymany, anymanyParts } from "./index";
+import { anymany } from "./index";
 
 describe("default join — en", () => {
   it("empty array → empty string", () => {
@@ -162,16 +162,16 @@ describe("input coercion", () => {
   });
 });
 
-describe("anymanyParts", () => {
+describe("anymany.parts", () => {
   it("returns element/literal parts", () => {
-    expect(anymanyParts(["a", "b"], { locale: "en" })).toEqual([
+    expect(anymany.parts(["a", "b"], { locale: "en" })).toEqual([
       { type: "element", value: "a" },
       { type: "literal", value: " and " },
       { type: "element", value: "b" },
     ]);
   });
   it("empty array → empty parts", () => {
-    expect(anymanyParts([], { locale: "en" })).toEqual([]);
+    expect(anymany.parts([], { locale: "en" })).toEqual([]);
   });
   it("joined parts equal the anymany string for every option mix", () => {
     const cases: Parameters<typeof anymany>[] = [
@@ -183,12 +183,12 @@ describe("anymanyParts", () => {
       [["x", "y", "z", "a", "b"], { max: 3, locale: "ar-EG" }],
     ];
     for (const [items, options] of cases) {
-      const parts = anymanyParts(items, options);
+      const parts = anymany.parts(items, options);
       expect(parts.map((p) => p.value).join("")).toBe(anymany(items, options));
     }
   });
   it("throws the same RangeError as anymany on invalid max", () => {
-    expect(() => anymanyParts(["a"], { max: 0 })).toThrow(RangeError);
+    expect(() => anymany.parts(["a"], { max: 0 })).toThrow(RangeError);
   });
 });
 
@@ -226,5 +226,20 @@ describe("formatter cache — eviction", () => {
     const first = anymany(["c", "a", "b"], opts);
     expect(anymany(["c", "a", "b"], opts)).toBe(first);
     expect(anymany(["c", "a", "b"], opts)).toBe("a, b, and +1");
+  });
+});
+
+describe("public surface", () => {
+  it("exports exactly one name, with extras hanging off it", async () => {
+    const mod = await import("./index");
+    expect(Object.keys(mod)).toEqual(["anymany"]);
+  });
+
+  it("parts join back into the plain call's output", () => {
+    const items = ["a", "b", "c"];
+    const opts = { locale: "en" } as const;
+    expect(anymany.parts(items, opts).map((p) => p.value).join("")).toBe(
+      anymany(items, opts),
+    );
   });
 });

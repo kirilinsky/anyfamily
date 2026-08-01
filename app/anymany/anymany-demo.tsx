@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { anymany, anymanyParts, type AnymanyOptions } from "anymany";
+import { anymany, type AnymanyOptions } from "anymany";
 
 type ListType = "conjunction" | "disjunction" | "unit";
 type SortChoice = "none" | "true" | "numeric";
@@ -72,7 +72,7 @@ export function AnymanyDemo() {
   const parts = (() => {
     if (!items.length) return null;
     try {
-      return anymanyParts(items, options);
+      return anymany.parts(items, options);
     } catch {
       return null;
     }
@@ -223,7 +223,7 @@ export function AnymanyDemo() {
               done ? "opacity-100" : "opacity-0"
             }`}
           >
-            <span className="text-white/25">anymanyParts →</span>
+            <span className="text-white/25">anymany.parts →</span>
             {parts.map((p, i) => (
               <span
                 key={i}

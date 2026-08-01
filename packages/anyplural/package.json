@@ -1,7 +1,7 @@
 {
   "name": "anyplural",
   "version": "1.0.0",
-  "description": "Micro smart pluralizer — pick the plural form and interpolate the count in any Intl locale, one function.",
+  "description": "Micro smart pluralizer \u2014 pick the plural form and interpolate the count in any Intl locale, one function.",
   "type": "module",
   "sideEffects": false,
   "main": "./dist/index.cjs",
@@ -69,11 +69,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/kirilinsky/anyplural.git"
+    "url": "git+https://github.com/kirilinsky/anyfamily.git",
+    "directory": "packages/anyplural"
   },
   "author": "Kirilinsky (https://github.com/kirilinsky)",
   "bugs": {
-    "url": "https://github.com/kirilinsky/anyplural/issues"
+    "url": "https://github.com/kirilinsky/anyfamily/issues"
   },
-  "homepage": "https://anyplural.vercel.app"
+  "homepage": "https://anyfamily.site/anyplural"
 }

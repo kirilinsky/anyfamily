@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { anyplural, anypluralParts, type Forms } from "anyplural";
+import { anyplural, type Forms } from "anyplural";
 
 type PluralType = "cardinal" | "ordinal";
 
@@ -94,7 +94,7 @@ export function AnypluralDemo() {
 
   const parts = (() => {
     try {
-      return anypluralParts(count, forms, { locale, type });
+      return anyplural.parts(count, forms, { locale, type });
     } catch {
       return null;
     }
@@ -216,7 +216,7 @@ export function AnypluralDemo() {
           <div
             className={`flex max-w-full flex-wrap items-center justify-center gap-x-1.5 gap-y-1 px-2 font-mono text-[11px] transition-opacity duration-200 ${done ? "opacity-100" : "opacity-0"}`}
           >
-            <span className="text-white/25">anypluralParts →</span>
+            <span className="text-white/25">anyplural.parts →</span>
             {parts.map((p, i) => (
               <span
                 key={i}

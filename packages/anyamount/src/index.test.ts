@@ -1,8 +1,6 @@
 import { describe, it, expect } from "vitest";
 import {
   anyamount,
-  anyamountParts,
-  anyamountSymbol,
   type AnyamountOptions,
 } from "./index";
 
@@ -24,20 +22,20 @@ describe("smart mode — plain numbers below the compact threshold", () => {
   });
 
   it("groups thousands below the threshold", () => {
-    const parts = anyamountParts(9999, { locale: "en" });
+    const parts = anyamount.parts(9999, { locale: "en" });
     expect(partTypes(parts)).toContain("group");
     expect(partTypes(parts)).not.toContain("compact");
   });
 
   it("negative plain numbers keep their sign", () => {
-    const parts = anyamountParts(-42.5, { locale: "en" });
+    const parts = anyamount.parts(-42.5, { locale: "en" });
     expect(partTypes(parts)).toContain("minusSign");
   });
 });
 
 describe("smart mode — compact notation at |value| >= 10000", () => {
   it("10000 switches to compact", () => {
-    const parts = anyamountParts(10_000, { locale: "en" });
+    const parts = anyamount.parts(10_000, { locale: "en" });
     expect(partTypes(parts)).toContain("compact");
   });
 
@@ -46,7 +44,7 @@ describe("smart mode — compact notation at |value| >= 10000", () => {
   });
 
   it("negative values also go compact", () => {
-    const parts = anyamountParts(-1_234_567, { locale: "en" });
+    const parts = anyamount.parts(-1_234_567, { locale: "en" });
     expect(partTypes(parts)).toContain("minusSign");
     expect(partTypes(parts)).toContain("compact");
   });
@@ -99,7 +97,7 @@ describe("currency mode", () => {
   });
 
   it("emits a currency part and the full value", () => {
-    const parts = anyamountParts(1999, {
+    const parts = anyamount.parts(1999, {
       mode: "currency",
       currency: "EUR",
       locale: "en",
@@ -112,14 +110,14 @@ describe("currency mode", () => {
 
   it("keeps the currency's own fraction digits by default", () => {
     // EUR → 2, JPY → 0
-    const eur = anyamountParts(1999, { mode: "currency", currency: "EUR", locale: "en" });
+    const eur = anyamount.parts(1999, { mode: "currency", currency: "EUR", locale: "en" });
     expect(eur.find((p) => p.type === "fraction")?.value).toBe("00");
-    const jpy = anyamountParts(1999, { mode: "currency", currency: "JPY", locale: "ja" });
+    const jpy = anyamount.parts(1999, { mode: "currency", currency: "JPY", locale: "ja" });
     expect(partTypes(jpy)).not.toContain("fraction");
   });
 
   it("digits caps fraction digits", () => {
-    const parts = anyamountParts(1999.99, {
+    const parts = anyamount.parts(1999.99, {
       mode: "currency",
       currency: "EUR",
       locale: "en",
@@ -130,7 +128,7 @@ describe("currency mode", () => {
 
   it("localizes across en, ru, de, ja", () => {
     for (const locale of ["en", "ru", "de", "ja"]) {
-      const parts = anyamountParts(1999, { mode: "currency", currency: "USD", locale });
+      const parts = anyamount.parts(1999, { mode: "currency", currency: "USD", locale });
       expect(partTypes(parts)).toContain("currency");
       expect(partTypes(parts)).toContain("integer");
     }
@@ -188,7 +186,7 @@ describe("unit mode", () => {
 
   it("localizes units across en, ru, de, ja", () => {
     for (const locale of ["en", "ru", "de", "ja"]) {
-      const parts = anyamountParts(3.2, { mode: "unit", unit: "gigabyte", locale });
+      const parts = anyamount.parts(3.2, { mode: "unit", unit: "gigabyte", locale });
       expect(partTypes(parts)).toContain("unit");
       expect(partTypes(parts)).toContain("integer");
     }
@@ -202,7 +200,7 @@ describe("unit mode", () => {
   });
 });
 
-describe("anyamountParts", () => {
+describe("anyamount.parts", () => {
   it("joining part values reproduces the string output", () => {
     const cases: [number, Parameters<typeof anyamount>[1]][] = [
       [1_234_567, { locale: "en" }],
@@ -211,7 +209,7 @@ describe("anyamountParts", () => {
       [120, { mode: "unit", unit: "kilometer-per-hour", locale: "ru" }],
     ];
     for (const [value, options] of cases) {
-      const joined = anyamountParts(value, options)
+      const joined = anyamount.parts(value, options)
         .map((p) => p.value)
         .join("");
       expect(joined).toBe(anyamount(value, options));
@@ -219,7 +217,7 @@ describe("anyamountParts", () => {
   });
 
   it("passes Intl part objects through unchanged", () => {
-    const parts = anyamountParts(42, { locale: "en" });
+    const parts = anyamount.parts(42, { locale: "en" });
     expect(parts).toEqual([{ type: "integer", value: "42" }]);
   });
 });
@@ -227,24 +225,24 @@ describe("anyamountParts", () => {
 describe("bigint values", () => {
   it("smart mode formats small bigints plain", () => {
     expect(anyamount(42n, { locale: "en" })).toBe("42");
-    const parts = anyamountParts(9999n, { locale: "en" });
+    const parts = anyamount.parts(9999n, { locale: "en" });
     expect(partTypes(parts)).not.toContain("compact");
   });
 
   it("smart mode compacts big bigints, including beyond MAX_SAFE_INTEGER", () => {
     expect(anyamount(1_234_567n, { locale: "en" })).toMatch(/^1[.,]2\s?M$/);
-    const parts = anyamountParts(123_456_789_012_345_678_901n, { locale: "en" });
+    const parts = anyamount.parts(123_456_789_012_345_678_901n, { locale: "en" });
     expect(partTypes(parts)).toContain("compact");
   });
 
   it("negative bigints keep their sign", () => {
-    const parts = anyamountParts(-1_234_567n, { locale: "en" });
+    const parts = anyamount.parts(-1_234_567n, { locale: "en" });
     expect(partTypes(parts)).toContain("minusSign");
     expect(partTypes(parts)).toContain("compact");
   });
 
   it("works in currency and unit modes", () => {
-    const eur = anyamountParts(1999n, { mode: "currency", currency: "EUR", locale: "en" });
+    const eur = anyamount.parts(1999n, { mode: "currency", currency: "EUR", locale: "en" });
     expect(partTypes(eur)).toContain("currency");
     expect(anyamount(3n, { mode: "unit", unit: "gigabyte", locale: "en" })).toMatch(
       /^3\s?GB$/,
@@ -252,7 +250,7 @@ describe("bigint values", () => {
   });
 
   it("joining part values reproduces the string output", () => {
-    const joined = anyamountParts(1_234_567n, { locale: "en" })
+    const joined = anyamount.parts(1_234_567n, { locale: "en" })
       .map((p) => p.value)
       .join("");
     expect(joined).toBe(anyamount(1_234_567n, { locale: "en" }));
@@ -266,7 +264,7 @@ describe("input validation", () => {
 
   it("formats ±Infinity as the locale infinity symbol", () => {
     expect(anyamount(Infinity, { locale: "en" })).toBe("∞");
-    const parts = anyamountParts(-Infinity, { locale: "en" });
+    const parts = anyamount.parts(-Infinity, { locale: "en" });
     expect(partTypes(parts)).toContain("minusSign");
     expect(partTypes(parts)).toContain("infinity");
   });
@@ -283,7 +281,7 @@ describe("input validation", () => {
 
   it("defaults to the runtime locale when locale is omitted", () => {
     expect(typeof anyamount(42)).toBe("string");
-    expect(anyamountParts(42).length).toBeGreaterThan(0);
+    expect(anyamount.parts(42).length).toBeGreaterThan(0);
   });
 });
 
@@ -326,12 +324,12 @@ describe("formatter cache", () => {
 
 describe("currencyDisplay option", () => {
   it("defaults to the locale's symbol", () => {
-    const parts = anyamountParts(1999, { mode: "currency", currency: "USD", locale: "en" });
+    const parts = anyamount.parts(1999, { mode: "currency", currency: "USD", locale: "en" });
     expect(parts.find((p) => p.type === "currency")?.value).toBe("$");
   });
 
   it("code renders the ISO code", () => {
-    const parts = anyamountParts(1999, {
+    const parts = anyamount.parts(1999, {
       mode: "currency",
       currency: "USD",
       locale: "en",
@@ -352,7 +350,7 @@ describe("currencyDisplay option", () => {
   });
 
   it("narrowSymbol drops the disambiguating prefix", () => {
-    const narrow = anyamountParts(5, {
+    const narrow = anyamount.parts(5, {
       mode: "currency",
       currency: "USD",
       locale: "en-CA",
@@ -374,50 +372,50 @@ describe("currencyDisplay option", () => {
   });
 });
 
-describe("anyamountSymbol", () => {
+describe("anyamount.symbol", () => {
   it("resolves common codes to their symbol", () => {
-    expect(anyamountSymbol("USD", { locale: "en" })).toBe("$");
-    expect(anyamountSymbol("EUR", { locale: "en" })).toBe("€");
-    expect(anyamountSymbol("GBP", { locale: "en" })).toBe("£");
+    expect(anyamount.symbol("USD", { locale: "en" })).toBe("$");
+    expect(anyamount.symbol("EUR", { locale: "en" })).toBe("€");
+    expect(anyamount.symbol("GBP", { locale: "en" })).toBe("£");
   });
 
   it("is case-insensitive", () => {
-    expect(anyamountSymbol("usd", { locale: "en" })).toBe("$");
+    expect(anyamount.symbol("usd", { locale: "en" })).toBe("$");
   });
 
   it("localizes the symbol", () => {
-    expect(anyamountSymbol("JPY", { locale: "ja" })).toBe("￥");
-    expect(anyamountSymbol("RUB", { locale: "ru" })).toBe("₽");
+    expect(anyamount.symbol("JPY", { locale: "ja" })).toBe("￥");
+    expect(anyamount.symbol("RUB", { locale: "ru" })).toBe("₽");
   });
 
   it("stays narrow across locales that disambiguate", () => {
-    expect(anyamountSymbol("USD", { locale: "en-CA" })).toBe("$");
+    expect(anyamount.symbol("USD", { locale: "en-CA" })).toBe("$");
   });
 
   it("display picks another spelling", () => {
-    expect(anyamountSymbol("USD", { locale: "en", display: "code" })).toBe("USD");
-    expect(anyamountSymbol("USD", { locale: "en", display: "name" })).toMatch(/dollar/i);
-    expect(anyamountSymbol("USD", { locale: "en", display: "symbol" })).toMatch(/\$/);
+    expect(anyamount.symbol("USD", { locale: "en", display: "code" })).toBe("USD");
+    expect(anyamount.symbol("USD", { locale: "en", display: "name" })).toMatch(/dollar/i);
+    expect(anyamount.symbol("USD", { locale: "en", display: "symbol" })).toMatch(/\$/);
   });
 
   it("falls back to the code when the locale has no symbol", () => {
-    expect(anyamountSymbol("XAU", { locale: "en" })).toBe("XAU");
+    expect(anyamount.symbol("XAU", { locale: "en" })).toBe("XAU");
   });
 
   it("works without a locale", () => {
-    expect(typeof anyamountSymbol("EUR")).toBe("string");
+    expect(typeof anyamount.symbol("EUR")).toBe("string");
   });
 
   it("throws a TypeError on a missing or non-string code", () => {
-    expect(() => anyamountSymbol("")).toThrow(TypeError);
+    expect(() => anyamount.symbol("")).toThrow(TypeError);
     // @ts-expect-error — currency must be a string
-    expect(() => anyamountSymbol(840)).toThrow(TypeError);
+    expect(() => anyamount.symbol(840)).toThrow(TypeError);
     // @ts-expect-error — currency is required
-    expect(() => anyamountSymbol()).toThrow(TypeError);
+    expect(() => anyamount.symbol()).toThrow(TypeError);
   });
 
   it("throws a RangeError on a malformed code", () => {
-    expect(() => anyamountSymbol("US")).toThrow(RangeError);
+    expect(() => anyamount.symbol("US")).toThrow(RangeError);
   });
 });
 
@@ -443,5 +441,23 @@ describe("digits is maximumFractionDigits, not a fixed width", () => {
     expect(
       anyamount(2.5, { mode: "currency", currency: "EUR", locale: "en", digits: 1 }),
     ).toMatch(/2[.,]5$/);
+  });
+});
+
+describe("public surface", () => {
+  it("exports exactly one name, with extras hanging off it", async () => {
+    const mod = await import("./index");
+    expect(Object.keys(mod)).toEqual(["anyamount"]);
+  });
+
+  it("parts join back into the plain call's output", () => {
+    const opts = { mode: "currency", currency: "EUR", locale: "en" } as const;
+    expect(anyamount.parts(1999, opts).map((p) => p.value).join("")).toBe(
+      anyamount(1999, opts),
+    );
+  });
+
+  it("symbol takes a currency code, not an amount", () => {
+    expect(anyamount.symbol("EUR", { locale: "en" })).toBe("€");
   });
 });

@@ -1,8 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   anylong,
-  anylongParts,
-  supported,
   type DurationFormatOptions,
   type DurationRecord,
 } from "./index";
@@ -20,8 +18,8 @@ const en = (record: DurationRecord, opts: DurationFormatOptions = {}) =>
   new DF("en", { style: "short", ...opts }).format(record);
 
 describe("feature detection", () => {
-  it("reports Intl.DurationFormat as supported on this runtime", () => {
-    expect(supported).toBe(true);
+  it("reports whether Intl.DurationFormat exists on this runtime", () => {
+    expect(anylong.supported).toBe(true);
     expect(typeof DF).toBe("function");
   });
 });
@@ -383,9 +381,9 @@ describe("locales", () => {
   });
 });
 
-describe("anylongParts", () => {
+describe("anylong.parts", () => {
   it("joins back to the anylong string", () => {
-    const parts = anylongParts("2h 30m", { locale: "en" });
+    const parts = anylong.parts("2h 30m", { locale: "en" });
     expect(parts.map((p) => p.value).join("")).toBe(
       anylong("2h 30m", { locale: "en" }),
     );
@@ -394,7 +392,19 @@ describe("anylongParts", () => {
   it("supports the two-date form", () => {
     const a = new Date("2026-07-01T10:00:00Z");
     const b = new Date("2026-07-01T12:30:00Z");
-    const parts = anylongParts(a, b, { locale: "en" });
+    const parts = anylong.parts(a, b, { locale: "en" });
     expect(parts.map((p) => p.value).join("")).toBe(anylong(a, b, { locale: "en" }));
+  });
+});
+
+describe("public surface", () => {
+  it("exports exactly one name, with extras hanging off it", async () => {
+    const mod = await import("./index");
+    expect(Object.keys(mod)).toEqual(["anylong"]);
+  });
+
+  it("carries parts and the support flag", () => {
+    expect(typeof anylong.parts).toBe("function");
+    expect(typeof anylong.supported).toBe("boolean");
   });
 });

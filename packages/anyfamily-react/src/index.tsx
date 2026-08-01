@@ -11,25 +11,16 @@ import {
 
 import {
   anyamount,
-  anyamountSymbol,
   type AnyamountOptions,
   type SymbolOptions as AnyamountSymbolOptions,
 } from "anyamount";
 import { anymany, type AnymanyOptions } from "anymany";
 import { anyaround, type AnyaroundOptions } from "anyaround";
-import {
-  anylong,
-  supported as anylongSupported,
-  type AnylongOptions,
-  type DurationInput,
-} from "anylong";
+import { anylong, type AnylongOptions, type DurationInput } from "anylong";
 import { anywhen, type AnywhenOptions, type DateInput, type Locale } from "anywhen";
 import { anyplural, type AnypluralOptions, type Forms } from "anyplural";
 import {
   anyword,
-  anywordCount,
-  anywordTruncate,
-  supported as anywordSupported,
   type AnywordOptions,
   type AnywordTruncateOptions,
 } from "anyword";
@@ -42,7 +33,13 @@ export type { AnylongOptions, DurationInput } from "anylong";
 export type { AnywhenOptions, DateInput } from "anywhen";
 export type { AnypluralOptions, Forms } from "anyplural";
 export type { AnywordOptions, AnywordTruncateOptions, Granularity } from "anyword";
-export { anylongSupported, anywordSupported };
+/**
+ * Re-exported so consumers can feature-detect without also importing the
+ * underlying packages. Since v2 each package carries its own flag, so these are
+ * plain forwards rather than the disambiguating aliases they used to be.
+ */
+export const anylongSupported = anylong.supported;
+export const anywordSupported = anyword.supported;
 
 /**
  * A BCP 47 locale tag, or a fallback chain. Structurally identical across
@@ -127,13 +124,13 @@ export function useAnyamount(value: number, options?: AnyamountOptions): string 
   return anyamount(value, withLocale(options, locale));
 }
 
-/** Like `anyamountSymbol`, reading `locale` from the nearest {@linkcode AnyfamilyProvider} when not set explicitly. */
+/** Like `anyamount.symbol`, reading `locale` from the nearest {@linkcode AnyfamilyProvider} when not set explicitly. */
 export function useAnyamountSymbol(
   currency: string,
   options?: AnyamountSymbolOptions,
 ): string {
   const locale = useAnyfamilyLocale();
-  return anyamountSymbol(currency, withLocale(options, locale));
+  return anyamount.symbol(currency, withLocale(options, locale));
 }
 
 /** Like `anymany`, reading `locale` from the nearest {@linkcode AnyfamilyProvider} when not set explicitly. */
@@ -177,18 +174,18 @@ export function useAnyword(text: string, options?: AnywordOptions): string[] {
   return useMemo(() => anyword(text, merged), [text, key]);
 }
 
-/** Like `anywordCount`, reading `locale` from the nearest {@linkcode AnyfamilyProvider} when not set explicitly. */
+/** Like `anyword.count`, reading `locale` from the nearest {@linkcode AnyfamilyProvider} when not set explicitly. */
 export function useAnywordCount(text: string, options?: AnywordOptions): number {
   const locale = useAnyfamilyLocale();
-  return anywordCount(text, withLocale(options, locale));
+  return anyword.count(text, withLocale(options, locale));
 }
 
-/** Like `anywordTruncate`, reading `locale` from the nearest {@linkcode AnyfamilyProvider} when not set explicitly. */
+/** Like `anyword.truncate`, reading `locale` from the nearest {@linkcode AnyfamilyProvider} when not set explicitly. */
 export function useAnywordTruncate(
   text: string,
   limit: number,
   options?: AnywordTruncateOptions,
 ): string {
   const locale = useAnyfamilyLocale();
-  return anywordTruncate(text, limit, withLocale(options, locale));
+  return anyword.truncate(text, limit, withLocale(options, locale));
 }

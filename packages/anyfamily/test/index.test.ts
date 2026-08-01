@@ -1,22 +1,16 @@
 import { describe, expect, it } from "vitest";
 import {
   anywhen,
-  anywhenParts,
   anyamount,
-  anyamountSymbol,
   anymany,
   anyaround,
   anylong,
-  anylongSupported,
   anyplural,
   anyword,
-  anywordCount,
-  anywordTruncate,
-  anywordSupported,
 } from "../src/index";
 
 describe("anyfamily", () => {
-  it("re-exports all seven as functions", () => {
+  it("re-exports all seven, one name each", () => {
     expect(typeof anywhen).toBe("function");
     expect(typeof anyamount).toBe("function");
     expect(typeof anymany).toBe("function");
@@ -40,8 +34,8 @@ describe("anyfamily", () => {
     ).toBe("€1,999.00");
   });
 
-  it("anyamountSymbol resolves a bare currency symbol", () => {
-    expect(anyamountSymbol("EUR", { locale: "en" })).toBe("€");
+  it("anyamount.symbol resolves a bare currency symbol", () => {
+    expect(anyamount.symbol("EUR", { locale: "en" })).toBe("€");
   });
 
   it("anymany joins lists", () => {
@@ -52,7 +46,7 @@ describe("anyfamily", () => {
     expect(anyaround("US", { locale: "en" })).toBe("United States");
   });
 
-  it.skipIf(!anylongSupported)("anylong formats durations", () => {
+  it.skipIf(!anylong.supported)("anylong formats durations", () => {
     expect(anylong("PT2H30M", { locale: "en" })).toBe("2 hr, 30 min");
   });
 
@@ -62,26 +56,15 @@ describe("anyfamily", () => {
     );
   });
 
-  it.skipIf(!anywordSupported)("anyword segments words without spaces", () => {
+  it.skipIf(!anyword.supported)("anyword segments words without spaces", () => {
     expect(anyword("世界 test", { locale: "en" })).toEqual(["世界", "test"]);
   });
 
-  it.skipIf(!anywordSupported)("anywordCount counts graphemes, not code units", () => {
-    expect(anywordCount("👨‍👩‍👧", { by: "grapheme" })).toBe(1);
+  it.skipIf(!anyword.supported)("anyword.count counts graphemes, not code units", () => {
+    expect(anyword.count("👨‍👩‍👧", { by: "grapheme" })).toBe(1);
   });
 
-  it.skipIf(!anywordSupported)("anywordTruncate cuts on a grapheme boundary", () => {
-    expect(anywordTruncate("héllo 👨‍👩‍👧", 5, { ellipsis: "…" })).toBe("héllo…");
-  });
-});
-
-describe("1.x bridges", () => {
-  it("anywhenParts still works as a deprecated alias for anywhen.parts", () => {
-    const now = new Date("2026-01-01T12:00:00Z");
-    const opts = { mode: "relative", locale: "en", now } as const;
-    const via = anywhenParts(new Date("2026-01-01T09:00:00Z"), opts);
-    expect(via.map((p) => p.value).join("")).toBe(
-      anywhen(new Date("2026-01-01T09:00:00Z"), opts),
-    );
+  it.skipIf(!anyword.supported)("anyword.truncate cuts on a grapheme boundary", () => {
+    expect(anyword.truncate("héllo 👨‍👩‍👧", 5, { ellipsis: "…" })).toBe("héllo…");
   });
 });

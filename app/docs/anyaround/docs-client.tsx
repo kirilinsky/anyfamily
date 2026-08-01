@@ -14,10 +14,13 @@ const NAV: DocsNavItem[] = [
   { id: "overview", label: "Overview" },
   { id: "install", label: "Install" },
   { id: "anyaround", label: "anyaround()" },
-  { id: "info", label: "anyaroundInfo()" },
+  { id: "migrating", label: "From 1.x" },
+  { id: "info", label: "anyaround.info()" },
   { id: "modes", label: "Modes" },
+  { id: "flags", label: "flags" },
   { id: "options", label: "Options" },
-  { id: "flags", label: "Flags" },
+  { id: "recipes", label: "Recipes" },
+  { id: "react", label: "React / Next.js" },
   { id: "locales", label: "Locales" },
   { id: "compatibility", label: "Compatibility" },
   { id: "limitations", label: "Limitations" },
@@ -105,10 +108,30 @@ anyaround("DE", { display: "flag" }); // "🇩🇪"`}</Code>
         </p>
       </Section>
 
-      <Section id="info" title="anyaroundInfo()">
+      <Section id="migrating" title="Migrating from 1.x">
+        <p>
+          2.0 removed the separate <Mono>anyaroundInfo</Mono> 
+           — they are the
+          same functions and values, reached through the one name the package
+          exports.
+        </p>
+        <Code>{`- import { anyaround, anyaroundInfo } from 'anyaround'
++ import { anyaround } from 'anyaround'
+
+- anyaroundInfo('US')
++ anyaround.info('US')`}</Code>
+        <p>
+          Arguments, return values and throwing behaviour are unchanged, and
+          nothing else in the API moved. Every <Mono>any*</Mono> package follows
+          this shape from 2.0 on: the bare call does the job, everything else
+          hangs off the same name.
+        </p>
+      </Section>
+
+      <Section id="info" title="anyaround.info()">
         <p>
           <code style={{ color: "var(--sky)" }} className="font-mono">
-            anyaroundInfo(code, options?) →{" "}
+            anyaround.info(code, options?) →{" "}
             {"{ code, type, name, flag, found }"}
           </code>
         </p>
@@ -116,13 +139,13 @@ anyaround("DE", { display: "flag" }); // "🇩🇪"`}</Code>
           Same arguments, structured result — build your own output or drive a{" "}
           <Mono>&lt;select&gt;</Mono>.
         </p>
-        <Code>{`anyaroundInfo("US", { locale: "en" });
+        <Code>{`anyaround.info("US", { locale: "en" });
 // { code: "US", type: "region", name: "United States", flag: "🇺🇸", found: true }
 
-anyaroundInfo("en", { locale: "fr" });
+anyaround.info("en", { locale: "fr" });
 // { code: "en", type: "language", name: "anglais", flag: "", found: true }
 
-anyaroundInfo("QZ", { mode: "region" });
+anyaround.info("QZ", { mode: "region" });
 // { code: "QZ", type: "region", name: "QZ", flag: "🇶🇿", found: false }`}</Code>
         <p>
           <Mono>flag</Mono> is <Mono>&quot;&quot;</Mono> whenever the code is not
@@ -159,6 +182,21 @@ anyaround("EUR", { mode: "currency" });                   // "Euro"
 anyaround("gregory", { mode: "calendar" });               // "Gregorian Calendar"`}</Code>
       </Section>
 
+      <Section id="flags" title="Flags">
+        <p>
+          Flags are derived from a two-letter region code by mapping each letter
+          to its Unicode Regional Indicator Symbol — no image assets, no lookup
+          table.
+        </p>
+        <Code>{`anyaround("US", { display: "flag" });      // "🇺🇸"
+anyaround("US", { display: "flag-name" }); // "🇺🇸 United States"
+anyaround("US", { display: "name-flag" }); // "United States 🇺🇸"`}</Code>
+        <p>
+          Numeric M49 regions (<Mono>&quot;419&quot;</Mono>) and non-region kinds
+          have no flag, so flag <Mono>display</Mono> values fall back to the
+          name.
+        </p>
+      </Section>
       <Section id="options" title="Options">
         <Prop
           name="mode"
@@ -203,21 +241,49 @@ anyaround("gregory", { mode: "calendar" });               // "Gregorian Calendar
         </p>
       </Section>
 
-      <Section id="flags" title="Flags">
-        <p>
-          Flags are derived from a two-letter region code by mapping each letter
-          to its Unicode Regional Indicator Symbol — no image assets, no lookup
-          table.
-        </p>
-        <Code>{`anyaround("US", { display: "flag" });      // "🇺🇸"
-anyaround("US", { display: "flag-name" }); // "🇺🇸 United States"
-anyaround("US", { display: "name-flag" }); // "United States 🇺🇸"`}</Code>
-        <p>
-          Numeric M49 regions (<Mono>&quot;419&quot;</Mono>) and non-region kinds
-          have no flag, so flag <Mono>display</Mono> values fall back to the
-          name.
-        </p>
+      <Section id="recipes" title="Recipes">
+        <p>Copy, paste, move on.</p>
+        <Code>{`// Country picker with flags
+countries.map((cc) => {
+  const { code, name, flag } = anyaround.info(cc)
+  return <option key={code} value={code}>{flag} {name}</option>
+})
+
+// Language switcher, each language in its own tongue
+anyaround('de', { mode: 'language', locale: 'de' })   // "Deutsch"
+anyaround('ja', { mode: 'language', locale: 'ja' })   // "日本語"
+
+// Profile location
+anyaround(user.country, { display: 'flag-name', locale: 'en' })
+// "🇩🇪 Germany"
+
+// Currency label next to an amount
+anyaround(order.currency, { mode: 'currency', locale: 'en' })
+// "Euro"
+
+// Flag only, for a compact table cell
+anyaround(row.country, { display: 'flag' })
+// "🇺🇸" `}</Code>
       </Section>
+
+      <Section id="react" title="React / Next.js">
+        <p>
+          anyaround is pure and synchronous, so it works in a component as-is. What 
+          <Mono>anyfamily-react</Mono> adds is a shared locale: set it once on 
+          <Mono>AnyfamilyProvider</Mono> and every hook below picks it up, so you
+          do not thread <Mono>locale</Mono> through every call.
+        </p>
+        <Code>{`import { AnyfamilyProvider, useAnyaround } from 'anyfamily-react'
+
+function Country({ code }: { code: string }) {
+  return <span>{useAnyaround(code, { display: 'flag-name' })}</span>
+}
+
+<AnyfamilyProvider locale="en">
+  <Country code={user.country} />
+</AnyfamilyProvider>`}</Code>
+      </Section>
+
 
       <Section id="locales" title="Locales">
         <p>

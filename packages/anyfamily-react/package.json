@@ -1,7 +1,7 @@
 {
   "name": "anyfamily-react",
   "version": "1.3.0",
-  "description": "React hooks for the any* family \u2014 useAnywhen, useAnyamount, useAnyamountSymbol, useAnymany, useAnyaround, useAnylong, useAnyplural, useAnyword, with live-updating relative time and a shared locale provider.",
+  "description": "React hooks for the any* family — useAnywhen, useAnyamount, useAnyamountSymbol, useAnymany, useAnyaround, useAnylong, useAnyplural, useAnyword, with live-updating relative time and a shared locale provider.",
   "type": "module",
   "sideEffects": false,
   "main": "./dist/index.cjs",

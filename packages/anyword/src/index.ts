@@ -24,13 +24,13 @@ export interface AnywordOptions {
   raw?: boolean;
 }
 
-/** Options for {@linkcode anywordTruncate}. */
+/** Options for {@linkcode anyword.truncate}. */
 export interface AnywordTruncateOptions extends AnywordOptions {
   /** Appended when the text was actually cut. Trailing whitespace is trimmed first. Defaults to `""`. */
   ellipsis?: string;
 }
 
-/** One segment returned by {@linkcode anywordParts}. */
+/** One segment returned by {@linkcode anyword.parts}. */
 export interface AnywordPart {
   /** The segment text. Joining every part of a `raw` pass reproduces the input. */
   segment: string;
@@ -56,7 +56,7 @@ const SEG =
  * supported ? anyword(text) : text.split(/\s+/);
  * ```
  */
-export const supported: boolean = typeof SEG === "function";
+const supported: boolean = typeof SEG === "function";
 
 const CACHE_LIMIT = 50;
 
@@ -122,9 +122,9 @@ function* walk(text: string, options: AnywordOptions) {
  * @returns The segments, in order.
  * @throws {TypeError} If `text` is not a string.
  * @throws {RangeError} If `options.by` is unknown.
- * @throws {Error} If `Intl.Segmenter` is unavailable in the runtime (check {@linkcode supported}).
+ * @throws {Error} If `Intl.Segmenter` is unavailable in the runtime (check {@linkcode anyword.supported}).
  */
-export function anyword(text: string, options: AnywordOptions = {}): string[] {
+function segment(text: string, options: AnywordOptions = {}): string[] {
   const out: string[] = [];
   for (const s of walk(text, options)) out.push(s.segment);
   return out;
@@ -149,9 +149,9 @@ export function anyword(text: string, options: AnywordOptions = {}): string[] {
  * @returns The segments as parts, in order.
  * @throws {TypeError} If `text` is not a string.
  * @throws {RangeError} If `options.by` is unknown.
- * @throws {Error} If `Intl.Segmenter` is unavailable in the runtime (check {@linkcode supported}).
+ * @throws {Error} If `Intl.Segmenter` is unavailable in the runtime (check {@linkcode anyword.supported}).
  */
-export function anywordParts(
+function parts(
   text: string,
   options: AnywordOptions = {},
 ): AnywordPart[] {
@@ -182,9 +182,9 @@ export function anywordParts(
  * @returns The number of segments.
  * @throws {TypeError} If `text` is not a string.
  * @throws {RangeError} If `options.by` is unknown.
- * @throws {Error} If `Intl.Segmenter` is unavailable in the runtime (check {@linkcode supported}).
+ * @throws {Error} If `Intl.Segmenter` is unavailable in the runtime (check {@linkcode anyword.supported}).
  */
-export function anywordCount(text: string, options: AnywordOptions = {}): number {
+function count(text: string, options: AnywordOptions = {}): number {
   let n = 0;
   for (const _ of walk(text, options)) n++;
   return n;
@@ -213,9 +213,9 @@ export function anywordCount(text: string, options: AnywordOptions = {}): number
  * @returns The truncated text, or `text` unchanged if it already fits.
  * @throws {TypeError} If `text` is not a string.
  * @throws {RangeError} If `limit` is negative or not finite, or `options.by` is unknown.
- * @throws {Error} If `Intl.Segmenter` is unavailable in the runtime (check {@linkcode supported}).
+ * @throws {Error} If `Intl.Segmenter` is unavailable in the runtime (check {@linkcode anyword.supported}).
  */
-export function anywordTruncate(
+function truncate(
   text: string,
   limit: number,
   options: AnywordTruncateOptions = {},
@@ -240,3 +240,57 @@ export function anywordTruncate(
   const head = text.slice(0, cut);
   return ellipsis ? head.trimEnd() + ellipsis : head;
 }
+
+/**
+ * Splits text into locale-correct segments using native `Intl.Segmenter` —
+ * words by default, or graphemes and sentences via `by`.
+ *
+ * Unlike `.split(" ")` it finds words in scripts without spaces, and unlike
+ * `[...str]` it never rips a composite emoji or a combining accent apart.
+ *
+ * The package exports this one name. Everything else hangs off it:
+ * {@linkcode anyword.parts}, {@linkcode anyword.count},
+ * {@linkcode anyword.truncate} and {@linkcode anyword.supported}.
+ *
+ * @example
+ * ```ts
+ * anyword("don't stop 世界");                 // ["don't", "stop", "世界"]
+ * anyword("👨‍👩‍👧 hi", { by: "grapheme" });      // ["👨‍👩‍👧", " ", "h", "i"]
+ * anyword.count("héllo", { by: "grapheme" }); // 5
+ * anyword.truncate("héllo 👨‍👩‍👧", 5, { ellipsis: "…" }); // "héllo…"
+ * ```
+ */
+export const anyword = Object.assign(segment, {
+  /**
+   * Like calling {@linkcode anyword} directly, but returns
+   * `{ segment, index, isWordLike? }` parts instead of plain strings — the
+   * offsets let you highlight, slice, or animate the original text without
+   * searching it again.
+   */
+  parts,
+
+  /**
+   * Counts segments — words by default, graphemes or sentences via `by`.
+   *
+   * A grapheme count is the character count users actually see: `"👨‍👩‍👧".length`
+   * is 8, `anyword.count("👨‍👩‍👧", { by: "grapheme" })` is 1.
+   */
+  count,
+
+  /**
+   * Cuts text to at most `limit` segments — graphemes by default, so an emoji
+   * or an accented letter is never split in half.
+   */
+  truncate,
+
+  /**
+   * Whether `Intl.Segmenter` exists in this runtime. `false` on older engines,
+   * where every anyword call throws — branch on this if you support them.
+   *
+   * @example
+   * ```ts
+   * anyword.supported ? anyword(text) : text.split(/\s+/);
+   * ```
+   */
+  supported,
+});

@@ -14,11 +14,14 @@ const NAV: DocsNavItem[] = [
   { id: "overview", label: "Overview" },
   { id: "install", label: "Install" },
   { id: "anyamount", label: "anyamount()" },
-  { id: "parts", label: "anyamountParts()" },
-  { id: "symbol", label: "anyamountSymbol()" },
+  { id: "migrating", label: "From 1.x" },
+  { id: "parts", label: "anyamount.parts()" },
+  { id: "symbol", label: "anyamount.symbol()" },
   { id: "modes", label: "Modes" },
+  { id: "units", label: "units" },
   { id: "options", label: "Options" },
-  { id: "units", label: "Units" },
+  { id: "recipes", label: "Recipes" },
+  { id: "react", label: "React / Next.js" },
   { id: "locales", label: "Locales" },
   { id: "compatibility", label: "Compatibility" },
   { id: "limitations", label: "Limitations" },
@@ -133,16 +136,39 @@ anyamount(1999.99, { mode: 'currency', currency: 'EUR', locale: 'en', digits: 0 
 // "€2,000"`}</Code>
       </Section>
 
-      <Section id="parts" title="anyamountParts()">
+      <Section id="migrating" title="Migrating from 1.x">
+        <p>
+          2.0 removed the separate <Mono>anyamountParts</Mono> 
+          and the other extra exports — they are the
+          same functions and values, reached through the one name the package
+          exports.
+        </p>
+        <Code>{`- import { anyamount, anyamountParts, anyamountSymbol } from 'anyamount'
++ import { anyamount } from 'anyamount'
+
+- anyamountParts(1999, opts)
++ anyamount.parts(1999, opts)
+
+- anyamountSymbol('USD')
++ anyamount.symbol('USD')`}</Code>
+        <p>
+          Arguments, return values and throwing behaviour are unchanged, and
+          nothing else in the API moved. Every <Mono>any*</Mono> package follows
+          this shape from 2.0 on: the bare call does the job, everything else
+          hangs off the same name.
+        </p>
+      </Section>
+
+      <Section id="parts" title="anyamount.parts()">
         <p>
           Same arguments as <Mono>anyamount()</Mono>, but returns the{" "}
           <Mono>Intl.NumberFormat.formatToParts</Mono> output unchanged — style
           the number apart from the currency symbol or unit, or rebuild the
           output your own way.
         </p>
-        <Code>{`import { anyamountParts } from 'anyamount'
+        <Code>{`import { anyamount } from 'anyamount'
 
-anyamountParts(1999, { mode: 'currency', currency: 'EUR', locale: 'en' })
+anyamount.parts(1999, { mode: 'currency', currency: 'EUR', locale: 'en' })
 // [
 //   { type: 'currency', value: '€' },
 //   { type: 'integer', value: '1' },
@@ -153,7 +179,7 @@ anyamountParts(1999, { mode: 'currency', currency: 'EUR', locale: 'en' })
 // ]
 
 // React: shrink the currency symbol
-anyamountParts(price, { mode: 'currency', currency: 'EUR' }).map((p, i) =>
+anyamount.parts(price, { mode: 'currency', currency: 'EUR' }).map((p, i) =>
   p.type === 'currency' ? <small key={i}>{p.value}</small> : p.value,
 )`}</Code>
         <p style={{ color: "var(--text-muted)" }} className="text-xs">
@@ -163,22 +189,22 @@ anyamountParts(price, { mode: 'currency', currency: 'EUR' }).map((p, i) =>
         </p>
       </Section>
 
-      <Section id="symbol" title="anyamountSymbol()">
+      <Section id="symbol" title="anyamount.symbol()">
         <p>
           Resolves an ISO 4217 code to its localized symbol, with no number
           attached — for labels, currency pickers, and input affixes, where the
           amount is rendered separately (or not at all).
         </p>
-        <Code>{`import { anyamountSymbol } from 'anyamount'
+        <Code>{`import { anyamount } from 'anyamount'
 
-anyamountSymbol('USD', { locale: 'en' })   // "$"
-anyamountSymbol('EUR', { locale: 'en' })   // "€"
-anyamountSymbol('GBP', { locale: 'en' })   // "£"
-anyamountSymbol('JPY', { locale: 'ja' })   // "￥"
-anyamountSymbol('RUB', { locale: 'ru' })   // "₽"
+anyamount.symbol('USD', { locale: 'en' })   // "$"
+anyamount.symbol('EUR', { locale: 'en' })   // "€"
+anyamount.symbol('GBP', { locale: 'en' })   // "£"
+anyamount.symbol('JPY', { locale: 'ja' })   // "￥"
+anyamount.symbol('RUB', { locale: 'ru' })   // "₽"
 
-anyamountSymbol('USD', { locale: 'en', display: 'code' })   // "USD"
-anyamountSymbol('USD', { locale: 'en', display: 'name' })   // "US dollars"`}</Code>
+anyamount.symbol('USD', { locale: 'en', display: 'code' })   // "USD"
+anyamount.symbol('USD', { locale: 'en', display: 'name' })   // "US dollars"`}</Code>
         <p>
           <Mono>display</Mono> defaults to <Mono>&apos;narrowSymbol&apos;</Mono>{" "}
           — the bare symbol, never the disambiguated <Mono>US$</Mono> some
@@ -298,6 +324,24 @@ anyamount(5, { mode: 'unit', unit: 'kilometer', locale: 'en', style: 'narrow' })
         </div>
       </Section>
 
+      <Section id="units" title="Units">
+        <p>
+          <Mono>Intl</Mono> supports a fixed, sanctioned list of unit identifiers
+          (from ECMA-402), plus any <Mono>&lt;unit&gt;-per-&lt;unit&gt;</Mono>{" "}
+          compound of them. anyamount ships the full list as a TypeScript union,
+          so invalid units fail at compile time.
+        </p>
+        <Code>{`acre bit byte celsius centimeter day degree fahrenheit
+fluid-ounce foot gallon gigabit gigabyte gram hectare hour
+inch kilobit kilobyte kilogram kilometer liter megabit
+megabyte meter microsecond mile mile-scandinavian milliliter
+millimeter millisecond minute month nanosecond ounce percent
+petabyte pound second stone terabit terabyte week yard year`}</Code>
+        <Code>{`// compounds work too
+anyamount(120, { mode: 'unit', unit: 'kilometer-per-hour' })   // "120 km/h"
+anyamount(8.5, { mode: 'unit', unit: 'liter-per-kilometer' })  // "8.5 L/km"
+anyamount(2, { mode: 'unit', unit: 'meter-per-second' })       // "2 m/s"`}</Code>
+      </Section>
       <Section id="options" title="Options">
         <Prop
           name="mode"
@@ -341,24 +385,56 @@ anyamount(5, { mode: 'unit', unit: 'kilometer', locale: 'en', style: 'narrow' })
         />
       </Section>
 
-      <Section id="units" title="Units">
-        <p>
-          <Mono>Intl</Mono> supports a fixed, sanctioned list of unit identifiers
-          (from ECMA-402), plus any <Mono>&lt;unit&gt;-per-&lt;unit&gt;</Mono>{" "}
-          compound of them. anyamount ships the full list as a TypeScript union,
-          so invalid units fail at compile time.
-        </p>
-        <Code>{`acre bit byte celsius centimeter day degree fahrenheit
-fluid-ounce foot gallon gigabit gigabyte gram hectare hour
-inch kilobit kilobyte kilogram kilometer liter megabit
-megabyte meter microsecond mile mile-scandinavian milliliter
-millimeter millisecond minute month nanosecond ounce percent
-petabyte pound second stone terabit terabyte week yard year`}</Code>
-        <Code>{`// compounds work too
-anyamount(120, { mode: 'unit', unit: 'kilometer-per-hour' })   // "120 km/h"
-anyamount(8.5, { mode: 'unit', unit: 'liter-per-kilometer' })  // "8.5 L/km"
-anyamount(2, { mode: 'unit', unit: 'meter-per-second' })       // "2 m/s"`}</Code>
+      <Section id="recipes" title="Recipes">
+        <p>Copy, paste, move on.</p>
+        <Code>{`// Dashboard stat
+anyamount(views, { locale: 'en' })
+// "1.2M"
+
+// …spelled out
+anyamount(views, { locale: 'en', style: 'long' })
+// "1.2 million"
+
+// Price
+anyamount(product.cents / 100, { mode: 'currency', currency: 'EUR', locale: 'de' })
+// "1.999,00 €"
+
+// Price with no cents
+anyamount(total, { mode: 'currency', currency: 'EUR', digits: 0 })
+// "€2,000"
+
+// Storage meter
+anyamount(file.gb, { mode: 'unit', unit: 'gigabyte' })
+// "3.2 GB"
+
+// Speed, compound unit
+anyamount(120, { mode: 'unit', unit: 'kilometer-per-hour', locale: 'ru' })
+// "120 км/ч"
+
+// Currency affix inside an input, amount rendered separately
+anyamount.symbol(account.currency)
+// "$" `}</Code>
       </Section>
+
+      <Section id="react" title="React / Next.js">
+        <p>
+          anyamount is pure and synchronous, so it works in a component as-is. What 
+          <Mono>anyfamily-react</Mono> adds is a shared locale: set it once on 
+          <Mono>AnyfamilyProvider</Mono> and every hook below picks it up, so you
+          do not thread <Mono>locale</Mono> through every call.
+        </p>
+        <Code>{`import { AnyfamilyProvider, useAnyamount } from 'anyfamily-react'
+
+function Price({ cents }: { cents: number }) {
+  return <b>{useAnyamount(cents / 100, { mode: 'currency', currency: 'EUR' })}</b>
+}
+
+<AnyfamilyProvider locale="de">
+  <Price cents={199900} />
+</AnyfamilyProvider>`}</Code>
+        <p>`useAnyamountSymbol` is there too, for the bare currency symbol.</p>
+      </Section>
+
 
       <Section id="locales" title="Locales">
         <p>Same calls in a few languages — no extra setup, no locale files.</p>

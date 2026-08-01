@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { anymany, anymanyParts } from "./index";
+import { anymany } from "./index";
 
 describe("SSR-safe formatting", () => {
   it("is pure — identical calls always produce identical output", () => {
@@ -17,7 +17,7 @@ describe("SSR-safe formatting", () => {
   });
 
   it("parts stay stable across the hydration boundary", () => {
-    const render = () => anymanyParts(["a", "b"], { locale: "en" });
+    const render = () => anymany.parts(["a", "b"], { locale: "en" });
     expect(render()).toEqual(render());
   });
 });

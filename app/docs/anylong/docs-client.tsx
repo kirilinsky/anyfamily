@@ -14,12 +14,15 @@ const NAV: DocsNavItem[] = [
   { id: "overview", label: "Overview" },
   { id: "install", label: "Install" },
   { id: "anylong", label: "anylong()" },
+  { id: "migrating", label: "From 1.x" },
   { id: "inputs", label: "Inputs" },
   { id: "refusals", label: "What it refuses" },
-  { id: "parts", label: "anylongParts()" },
+  { id: "parts", label: "anylong.parts()" },
+  { id: "styles", label: "styles" },
+  { id: "clamping", label: "clamping" },
   { id: "options", label: "Options" },
-  { id: "styles", label: "Styles" },
-  { id: "clamping", label: "Clamping units" },
+  { id: "recipes", label: "Recipes" },
+  { id: "react", label: "React / Next.js" },
   { id: "locales", label: "Locales" },
   { id: "support", label: "Support flag" },
   { id: "compatibility", label: "Compatibility" },
@@ -122,6 +125,29 @@ anylong(finishedAt, startedAt)             // same
 anylong(startedAt, finishedAt, { locale: "de" })`}</Code>
       </Section>
 
+      <Section id="migrating" title="Migrating from 1.x">
+        <p>
+          2.0 removed the separate <Mono>anylongParts</Mono> 
+          and the other extra exports — they are the
+          same functions and values, reached through the one name the package
+          exports.
+        </p>
+        <Code>{`- import { anylong, anylongParts, supported } from 'anylong'
++ import { anylong } from 'anylong'
+
+- anylongParts('2h 30m')
++ anylong.parts('2h 30m')
+
+- supported ? anylong(ms) : fallback
++ anylong.supported ? anylong(ms) : fallback`}</Code>
+        <p>
+          Arguments, return values and throwing behaviour are unchanged, and
+          nothing else in the API moved. Every <Mono>any*</Mono> package follows
+          this shape from 2.0 on: the bare call does the job, everything else
+          hangs off the same name.
+        </p>
+      </Section>
+
       <Section id="inputs" title="Inputs">
         <p>
           <strong style={{ color: "var(--text-primary)" }}>
@@ -210,16 +236,16 @@ anylong({ hourz: 2 })    // ✗ unknown key, accepted keys listed
 anylong(NaN)             // ✗ with the full accepted-inputs list`}</Code>
       </Section>
 
-      <Section id="parts" title="anylongParts()">
+      <Section id="parts" title="anylong.parts()">
         <p>
           Same arguments as <Mono>anylong()</Mono> — including the two-date form
           — but returns <Mono>{"{ type, value, unit? }"}</Mono> parts instead of
           a string. Style the numbers apart from the units, or rebuild the output
           your own way.
         </p>
-        <Code>{`import { anylongParts } from 'anylong'
+        <Code>{`import { anylong } from 'anylong'
 
-anylongParts("2h 30m", { locale: "en" })
+anylong.parts("2h 30m", { locale: "en" })
 // [
 //   { type: "integer", value: "2", unit: "hour" },
 //   { type: "literal", value: " hr, " },
@@ -228,7 +254,7 @@ anylongParts("2h 30m", { locale: "en" })
 // ]
 
 // React: bold the numbers
-anylongParts("2h 30m", { locale: "en" }).map((p, i) =>
+anylong.parts("2h 30m", { locale: "en" }).map((p, i) =>
   p.type === "integer" ? <b key={i}>{p.value}</b> : p.value,
 )`}</Code>
         <p>
@@ -237,6 +263,53 @@ anylongParts("2h 30m", { locale: "en" }).map((p, i) =>
         </p>
       </Section>
 
+      <Section id="styles" title="Styles">
+        <Rows>
+          {STYLES.map(([value, meaning, example]) => (
+            <div
+              key={value}
+              className="flex flex-col gap-1 px-4 py-3 text-sm sm:flex-row sm:items-center sm:gap-4"
+            >
+              <code
+                style={{ color: "var(--doc-accent)", minWidth: "6rem" }}
+                className="font-mono text-sm"
+              >
+                &quot;{value}&quot;
+              </code>
+              <span style={{ color: "var(--text-secondary)", minWidth: "15rem" }}>
+                {meaning}
+              </span>
+              <code
+                style={{ color: "var(--emerald)" }}
+                className="font-mono text-xs break-words"
+              >
+                {example}
+              </code>
+            </div>
+          ))}
+        </Rows>
+        <Code>{`anylong("2h 30m", { style: "long" })      // "2 hours, 30 minutes"
+anylong("2h 30m", { style: "short" })     // "2 hr, 30 min"       (default)
+anylong("2h 30m", { style: "narrow" })    // "2h 30m"
+anylong("2h 30m", { style: "digital" })   // "2:30:00"`}</Code>
+      </Section>
+      <Section id="clamping" title="Clamping units">
+        <p>
+          <Mono>largestUnit</Mono> and <Mono>smallestUnit</Mono> clamp the
+          decomposition of elapsed time — number and <Mono>Date</Mono> inputs.
+          Values are rounded at <Mono>smallestUnit</Mono>. Inputs that already
+          carry units (ISO, shorthand, records) are passed through as-is and
+          ignore both.
+        </p>
+        <Code>{`anylong(90_061_000, { largestUnit: "hours" })
+// "25 hr, 1 min, 1 sec"        — no day rollup
+
+anylong(30 * 86_400_000, { largestUnit: "weeks" })
+// "4 wks, 2 days"
+
+anylong(1_500, { smallestUnit: "seconds" })
+// "2 sec"                      — never shows ms`}</Code>
+      </Section>
       <Section id="options" title="Options">
         <Prop
           name="locale"
@@ -278,54 +351,52 @@ anylongParts("2h 30m", { locale: "en" }).map((p, i) =>
 // "0:05:00"`}</Code>
       </Section>
 
-      <Section id="styles" title="Styles">
-        <Rows>
-          {STYLES.map(([value, meaning, example]) => (
-            <div
-              key={value}
-              className="flex flex-col gap-1 px-4 py-3 text-sm sm:flex-row sm:items-center sm:gap-4"
-            >
-              <code
-                style={{ color: "var(--doc-accent)", minWidth: "6rem" }}
-                className="font-mono text-sm"
-              >
-                &quot;{value}&quot;
-              </code>
-              <span style={{ color: "var(--text-secondary)", minWidth: "15rem" }}>
-                {meaning}
-              </span>
-              <code
-                style={{ color: "var(--emerald)" }}
-                className="font-mono text-xs break-words"
-              >
-                {example}
-              </code>
-            </div>
-          ))}
-        </Rows>
-        <Code>{`anylong("2h 30m", { style: "long" })      // "2 hours, 30 minutes"
-anylong("2h 30m", { style: "short" })     // "2 hr, 30 min"       (default)
-anylong("2h 30m", { style: "narrow" })    // "2h 30m"
-anylong("2h 30m", { style: "digital" })   // "2:30:00"`}</Code>
+      <Section id="recipes" title="Recipes">
+        <p>Copy, paste, move on.</p>
+        <Code>{`// Video / track length
+anylong(track.ms, { style: 'digital' })
+// "3:42"
+
+// Task duration in a log
+anylong(job.startedAt, job.finishedAt, { style: 'long' })
+// "1 day, 4 hours, 30 minutes"
+
+// Time left until a deadline
+anylong(deadline, { largestUnit: 'days' })
+// "2 days, 6 hr"
+
+// Cache TTL from seconds
+anylong(ttl, { unit: 's', style: 'long' })
+// "15 minutes"
+
+// Compact badge
+anylong('2h 30m', { style: 'narrow' })
+// "2h 30m"
+
+// Degrade gracefully where Intl.DurationFormat is missing
+anylong.supported ? anylong(ms) : \`\${Math.round(ms / 60000)} min\``}</Code>
       </Section>
 
-      <Section id="clamping" title="Clamping units">
+      <Section id="react" title="React / Next.js">
         <p>
-          <Mono>largestUnit</Mono> and <Mono>smallestUnit</Mono> clamp the
-          decomposition of elapsed time — number and <Mono>Date</Mono> inputs.
-          Values are rounded at <Mono>smallestUnit</Mono>. Inputs that already
-          carry units (ISO, shorthand, records) are passed through as-is and
-          ignore both.
+          anylong is pure and synchronous, so it works in a component as-is. What 
+          <Mono>anyfamily-react</Mono> adds is a shared locale: set it once on 
+          <Mono>AnyfamilyProvider</Mono> and every hook below picks it up, so you
+          do not thread <Mono>locale</Mono> through every call.
         </p>
-        <Code>{`anylong(90_061_000, { largestUnit: "hours" })
-// "25 hr, 1 min, 1 sec"        — no day rollup
+        <Code>{`import { AnyfamilyProvider, useAnylong } from 'anyfamily-react'
 
-anylong(30 * 86_400_000, { largestUnit: "weeks" })
-// "4 wks, 2 days"
+function Duration({ ms }: { ms: number }) {
+  return <span>{useAnylong(ms, { style: 'long' })}</span>
+}
 
-anylong(1_500, { smallestUnit: "seconds" })
-// "2 sec"                      — never shows ms`}</Code>
+<AnyfamilyProvider locale="en">
+  <Duration ms={job.elapsed} />
+</AnyfamilyProvider>`}</Code>
+        <p>`anylongSupported` is re-exported for the same feature detection anylong itself provides.</p>
       </Section>
+
+
 
       <Section id="locales" title="Locales">
         <p>
@@ -345,9 +416,9 @@ anylong("2h 30m", { locale: ["sr-Latn-RS", "en"] })`}</Code>
           a clear error at call time there; check the exported{" "}
           <Mono>supported</Mono> flag to degrade gracefully.
         </p>
-        <Code>{`import { anylong, supported } from 'anylong'
+        <Code>{`import { anylong } from 'anylong'
 
-supported ? anylong(ms) : \`\${Math.round(ms / 60000)} min\``}</Code>
+anylong.supported ? anylong(ms) : \`\${Math.round(ms / 60000)} min\``}</Code>
         <p>
           Through the <Mono>anyfamily</Mono> meta-package the flag is exported as{" "}
           <Mono>anylongSupported</Mono>, since <Mono>supported</Mono> collides

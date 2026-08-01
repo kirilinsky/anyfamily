@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { anyplural, anypluralParts } from "./index";
+import { anyplural } from "./index";
 
 // anyplural has no time dependency, so its only SSR risk is the runtime locale
 // drifting between server and client. Passing `locale` pins output on both.
@@ -11,8 +11,8 @@ describe("SSR-safe formatting", () => {
   });
 
   it("produces identical parts across calls", () => {
-    const a = anypluralParts(1500, { one: "item", other: "items" }, { locale: "en" });
-    const b = anypluralParts(1500, { one: "item", other: "items" }, { locale: "en" });
+    const a = anyplural.parts(1500, { one: "item", other: "items" }, { locale: "en" });
+    const b = anyplural.parts(1500, { one: "item", other: "items" }, { locale: "en" });
     expect(a).toEqual(b);
   });
 

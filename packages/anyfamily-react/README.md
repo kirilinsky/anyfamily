@@ -57,7 +57,7 @@ function Post({ publishedAt, price }: { publishedAt: Date; price: number }) {
 - `useAnywhen(date, options?)` — see `anywhen`. `options.refresh` controls
   the tick interval.
 - `useAnyamount(value, options?)` — see `anyamount`.
-- `useAnyamountSymbol(currency, options?)` — see `anyamountSymbol`. The bare
+- `useAnyamountSymbol(currency, options?)` — see `anyamount.symbol`. The bare
   currency symbol, for labels and input affixes where the amount is rendered
   separately.
 - `useAnymany(items, options?)` — see `anymany`.
@@ -68,13 +68,33 @@ function Post({ publishedAt, price }: { publishedAt: Date; price: number }) {
 - `useAnyword(text, options?)` — see `anyword`. Returns `string[]`, memoized on
   the text and the options' contents, so the array keeps its reference between
   renders and is safe as an effect dependency.
-- `useAnywordCount(text, options?)` — see `anywordCount`.
-- `useAnywordTruncate(text, limit, options?)` — see `anywordTruncate`.
+- `useAnywordCount(text, options?)` — see `anyword.count`.
+- `useAnywordTruncate(text, limit, options?)` — see `anyword.truncate`.
   `anywordSupported` is re-exported for feature-detecting `Intl.Segmenter`,
   which all three anyword hooks require.
 
 `useAnyfamilyLocale()` reads the locale from the nearest provider directly,
 for anything not covered by the hooks above.
+
+## stability
+
+anyfamily-react follows [semver](https://semver.org/) and tracks the packages it
+wraps.
+
+The 2.0 wave across the `any*` packages reshaped **their** exports — one name
+each, extras hanging off it — but the hook surface here is unchanged. Every hook
+keeps its name and signature, and `anylongSupported` / `anywordSupported` are
+still exported; they are now plain forwards of `anylong.supported` and
+`anyword.supported` rather than the disambiguating aliases they used to be.
+
+If you call the underlying packages directly as well, see their migration notes:
+[anywhen](https://anyfamily.site/docs/anywhen#migrating) ·
+[anyamount](https://anyfamily.site/docs/anyamount#migrating) ·
+[anymany](https://anyfamily.site/docs/anymany#migrating) ·
+[anyaround](https://anyfamily.site/docs/anyaround#migrating) ·
+[anylong](https://anyfamily.site/docs/anylong#migrating) ·
+[anyplural](https://anyfamily.site/docs/anyplural#migrating) ·
+[anyword](https://anyfamily.site/docs/anyword#migrating)
 
 ## license
 

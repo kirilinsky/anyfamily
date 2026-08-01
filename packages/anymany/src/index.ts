@@ -10,7 +10,7 @@ export type Locale = string | readonly string[];
  */
 export type Sort = boolean | "numeric" | Intl.CollatorOptions;
 
-/** One piece of formatted output returned by {@linkcode anymanyParts}. */
+/** One piece of formatted output returned by {@linkcode anymany.parts}. */
 export interface AnymanyPart {
   /** Part kind as reported by `Intl.ListFormat` — `"element"` or `"literal"`. */
   type: string;
@@ -18,7 +18,7 @@ export interface AnymanyPart {
   value: string;
 }
 
-/** Options for {@linkcode anymany} and {@linkcode anymanyParts}. */
+/** Options for {@linkcode anymany} and {@linkcode anymany.parts}. */
 export interface AnymanyOptions {
   /** Output locale. Defaults to the runtime locale. */
   locale?: Locale;
@@ -130,6 +130,22 @@ function plan(items: readonly string[], options: AnymanyOptions): Plan {
   return { f: lf(locale, type, style), items: list };
 }
 
+function format(
+  items: readonly string[],
+  options: AnymanyOptions = {},
+): string {
+  const p = plan(items, options);
+  return p.f.format(p.items);
+}
+
+function parts(
+  items: readonly string[],
+  options: AnymanyOptions = {},
+): AnymanyPart[] {
+  const p = plan(items, options);
+  return p.f.formatToParts(p.items);
+}
+
 /**
  * Joins an array of strings into a human-readable, localized list using
  * native `Intl` — sorted right, joined right, in any locale.
@@ -147,41 +163,29 @@ function plan(items: readonly string[], options: AnymanyOptions): Plan {
  *
  * @param items The strings to join.
  * @param options See {@linkcode AnymanyOptions}.
+ * The package exports this one name. Anything beyond the plain call hangs off
+ * it — currently {@linkcode anymany.parts}.
+ *
  * @returns The formatted list as a string.
  * @throws {RangeError} If `options.max` is not a positive integer, or `options.locale` is invalid.
  */
-export function anymany(
-  items: readonly string[],
-  options: AnymanyOptions = {},
-): string {
-  const p = plan(items, options);
-  return p.f.format(p.items);
-}
-
-/**
- * Like {@linkcode anymany}, but returns the output as `{ type, value }`
- * parts instead of a string — style the items apart from the separators, or
- * rebuild the output your own way.
- *
- * @example
- * ```ts
- * anymanyParts(["a", "b"]);
- * // [
- * //   { type: "element", value: "a" },
- * //   { type: "literal", value: " and " },
- * //   { type: "element", value: "b" },
- * // ]
- * ```
- *
- * @param items The strings to join.
- * @param options See {@linkcode AnymanyOptions} — same options as {@linkcode anymany}.
- * @returns The formatted output as an array of parts.
- * @throws {RangeError} If `options.max` is not a positive integer, or `options.locale` is invalid.
- */
-export function anymanyParts(
-  items: readonly string[],
-  options: AnymanyOptions = {},
-): AnymanyPart[] {
-  const p = plan(items, options);
-  return p.f.formatToParts(p.items);
-}
+export const anymany = Object.assign(format, {
+  /**
+   * Like calling {@linkcode anymany} directly, but returns the output as
+   * `{ type, value }` parts instead of a string — style the items apart from
+   * the separators, or rebuild the output your own way.
+   *
+   * Takes the same arguments and throws on the same inputs.
+   *
+   * @example
+   * ```ts
+   * anymany.parts(["a", "b"]);
+   * // [
+   * //   { type: "element", value: "a" },
+   * //   { type: "literal", value: " and " },
+   * //   { type: "element", value: "b" },
+   * // ]
+   * ```
+   */
+  parts,
+});

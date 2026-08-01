@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { anyamount, anyamountParts } from "anyamount";
+import { anyamount } from "anyamount";
 import type { AnyamountOptions, Unit } from "anyamount";
 
 type Mode = "smart" | "currency" | "unit";
@@ -80,7 +80,7 @@ export function AnyamountDemo() {
   const parts = (() => {
     if (valueStr.trim() === "" || Number.isNaN(value)) return null;
     try {
-      return anyamountParts(value, options);
+      return anyamount.parts(value, options);
     } catch {
       return null;
     }
@@ -247,7 +247,7 @@ export function AnyamountDemo() {
         >
           {parts && (
             <>
-              <span className="text-white/25">anyamountParts →</span>
+              <span className="text-white/25">anyamount.parts →</span>
               {parts.map((p, i) => (
                 <span
                   key={i}

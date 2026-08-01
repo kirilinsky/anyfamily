@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { anywordCount, anywordParts, anywordTruncate } from "anyword";
+import { anyword } from "anyword";
 import type { Granularity } from "anyword";
 
 const LOCALES = ["en", "ru", "ja", "th", "zh", "ar", "pt-BR"];
@@ -41,7 +41,7 @@ export function AnywordDemo() {
 
   const parts = useMemo(() => {
     try {
-      return anywordParts(text, { by, locale, raw });
+      return anyword.parts(text, { by, locale, raw });
     } catch {
       return [];
     }
@@ -49,7 +49,7 @@ export function AnywordDemo() {
 
   const count = useMemo(() => {
     try {
-      return anywordCount(text, { by, locale, raw });
+      return anyword.count(text, { by, locale, raw });
     } catch {
       return 0;
     }
@@ -57,7 +57,7 @@ export function AnywordDemo() {
 
   const graphemes = useMemo(() => {
     try {
-      return anywordCount(text, { by: "grapheme", locale });
+      return anyword.count(text, { by: "grapheme", locale });
     } catch {
       return 0;
     }
@@ -65,7 +65,7 @@ export function AnywordDemo() {
 
   const truncated = useMemo(() => {
     try {
-      return anywordTruncate(text, limit, { locale, ellipsis: "…" });
+      return anyword.truncate(text, limit, { locale, ellipsis: "…" });
     } catch {
       return "";
     }
@@ -210,7 +210,7 @@ export function AnywordDemo() {
         <div className="mt-2 grid w-full gap-2 font-mono text-xs sm:grid-cols-2">
           <div className="rounded-xl border border-white/[0.07] bg-black/20 px-4 py-3">
             <p className="text-[10px] tracking-[0.2em] text-white/25 uppercase">
-              anywordCount
+              anyword.count
             </p>
             <p className="mt-1.5 flex items-baseline gap-2">
               <span className="text-2xl text-emerald-300">{count}</span>
@@ -227,7 +227,7 @@ export function AnywordDemo() {
 
           <div className="rounded-xl border border-white/[0.07] bg-black/20 px-4 py-3">
             <p className="text-[10px] tracking-[0.2em] text-white/25 uppercase">
-              anywordTruncate
+              anyword.truncate
             </p>
             <p className="mt-1.5 min-h-8 text-base break-words text-white/85">
               {truncated ? q(truncated) : <span className="text-white/20">&quot;&quot;</span>}

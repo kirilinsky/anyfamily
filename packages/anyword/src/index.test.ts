@@ -1,10 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
   anyword,
-  anywordCount,
-  anywordParts,
-  anywordTruncate,
-  supported,
 } from "./index";
 
 describe("anyword — words", () => {
@@ -79,9 +75,9 @@ describe("anyword — sentences", () => {
   });
 });
 
-describe("anywordParts", () => {
+describe("anyword.parts", () => {
   it("returns segments with their offsets", () => {
-    expect(anywordParts("世界 test", { locale: "en" })).toEqual([
+    expect(anyword.parts("世界 test", { locale: "en" })).toEqual([
       { segment: "世界", index: 0, isWordLike: true },
       { segment: "test", index: 3, isWordLike: true },
     ]);
@@ -89,19 +85,19 @@ describe("anywordParts", () => {
 
   it("offsets index into the original string", () => {
     const text = "hi there";
-    for (const p of anywordParts(text, { locale: "en", raw: true }))
+    for (const p of anyword.parts(text, { locale: "en", raw: true }))
       expect(text.slice(p.index, p.index + p.segment.length)).toBe(p.segment);
   });
 
   it("omits isWordLike outside word mode", () => {
-    expect(anywordParts("ab", { by: "grapheme" })).toEqual([
+    expect(anyword.parts("ab", { by: "grapheme" })).toEqual([
       { segment: "a", index: 0 },
       { segment: "b", index: 1 },
     ]);
   });
 
   it("reports non-word segments with raw", () => {
-    expect(anywordParts("a b", { locale: "en", raw: true })).toEqual([
+    expect(anyword.parts("a b", { locale: "en", raw: true })).toEqual([
       { segment: "a", index: 0, isWordLike: true },
       { segment: " ", index: 1, isWordLike: false },
       { segment: "b", index: 2, isWordLike: true },
@@ -109,64 +105,64 @@ describe("anywordParts", () => {
   });
 });
 
-describe("anywordCount", () => {
+describe("anyword.count", () => {
   it("counts words, not space-delimited chunks", () => {
-    expect(anywordCount("世界 test", { locale: "en" })).toBe(2);
-    expect(anywordCount("one two three", { locale: "en" })).toBe(3);
-    expect(anywordCount("  ", { locale: "en" })).toBe(0);
+    expect(anyword.count("世界 test", { locale: "en" })).toBe(2);
+    expect(anyword.count("one two three", { locale: "en" })).toBe(3);
+    expect(anyword.count("  ", { locale: "en" })).toBe(0);
   });
 
   it("counts graphemes the way users see them", () => {
-    expect(anywordCount("héllo", { by: "grapheme" })).toBe(5);
-    expect(anywordCount("👨‍👩‍👧", { by: "grapheme" })).toBe(1);
+    expect(anyword.count("héllo", { by: "grapheme" })).toBe(5);
+    expect(anyword.count("👨‍👩‍👧", { by: "grapheme" })).toBe(1);
   });
 
   it("counts sentences", () => {
-    expect(anywordCount("Hi. Go now!", { by: "sentence", locale: "en" })).toBe(2);
+    expect(anyword.count("Hi. Go now!", { by: "sentence", locale: "en" })).toBe(2);
   });
 });
 
-describe("anywordTruncate", () => {
+describe("anyword.truncate", () => {
   it("cuts on a grapheme boundary by default", () => {
-    expect(anywordTruncate("héllo 👨‍👩‍👧", 6)).toBe("héllo ");
-    expect(anywordTruncate("héllo 👨‍👩‍👧", 7)).toBe("héllo 👨‍👩‍👧");
+    expect(anyword.truncate("héllo 👨‍👩‍👧", 6)).toBe("héllo ");
+    expect(anyword.truncate("héllo 👨‍👩‍👧", 7)).toBe("héllo 👨‍👩‍👧");
   });
 
   it("never splits a composite emoji", () => {
-    const cut = anywordTruncate("ab👨‍👩‍👧cd", 3);
+    const cut = anyword.truncate("ab👨‍👩‍👧cd", 3);
     expect(cut).toBe("ab👨‍👩‍👧");
-    expect(anywordCount(cut, { by: "grapheme" })).toBe(3);
+    expect(anyword.count(cut, { by: "grapheme" })).toBe(3);
   });
 
   it("returns the input untouched when it already fits", () => {
-    expect(anywordTruncate("short", 99)).toBe("short");
-    expect(anywordTruncate("short", 99, { ellipsis: "…" })).toBe("short");
-    expect(anywordTruncate("", 0)).toBe("");
+    expect(anyword.truncate("short", 99)).toBe("short");
+    expect(anyword.truncate("short", 99, { ellipsis: "…" })).toBe("short");
+    expect(anyword.truncate("", 0)).toBe("");
   });
 
   it("appends the ellipsis only on a real cut, trimming trailing space", () => {
-    expect(anywordTruncate("héllo 👨‍👩‍👧", 5, { ellipsis: "…" })).toBe("héllo…");
-    expect(anywordTruncate("héllo 👨‍👩‍👧", 6, { ellipsis: "…" })).toBe("héllo…");
+    expect(anyword.truncate("héllo 👨‍👩‍👧", 5, { ellipsis: "…" })).toBe("héllo…");
+    expect(anyword.truncate("héllo 👨‍👩‍👧", 6, { ellipsis: "…" })).toBe("héllo…");
   });
 
   it("cuts by word when asked", () => {
-    expect(anywordTruncate("one two three", 2, { by: "word", locale: "en" })).toBe(
+    expect(anyword.truncate("one two three", 2, { by: "word", locale: "en" })).toBe(
       "one two ",
     );
     expect(
-      anywordTruncate("one two three", 2, { by: "word", locale: "en", ellipsis: "…" }),
+      anyword.truncate("one two three", 2, { by: "word", locale: "en", ellipsis: "…" }),
     ).toBe("one two…");
   });
 
   it("handles a zero limit", () => {
-    expect(anywordTruncate("abc", 0)).toBe("");
-    expect(anywordTruncate("abc", 0, { ellipsis: "…" })).toBe("…");
+    expect(anyword.truncate("abc", 0)).toBe("");
+    expect(anyword.truncate("abc", 0, { ellipsis: "…" })).toBe("…");
   });
 
   it("rejects an invalid limit", () => {
-    expect(() => anywordTruncate("abc", -1)).toThrow(RangeError);
-    expect(() => anywordTruncate("abc", NaN)).toThrow(RangeError);
-    expect(() => anywordTruncate("abc", Infinity)).toThrow(RangeError);
+    expect(() => anyword.truncate("abc", -1)).toThrow(RangeError);
+    expect(() => anyword.truncate("abc", NaN)).toThrow(RangeError);
+    expect(() => anyword.truncate("abc", Infinity)).toThrow(RangeError);
   });
 });
 
@@ -176,24 +172,45 @@ describe("locales", () => {
   });
 
   it("segments Thai, which has no spaces between words", () => {
-    expect(anywordCount("สวัสดีชาวโลก", { locale: "th" })).toBeGreaterThan(1);
+    expect(anyword.count("สวัสดีชาวโลก", { locale: "th" })).toBeGreaterThan(1);
   });
 });
 
 describe("errors and support", () => {
   it("reports Intl.Segmenter support", () => {
-    expect(supported).toBe(true); // Node 18+ ships it
+    expect(anyword.supported).toBe(true); // Node 18+ ships it
   });
 
   it("throws on a non-string input", () => {
     // @ts-expect-error runtime guard for untyped callers
     expect(() => anyword(42)).toThrow(TypeError);
     // @ts-expect-error runtime guard for untyped callers
-    expect(() => anywordCount(null)).toThrow(TypeError);
+    expect(() => anyword.count(null)).toThrow(TypeError);
   });
 
   it("throws on an unknown granularity", () => {
     // @ts-expect-error runtime guard for untyped callers
     expect(() => anyword("hi", { by: "chapter" })).toThrow(RangeError);
+  });
+});
+
+describe("public surface", () => {
+  it("exports exactly one name, with extras hanging off it", async () => {
+    const mod = await import("./index");
+    expect(Object.keys(mod)).toEqual(["anyword"]);
+  });
+
+  it("carries every extra", () => {
+    expect(typeof anyword.parts).toBe("function");
+    expect(typeof anyword.count).toBe("function");
+    expect(typeof anyword.truncate).toBe("function");
+    expect(typeof anyword.supported).toBe("boolean");
+  });
+
+  it.skipIf(!anyword.supported)("count matches the segment list length", () => {
+    const opts = { locale: "en" } as const;
+    expect(anyword.count("don't stop 世界", opts)).toBe(
+      anyword("don't stop 世界", opts).length,
+    );
   });
 });

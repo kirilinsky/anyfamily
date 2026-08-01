@@ -14,12 +14,14 @@ const NAV: DocsNavItem[] = [
   { id: "overview", label: "Overview" },
   { id: "install", label: "Install" },
   { id: "anyword", label: "anyword()" },
-  { id: "parts", label: "anywordParts()" },
-  { id: "count", label: "anywordCount()" },
-  { id: "truncate", label: "anywordTruncate()" },
+  { id: "migrating", label: "From 1.x" },
+  { id: "parts", label: "anyword.parts()" },
+  { id: "count", label: "anyword.count()" },
+  { id: "truncate", label: "anyword.truncate()" },
   { id: "granularity", label: "Granularity" },
   { id: "options", label: "Options" },
   { id: "recipes", label: "Recipes" },
+  { id: "react", label: "React / Next.js" },
   { id: "ssr", label: "SSR" },
   { id: "locales", label: "Locales" },
   { id: "support", label: "Support flag" },
@@ -84,7 +86,7 @@ export function DocsClient() {
           browser already knows where the real boundaries are. anyword is the
           thin wrapper — no rule tables, no locale files, no config.
         </p>
-        <Code>{`import { anyword, anywordCount, anywordTruncate } from 'anyword'
+        <Code>{`import { anyword, anyword.count, anyword.truncate } from 'anyword'
 
 anyword("don't stop 世界")
 // ["don't", "stop", "世界"]
@@ -92,10 +94,10 @@ anyword("don't stop 世界")
 anyword("👨‍👩‍👧 hi", { by: 'grapheme' })
 // ["👨‍👩‍👧", " ", "h", "i"]
 
-anywordCount("世界 test")
+anyword.count("世界 test")
 // 2
 
-anywordTruncate("héllo 👨‍👩‍👧", 5, { ellipsis: '…' })
+anyword.truncate("héllo 👨‍👩‍👧", 5, { ellipsis: '…' })
 // "héllo…"   — never cuts an emoji in half`}</Code>
       </Section>
 
@@ -133,23 +135,49 @@ anyword('Hi. Go now!', { by: 'sentence' })  // ["Hi. ", "Go now!"]`}</Code>
 anyword('hi, there!', { raw: true })   // ["hi", ",", " ", "there", "!"]`}</Code>
       </Section>
 
-      <Section id="parts" title="anywordParts()">
+      <Section id="migrating" title="Migrating from 1.x">
+        <p>
+          2.0 removed the separate <Mono>anywordParts</Mono> 
+          and the other extra exports — they are the
+          same functions and values, reached through the one name the package
+          exports.
+        </p>
+        <Code>{`- import { anyword, anywordCount, anywordTruncate, supported } from 'anyword'
++ import { anyword } from 'anyword'
+
+- anywordCount(text)
++ anyword.count(text)
+
+- anywordTruncate(text, 20)
++ anyword.truncate(text, 20)
+
+- supported ? anyword(text) : text.split(/\\s+/)
++ anyword.supported ? anyword(text) : text.split(/\\s+/)`}</Code>
+        <p>
+          Arguments, return values and throwing behaviour are unchanged, and
+          nothing else in the API moved. Every <Mono>any*</Mono> package follows
+          this shape from 2.0 on: the bare call does the job, everything else
+          hangs off the same name.
+        </p>
+      </Section>
+
+      <Section id="parts" title="anyword.parts()">
         <p>
           Same arguments as <Mono>anyword()</Mono>, but returns{" "}
           <Mono>{"{ segment, index, isWordLike? }"}</Mono> instead of plain
           strings. The offsets point into the original text, so you can
           highlight or slice without searching again.
         </p>
-        <Code>{`import { anywordParts } from 'anyword'
+        <Code>{`import { anyword } from 'anyword'
 
-anywordParts('世界 test')
+anyword.parts('世界 test')
 // [
 //   { segment: '世界', index: 0, isWordLike: true },
 //   { segment: 'test', index: 3, isWordLike: true },
 // ]
 
 // React: highlight the matched word in place
-anywordParts(text, { raw: true }).map((p, i) =>
+anyword.parts(text, { raw: true }).map((p, i) =>
   p.segment === query ? <mark key={i}>{p.segment}</mark> : p.segment,
 )`}</Code>
         <p>
@@ -158,30 +186,30 @@ anywordParts(text, { raw: true }).map((p, i) =>
         </p>
       </Section>
 
-      <Section id="count" title="anywordCount()">
+      <Section id="count" title="anyword.count()">
         <p>
           Takes the same options and counts segments instead of returning them.
         </p>
-        <Code>{`anywordCount('世界 test')                  // 2
-anywordCount('世界test')                   // 2   — .split(/\\s+/) says 1
-anywordCount('héllo', { by: 'grapheme' })  // 5
-anywordCount('👨‍👩‍👧', { by: 'grapheme' })    // 1   — "👨‍👩‍👧".length is 8`}</Code>
+        <Code>{`anyword.count('世界 test')                  // 2
+anyword.count('世界test')                   // 2   — .split(/\\s+/) says 1
+anyword.count('héllo', { by: 'grapheme' })  // 5
+anyword.count('👨‍👩‍👧', { by: 'grapheme' })    // 1   — "👨‍👩‍👧".length is 8`}</Code>
         <p>
           Grapheme counting is what a char-limit counter should show: the number
           of characters the user believes they typed.
         </p>
       </Section>
 
-      <Section id="truncate" title="anywordTruncate()">
+      <Section id="truncate" title="anyword.truncate()">
         <p>
-          <Mono>anywordTruncate(text, limit, options?)</Mono> cuts to at most{" "}
+          <Mono>anyword.truncate(text, limit, options?)</Mono> cuts to at most{" "}
           <Mono>limit</Mono> segments — graphemes by default, so an emoji or an
           accented letter is never split.
         </p>
-        <Code>{`anywordTruncate('héllo 👨‍👩‍👧', 6)                     // "héllo "
-anywordTruncate('héllo 👨‍👩‍👧', 5, { ellipsis: '…' })   // "héllo…"
-anywordTruncate('one two three', 2, { by: 'word' })  // "one two "
-anywordTruncate('short', 99)                         // "short"  — already fits`}</Code>
+        <Code>{`anyword.truncate('héllo 👨‍👩‍👧', 6)                     // "héllo "
+anyword.truncate('héllo 👨‍👩‍👧', 5, { ellipsis: '…' })   // "héllo…"
+anyword.truncate('one two three', 2, { by: 'word' })  // "one two "
+anyword.truncate('short', 99)                         // "short"  — already fits`}</Code>
         <p>
           The cut lands on a segment boundary and keeps everything before it
           verbatim, trailing whitespace included. With <Mono>ellipsis</Mono>,
@@ -234,7 +262,7 @@ anywordTruncate('short', 99)                         // "short"  — already fit
           name="by"
           type="'word' | 'grapheme' | 'sentence'"
           def="'word'"
-          desc="Segmentation unit. anywordTruncate defaults to 'grapheme' instead — cutting by character is what a length limit almost always means."
+          desc="Segmentation unit. anyword.truncate defaults to 'grapheme' instead — cutting by character is what a length limit almost always means."
         />
         <Prop
           name="locale"
@@ -252,24 +280,24 @@ anywordTruncate('short', 99)                         // "short"  — already fit
           name="ellipsis"
           type="string"
           def="''"
-          desc="anywordTruncate only. Appended when the text was actually cut; trailing whitespace is trimmed first. Does not count toward the limit."
+          desc="anyword.truncate only. Appended when the text was actually cut; trailing whitespace is trimmed first. Does not count toward the limit."
         />
       </Section>
 
       <Section id="recipes" title="Recipes">
         <p>Copy, paste, move on.</p>
         <Code>{`// Word counter
-anywordCount(post.body)
+anyword.count(post.body)
 // 412
 
 // Character counter users agree with (👨‍👩‍👧 counts as 1, not 8)
-anywordCount(input, { by: 'grapheme' })
+anyword.count(input, { by: 'grapheme' })
 
 // Safe preview / char-limit cut
-anywordTruncate(bio, 140, { ellipsis: '…' })
+anyword.truncate(bio, 140, { ellipsis: '…' })
 
 // Word-limited excerpt
-anywordTruncate(article, 30, { by: 'word', ellipsis: ' …' })
+anyword.truncate(article, 30, { by: 'word', ellipsis: ' …' })
 
 // Per-character animation, emoji intact
 anyword(title, { by: 'grapheme' }).map((c, i) => <span key={i}>{c}</span>)
@@ -286,6 +314,27 @@ anyword(fullName).slice(0, 2)
 anyword(text, { by: 'sentence' })`}</Code>
       </Section>
 
+      <Section id="react" title="React / Next.js">
+        <p>
+          anyword is pure and synchronous, so it works in a component as-is. What 
+          <Mono>anyfamily-react</Mono> adds is a shared locale: set it once on 
+          <Mono>AnyfamilyProvider</Mono> and every hook below picks it up, so you
+          do not thread <Mono>locale</Mono> through every call.
+        </p>
+        <Code>{`import { AnyfamilyProvider, useAnyword, useAnywordCount } from 'anyfamily-react'
+
+function CharCounter({ value }: { value: string }) {
+  return <span>{useAnywordCount(value, { by: 'grapheme' })}/280</span>
+}
+
+// useAnyword returns an array, so it is memoized — the same segments keep the
+// same reference until the text or the options change.
+function Letters({ title }: { title: string }) {
+  return useAnyword(title, { by: 'grapheme' }).map((c, i) => <span key={i}>{c}</span>)
+}`}</Code>
+        <p>`anywordSupported` is re-exported for feature-detecting `Intl.Segmenter`.</p>
+      </Section>
+
       <Section id="ssr" title="SSR">
         <p>
           anyword is pure and synchronous — no clock, no state — so it renders
@@ -293,11 +342,11 @@ anyword(text, { by: 'sentence' })`}</Code>
           output stable across the hydration boundary regardless of the runtime
           default.
         </p>
-        <Code>{`import { anywordCount } from 'anyword'
+        <Code>{`import { anyword } from 'anyword'
 
 export function CharCounter({ value }: { value: string }) {
   return (
-    <span>{anywordCount(value, { by: 'grapheme', locale: 'en' })}/280</span>
+    <span>{anyword.count(value, { by: 'grapheme', locale: 'en' })}/280</span>
   )
 }`}</Code>
       </Section>
@@ -322,9 +371,9 @@ anyword('hi', { locale: ['xx-Nope', 'en'] })`}</Code>
           throws a clear error at call time; check the exported{" "}
           <Mono>supported</Mono> flag first if you target them.
         </p>
-        <Code>{`import { anyword, supported } from 'anyword'
+        <Code>{`import { anyword } from 'anyword'
 
-supported ? anyword(text) : text.split(/\\s+/)`}</Code>
+anyword.supported ? anyword(text) : text.split(/\\s+/)`}</Code>
         <p>
           Through the <Mono>anyfamily</Mono> meta-package the same flag is
           exported as <Mono>anywordSupported</Mono>, since{" "}

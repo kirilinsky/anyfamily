@@ -1,7 +1,7 @@
 {
   "name": "anylong",
   "version": "1.0.1",
-  "description": "Compact duration formatter — any duration in, localized string out. One function over Intl.DurationFormat, any locale.",
+  "description": "Compact duration formatter \u2014 any duration in, localized string out. One function over Intl.DurationFormat, any locale.",
   "type": "module",
   "sideEffects": false,
   "main": "./dist/index.cjs",
@@ -72,11 +72,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/kirilinsky/anylong.git"
+    "url": "git+https://github.com/kirilinsky/anyfamily.git",
+    "directory": "packages/anylong"
   },
   "author": "Kirilinsky (https://github.com/kirilinsky)",
   "bugs": {
-    "url": "https://github.com/kirilinsky/anylong/issues"
+    "url": "https://github.com/kirilinsky/anyfamily/issues"
   },
-  "homepage": "https://github.com/kirilinsky/anylong#readme"
+  "homepage": "https://anyfamily.site/anylong"
 }

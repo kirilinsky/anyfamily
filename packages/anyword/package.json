@@ -1,7 +1,7 @@
 {
   "name": "anyword",
   "version": "1.0.0",
-  "description": "Micro text segmenter — locale-correct words, graphemes and sentences, safe counting and truncation, one native Intl wrapper.",
+  "description": "Micro text segmenter \u2014 locale-correct words, graphemes and sentences, safe counting and truncation, one native Intl wrapper.",
   "type": "module",
   "sideEffects": false,
   "main": "./dist/index.cjs",
@@ -72,11 +72,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/kirilinsky/anyword.git"
+    "url": "git+https://github.com/kirilinsky/anyfamily.git",
+    "directory": "packages/anyword"
   },
   "author": "Kirilinsky (https://github.com/kirilinsky)",
   "bugs": {
-    "url": "https://github.com/kirilinsky/anyword/issues"
+    "url": "https://github.com/kirilinsky/anyfamily/issues"
   },
-  "homepage": "https://anyword-three.vercel.app"
+  "homepage": "https://anyfamily.site/anyword"
 }

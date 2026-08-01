@@ -116,7 +116,7 @@ interface DurationFormatCtor {
 const DF = (Intl as { DurationFormat?: DurationFormatCtor }).DurationFormat;
 
 /** `true` when the runtime provides `Intl.DurationFormat` (Baseline 2025). */
-export const supported: boolean = typeof DF === "function";
+const supported: boolean = typeof DF === "function";
 
 const ACCEPTED =
   'a Date, two Dates, a non-negative number (milliseconds, or seconds with { unit: "s" }), ' +
@@ -206,7 +206,7 @@ function formatter(locale: Locale | undefined, opts: DurationFormatOptions): Dur
     throw new Error(
       "Intl.DurationFormat is not available in this runtime. It requires Node.js 23+, " +
         "Chrome 129+, Firefox 132+, Safari 16.4+ (Baseline 2025), or a polyfill. " +
-        "Check the exported `supported` flag before calling anylong.",
+        "Check the `anylong.supported` flag before calling anylong.",
     );
   const k = `${localeKey(locale)}|${JSON.stringify(opts)}`;
   const hit = dfCache.get(k);
@@ -466,11 +466,11 @@ function prepare(
  * @param c Options for the two-date form.
  * @returns The formatted string.
  * @throws {TypeError | RangeError} On ambiguous, negative, or unparseable input — the message states what was received and what is accepted.
- * @throws {Error} If `Intl.DurationFormat` is unavailable in the runtime (check {@linkcode supported}).
+ * @throws {Error} If `Intl.DurationFormat` is unavailable in the runtime (check {@linkcode anylong.supported}).
  */
-export function anylong(input: DurationInput, options?: AnylongOptions): string;
-export function anylong(dateA: Date, dateB: Date, options?: AnylongOptions): string;
-export function anylong(
+function format(input: DurationInput, options?: AnylongOptions): string;
+function format(dateA: Date, dateB: Date, options?: AnylongOptions): string;
+function format(
   input: DurationInput,
   b?: Date | AnylongOptions,
   c?: AnylongOptions,
@@ -479,22 +479,9 @@ export function anylong(
   return formatter(locale, opts).format(record);
 }
 
-/**
- * Like {@linkcode anylong}, but returns the output as `{ type, value, unit? }`
- * parts instead of a string — style the numbers apart from the units, or
- * rebuild the output your own way.
- *
- * @example
- * ```ts
- * anylongParts("2h 30m", { locale: "en" });
- * // [
- * //   { type: "integer", value: "2", unit: "hour" }, ...
- * // ]
- * ```
- */
-export function anylongParts(input: DurationInput, options?: AnylongOptions): AnylongPart[];
-export function anylongParts(dateA: Date, dateB: Date, options?: AnylongOptions): AnylongPart[];
-export function anylongParts(
+function parts(input: DurationInput, options?: AnylongOptions): AnylongPart[];
+function parts(dateA: Date, dateB: Date, options?: AnylongOptions): AnylongPart[];
+function parts(
   input: DurationInput,
   b?: Date | AnylongOptions,
   c?: AnylongOptions,
@@ -502,3 +489,34 @@ export function anylongParts(
   const { record, locale, opts } = prepare(input, b, c);
   return formatter(locale, opts).formatToParts(record);
 }
+
+export const anylong = Object.assign(format, {
+  /**
+   * Like calling {@linkcode anylong} directly, but returns the output as
+   * `{ type, value, unit? }` parts instead of a string — style the numbers
+   * apart from the units, or rebuild the output your own way.
+   *
+   * Takes the same arguments, including the two-date form.
+   *
+   * @example
+   * ```ts
+   * anylong.parts("2h 30m", { locale: "en" });
+   * // [
+   * //   { type: "integer", value: "2", unit: "hour" }, ...
+   * // ]
+   * ```
+   */
+  parts,
+
+  /**
+   * Whether the runtime provides `Intl.DurationFormat` (Baseline 2025). `false`
+   * on Node 22 and older engines, where every anylong call throws — branch on
+   * this if you target them.
+   *
+   * @example
+   * ```ts
+   * anylong.supported ? anylong(ms) : `${Math.round(ms / 60000)} min`;
+   * ```
+   */
+  supported,
+});

@@ -7,7 +7,7 @@ import { anywhen } from "anywhen";
 import { anymany } from "anymany";
 import { anylong } from "anylong";
 import { anyplural } from "anyplural";
-import { anyword, anywordCount, anywordTruncate } from "anyword";
+import { anyword } from "anyword";
 
 /**
  * A canned demo. `call` is the source shown typing out; `run` invokes the real
@@ -83,8 +83,8 @@ export const WORD_PRESETS: Preset[] = [
   { call: `anyword("สวัสดีตอนเช้า", { locale: "th" })`, run: () => arr(anyword("สวัสดีตอนเช้า", { locale: "th" })) },
   { call: `anyword("👨‍👩‍👧‍👦!", { by: "grapheme" })`, run: () => arr(anyword("👨‍👩‍👧‍👦!", { by: "grapheme", locale: "en" })) },
   { call: `anyword("Hi. Go now!", { by: "sentence" })`, run: () => arr(anyword("Hi. Go now!", { by: "sentence", locale: "en" })) },
-  { fn: `anywordCount`, call: `anywordCount("👨‍👩‍👧‍👦", { by: "grapheme" })`, run: () => String(anywordCount("👨‍👩‍👧‍👦", { by: "grapheme", locale: "en" })) },
-  { fn: `anywordTruncate`, call: `anywordTruncate("héllo 👨‍👩‍👧", 5, { ellipsis: "…" })`, run: () => anywordTruncate("héllo 👨‍👩‍👧", 5, { ellipsis: "…", locale: "en" }) },
+  { fn: `anyword.count`, call: `anyword.count("👨‍👩‍👧‍👦", { by: "grapheme" })`, run: () => String(anyword.count("👨‍👩‍👧‍👦", { by: "grapheme", locale: "en" })) },
+  { fn: `anyword.truncate`, call: `anyword.truncate("héllo 👨‍👩‍👧", 5, { ellipsis: "…" })`, run: () => anyword.truncate("héllo 👨‍👩‍👧", 5, { ellipsis: "…", locale: "en" }) },
 ];
 
 // Meta-package tour: cycles one import + call per any* package, all from

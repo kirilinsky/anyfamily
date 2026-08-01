@@ -17,8 +17,8 @@ const NAV: DocsNavItem[] = [
   { id: "migrating", label: "From 1.x" },
   { id: "parts", label: "anywhen.parts()" },
   { id: "modes", label: "Modes" },
-  { id: "options", label: "Options" },
   { id: "thresholds", label: "Thresholds" },
+  { id: "options", label: "Options" },
   { id: "recipes", label: "Recipes" },
   { id: "react", label: "React / Next.js" },
   { id: "ssr", label: "SSR" },
@@ -287,6 +287,28 @@ anywhen(date, { mode: 'relative', locale: 'en', style: 'narrow' })
         </div>
       </Section>
 
+      <Section id="thresholds" title="Thresholds">
+        <p>
+          Each unit is shown while the distance from <Mono>now</Mono> is below
+          its cutoff, in seconds. Defaults:{" "}
+          <Mono>
+            second: 45, minute: 2700, hour: 79200, day: 518400, week: 2160000,
+            month: 28512000
+          </Mono>
+          . New in 1.0.
+        </p>
+        <Code>{`anywhen(date, { mode: 'relative', locale: 'en', thresholds: { minute: 5400 } })
+// 50 minutes ago → "50 minutes ago" instead of "1 hour ago"
+
+anywhen(date, { locale: 'en', thresholds: { second: 120 } })
+// smart mode: "now" covers the first 2 minutes`}</Code>
+        <p>
+          In smart mode <Mono>thresholds.second</Mono> widens the
+          &quot;now&quot; window and <Mono>thresholds.minute</Mono> the sub-hour
+          minutes window, symmetrically in both directions. Calendar labels
+          (today, yesterday, tomorrow, weekday) are not affected.
+        </p>
+      </Section>
       <Section id="options" title="Options">
         <Prop
           name="mode"
@@ -344,28 +366,6 @@ anywhen(date, { mode: 'relative', locale: 'en', style: 'narrow' })
         />
       </Section>
 
-      <Section id="thresholds" title="Thresholds">
-        <p>
-          Each unit is shown while the distance from <Mono>now</Mono> is below
-          its cutoff, in seconds. Defaults:{" "}
-          <Mono>
-            second: 45, minute: 2700, hour: 79200, day: 518400, week: 2160000,
-            month: 28512000
-          </Mono>
-          . New in 1.0.
-        </p>
-        <Code>{`anywhen(date, { mode: 'relative', locale: 'en', thresholds: { minute: 5400 } })
-// 50 minutes ago → "50 minutes ago" instead of "1 hour ago"
-
-anywhen(date, { locale: 'en', thresholds: { second: 120 } })
-// smart mode: "now" covers the first 2 minutes`}</Code>
-        <p>
-          In smart mode <Mono>thresholds.second</Mono> widens the
-          &quot;now&quot; window and <Mono>thresholds.minute</Mono> the sub-hour
-          minutes window, symmetrically in both directions. Calendar labels
-          (today, yesterday, tomorrow, weekday) are not affected.
-        </p>
-      </Section>
 
       <Section id="recipes" title="Recipes">
         <p>Copy, paste, move on.</p>
