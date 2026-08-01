@@ -36,14 +36,18 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
+      # Must come first. The meta packages import their siblings by package
+      # name, which the workspace resolves to each sibling's dist/ — so on a
+      # fresh checkout nothing type-checks or tests until the leaves are built.
+      # pnpm runs recursive scripts in dependency order, so the leaves go first.
+      - name: build
+        run: pnpm --filter "./packages/*" build
+
       - name: typecheck
         run: pnpm --filter "./packages/*" --if-present typecheck
 
       - name: test
         run: pnpm --filter "./packages/*" test
-
-      - name: build
-        run: pnpm --filter "./packages/*" build
 
       # Validates the published shape — exports map, types resolution, files.
       # More important now than per-repo: changesets publishes automatically, so
