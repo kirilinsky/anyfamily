@@ -10,9 +10,17 @@ on:
 permissions:
   contents: read
 
+env:
+  # tsdown declares engines ^22.18.0 || >=24.11.0, so anything that builds has
+  # to run here. The runtime matrix below deliberately does not build.
+  BUILD_NODE: 24
+
 jobs:
-  packages:
-    name: packages (node ${{ matrix.node }})
+  # Does the shipped code run on every Node the packages claim to support?
+  # The seven leaf packages test their own src/, so no build is involved and
+  # the build tool's own floor is irrelevant.
+  runtime:
+    name: runtime (node ${{ matrix.node }})
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -36,10 +44,36 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
-      # Must come first. The meta packages import their siblings by package
-      # name, which the workspace resolves to each sibling's dist/ — so on a
-      # fresh checkout nothing type-checks or tests until the leaves are built.
-      # pnpm runs recursive scripts in dependency order, so the leaves go first.
+      - name: test packages
+        run: >
+          pnpm --filter "./packages/*"
+          --filter "!./packages/anyfamily"
+          --filter "!./packages/anyfamily-react"
+          test
+
+  # Does it build, type-check and package correctly? Once, on a modern Node.
+  # The meta packages live here because they import their siblings by package
+  # name, which resolves to each sibling's dist/ — so they cannot be tested
+  # before the leaves are built.
+  packaging:
+    name: build, types & packaging
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.32.1
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: ${{ env.BUILD_NODE }}
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      # pnpm runs recursive scripts in dependency order, so the leaves go first
+      # and the metas find their dist/ when their turn comes.
       - name: build
         run: pnpm --filter "./packages/*" build
 
@@ -53,7 +87,6 @@ jobs:
       # More important now than per-repo: changesets publishes automatically, so
       # a broken exports map would ship without anyone looking at it.
       - name: publint
-        if: matrix.node == 24
         run: pnpm --filter "./packages/*" --if-present publint
 
   site:
@@ -68,7 +101,7 @@ jobs:
 
       - uses: actions/setup-node@v5
         with:
-          node-version: 24
+          node-version: ${{ env.BUILD_NODE }}
           cache: pnpm
 
       - run: pnpm install --frozen-lockfile
