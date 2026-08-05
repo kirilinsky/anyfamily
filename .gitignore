@@ -1,4 +1,9 @@
-/node_modules
+# Depth-independent on purpose: `/node_modules` only covered the root, and every
+# packages/* directory was relying on a .gitignore inherited from its old
+# standalone repo. A new package without that file leaked its node_modules and
+# dist into git status.
+node_modules
+dist
 /.pnp
 .pnp.*
 /coverage
