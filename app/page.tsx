@@ -243,7 +243,6 @@ export default function Home() {
               <div className="mt-1 hidden flex-wrap items-center gap-2 md:flex">
                 <DemoLink pkg={p} />
                 <ExtLink href={p.npm} label="npm" accent={p.accent} />
-                <ExtLink href={p.github} label="github" accent={p.accent} />
               </div>
             </div>
 
@@ -276,7 +275,6 @@ export default function Home() {
               <div className="mt-2 flex flex-wrap items-center gap-2 md:hidden">
                 <DemoLink pkg={p} />
                 <ExtLink href={p.npm} label="npm" accent={p.accent} />
-                <ExtLink href={p.github} label="github" accent={p.accent} />
               </div>
             </div>
           </div>

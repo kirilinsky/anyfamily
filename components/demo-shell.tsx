@@ -78,20 +78,14 @@ function DemoFooter({ pkg }: { pkg: Pkg }) {
               docs
             </Link>
           )}
-          {[
-            ["github", pkg.github],
-            ["npm", pkg.npm],
-          ].map(([label, href]) => (
-            <a
-              key={label}
-              href={href}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-3 py-2 text-xs tracking-widest text-white/25 uppercase transition-colors hover:text-white/60 sm:py-3"
-            >
-              {label}
-            </a>
-          ))}
+          <a
+            href={pkg.npm}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="px-3 py-2 text-xs tracking-widest text-white/25 uppercase transition-colors hover:text-white/60 sm:py-3"
+          >
+            npm
+          </a>
         </div>
       </div>
     </footer>
