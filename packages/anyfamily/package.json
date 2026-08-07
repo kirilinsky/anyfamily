@@ -1,7 +1,7 @@
 {
   "name": "anyfamily",
-  "version": "2.0.0",
-  "description": "The whole any* family in one install \u2014 anywhen, anyamount, anymany, anyaround, anylong, anyplural, anyword and anylocale: micro Intl tools with zero dependencies of their own.",
+  "version": "2.1.0",
+  "description": "The whole any* family in one install — anywhen, anyamount, anymany, anyaround, anylong, anyplural, anyword and anylocale: micro Intl tools with zero dependencies of their own.",
   "type": "module",
   "sideEffects": false,
   "main": "./dist/index.cjs",
