@@ -32,6 +32,12 @@ export function FamilyLogo({
   const suffixLen = suffix.length * CHAR;
   const suffixX = 230;
   const width = suffixX + (widthChars ?? suffix.length) * CHAR + 20;
+  /**
+   * With a pinned viewBox the mark is drawn at its natural width and the slack
+   * all lands on the right, so a short suffix leaves the wordmark visibly
+   * off-centre. Shift the whole group by half the slack instead.
+   */
+  const dx = ((widthChars ?? suffix.length) - suffix.length) * CHAR * 0.5;
 
   return (
     <svg
@@ -46,6 +52,7 @@ export function FamilyLogo({
         `}</style>
       </defs>
 
+      <g transform={`translate(${dx} 0)`}>
       <text
         x="10"
         y="92"
@@ -98,6 +105,7 @@ export function FamilyLogo({
       >
         {suffix}
       </text>
+      </g>
     </svg>
   );
 }
