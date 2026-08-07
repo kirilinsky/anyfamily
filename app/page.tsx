@@ -397,7 +397,7 @@ export default function Home() {
                 accent={colors["anyfamily-react"]}
               />
               <ExtLink
-                href="https://github.com/kirilinsky/anyfamily/tree/main/packages/anyfamily-react"
+                href="https://github.com/kirilinsky/anyfamily"
                 label="github"
                 accent={colors["anyfamily-react"]}
               />
@@ -434,7 +434,7 @@ export default function Home() {
                 accent={colors["anyfamily-react"]}
               />
               <ExtLink
-                href="https://github.com/kirilinsky/anyfamily/tree/main/packages/anyfamily-react"
+                href="https://github.com/kirilinsky/anyfamily"
                 label="github"
                 accent={colors["anyfamily-react"]}
               />
