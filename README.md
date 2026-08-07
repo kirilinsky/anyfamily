@@ -68,8 +68,10 @@ pnpm --filter anywhen test        # just one
 The site resolves the packages through their `dist/`, so **rebuild a package
 after editing it** or the demos keep showing the old output.
 
-Releases go through changesets — see [RELEASING.md](RELEASING.md). Package
-layout and conventions are in [PACKAGE-STANDARD.md](PACKAGE-STANDARD.md).
+Releases go through changesets, by hand — the whole sequence is the
+[start-to-finish checklist](RELEASING.md#start-to-finish) in
+[RELEASING.md](RELEASING.md). Package layout and conventions are in
+[PACKAGE-STANDARD.md](PACKAGE-STANDARD.md).
 
 Next.js 16 · React 19 · Tailwind v4 · TypeScript.
 

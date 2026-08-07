@@ -70,10 +70,13 @@ those too.
 
 ## releasing
 
-Releases go through changesets — see [RELEASING.md](RELEASING.md). Short version:
-run `pnpm changeset` and commit the generated file alongside your change. A
-breaking change must list the metas in the changeset by hand; they are only
-bumped a patch otherwise.
+Releases go through changesets. The full sequence, git steps included, is the
+[start-to-finish checklist](RELEASING.md#start-to-finish) — start there rather
+than reconstructing it.
+
+Short version for a PR: run `pnpm changeset` and commit the generated file
+alongside your change. A breaking change must list the metas in the changeset by
+hand; they are only bumped a patch otherwise.
 
 ## before opening a PR
 

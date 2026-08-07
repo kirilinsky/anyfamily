@@ -14,13 +14,54 @@ packages/
 The landing app at the repo root is `private: true`, so it is never published
 and changesets ignores it.
 
-## the three commands
+## start to finish
+
+The whole release, in order, including the git steps. Nothing here is automated
+— every line is typed by hand.
 
 ```bash
-pnpm changeset          # 1. describe the change  (commit the generated file)
-pnpm version-packages   # 2. apply versions + changelogs
-pnpm release            # 3. build everything, then publish to npm
+# 1. describe the change, then commit it WITH the code
+pnpm changeset
+git add -A && git commit -m "feat: …" && git push
+
+# 2. apply the versions
+pnpm version-packages
+git add -A && git commit -m "chore: version packages" && git push
+
+# 3. publish to npm (this also creates the tags, locally)
+pnpm release
+
+# 4. push the tags — this is what starts JSR and GitHub Packages
+git push --follow-tags
 ```
+
+Check afterwards: `npm view anyfamily version` shows the new number, and the
+Actions tab shows one green `jsr` run per leaf and one green `github packages`
+run per meta.
+
+### four things that trip people up
+
+**A changeset does not publish anything.** It is a file describing intent.
+Without one, `pnpm version-packages` finds nothing, versions stay put, and
+`pnpm release` publishes nothing — `changeset publish` only pushes packages
+whose version is not on npm yet. The changeset is what *creates* the bump.
+
+**Step 1 has to be pushed before step 4.** The tag-triggered workflows are read
+from the commit the tag points at, not from the branch head. A workflow added in
+the same release it is meant to run for will not run — the tag predates it in
+the tree.
+
+**`changeset publish` creates tags but does not push them.** Until step 4 they
+sit locally. If several releases go by without a `--follow-tags`, the next push
+sends them all at once, and every stale tag re-triggers its workflow: JSR then
+fails on "version already exists". Those failures are noise — nothing to fix.
+
+**npm first, mirrors second.** `pnpm publish` turns each `workspace:^` into a
+real version range, so the leaf versions must already be on npmjs before a meta
+that depends on them can be published anywhere. That ordering is why the mirrors
+run off the tag rather than in parallel with the release.
+
+## what each command does
 
 **1. `pnpm changeset`** asks which packages changed and at what level, then
 writes a markdown file into `.changeset/`. Commit that file together with the

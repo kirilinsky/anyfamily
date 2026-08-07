@@ -59,7 +59,11 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
-      - run: pnpm --filter "${{ steps.pkg.outputs.name }}" build
+      # `<pkg>...` is "the package *and its dependencies*". A bare
+      # `--filter <pkg>` builds the meta alone, and since it imports its siblings
+      # by package name — resolved to their `dist/` — the dts build then fails
+      # with `Cannot find module 'anywhen'` for every one of them.
+      - run: pnpm --filter "${{ steps.pkg.outputs.name }}..." build
 
       # The manifest is rewritten in place for the publish only. The checkout is
       # thrown away with the runner, so there is nothing to restore — and the
