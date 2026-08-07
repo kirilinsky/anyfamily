@@ -8,6 +8,7 @@ import { anymany } from "anymany";
 import { anylong } from "anylong";
 import { anyplural } from "anyplural";
 import { anyword } from "anyword";
+import { anylocale } from "anylocale";
 
 /**
  * A canned demo. `call` is the source shown typing out; `run` invokes the real
@@ -87,6 +88,17 @@ export const WORD_PRESETS: Preset[] = [
   { fn: `anyword.truncate`, call: `anyword.truncate("héllo 👨‍👩‍👧", 5, { ellipsis: "…" })`, run: () => anyword.truncate("héllo 👨‍👩‍👧", 5, { ellipsis: "…", locale: "en" }) },
 ];
 
+// anylocale returns a record, not a string — each preset shows the one field
+// that makes the point, so the reveal stays a single readable value.
+export const LOCALE_PRESETS: Preset[] = [
+  { call: `anylocale("ar-EG").direction`, run: () => anylocale("ar-EG").direction },
+  { call: `anylocale("en-US").weekStart`, run: () => String(anylocale("en-US").weekStart) },
+  { call: `anylocale("en-GB").weekStart`, run: () => String(anylocale("en-GB").weekStart) },
+  { call: `anylocale("fa-IR").weekend`, run: () => JSON.stringify(anylocale("fa-IR").weekend) },
+  { call: `anylocale("ar-EG").timeZones`, run: () => arr(anylocale("ar-EG").timeZones) },
+  { call: `anylocale("fa-IR").calendars[0]`, run: () => anylocale("fa-IR").calendars[0] ?? "—" },
+];
+
 // Meta-package tour: cycles one import + call per any* package, all from
 // "anyfamily" — `fn` overrides the accent-colored prefix per preset since it
 // varies (the import clause), unlike the single-package demos above.
@@ -120,6 +132,11 @@ export const FAMILY_PRESETS: Preset[] = [
     fn: `import { anyplural } from "anyfamily";`,
     call: `import { anyplural } from "anyfamily";\n\nanyplural(5, { one: "item", other: "items" })`,
     run: () => anyplural(5, { one: "item", other: "items" }, { locale: "en" }),
+  },
+  {
+    fn: `import { anylocale } from "anyfamily";`,
+    call: `import { anylocale } from "anyfamily";\n\nanylocale("ar-EG").direction`,
+    run: () => anylocale("ar-EG").direction,
   },
   {
     fn: `import { anyword } from "anyfamily";`,

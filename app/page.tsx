@@ -17,6 +17,7 @@ import {
   LONG_PRESETS,
   PLURAL_PRESETS,
   WORD_PRESETS,
+  LOCALE_PRESETS,
   FAMILY_PRESETS,
   REACT_PRESETS,
 } from "@/components/examples";
@@ -34,6 +35,7 @@ const PRESETS_BY_ID: Record<string, Preset[]> = {
   anylong: LONG_PRESETS,
   anyplural: PLURAL_PRESETS,
   anyword: WORD_PRESETS,
+  anylocale: LOCALE_PRESETS,
 };
 
 const LINK_CLASS =
@@ -102,7 +104,7 @@ const jsonLd = {
       "@type": "SoftwareApplication",
       name: "anyfamily",
       description:
-        "The whole any* family in one install — anywhen, anyamount, anymany, anyaround, anylong, anyplural and anyword behind a single import.",
+        "The whole any* family in one install — anywhen, anyamount, anymany, anyaround, anylong, anyplural, anyword and anylocale behind a single import.",
       applicationCategory: "DeveloperApplication",
       operatingSystem: "Any",
       url: BASE_URL,
@@ -116,7 +118,7 @@ const jsonLd = {
       "@type": "SoftwareApplication",
       name: "anyfamily-react",
       description:
-        "React hooks for the any* family — useAnywhen, useAnyamount, useAnymany, useAnyaround, useAnylong, useAnyplural and useAnyword, sharing one locale provider.",
+        "React hooks for the any* family — useAnywhen, useAnyamount, useAnymany, useAnyaround, useAnylong, useAnyplural, useAnyword and useAnylocale, sharing one locale provider.",
       applicationCategory: "DeveloperApplication",
       operatingSystem: "Any",
       url: BASE_URL,
@@ -168,23 +170,23 @@ export default function Home() {
 
       <SectionNav
         items={[
-          { id: "hero", label: "hero", accent: "#d6b3e2" },
+          { id: "main", label: "the family", accent: "#d6b3e2" },
           ...PACKAGES.map((p) => ({
             id: p.id,
-            label: p.navLabel,
+            label: p.id,
             accent: p.accent,
           })),
-          { id: "anyfamily", label: "a | f", accent: colors.anyfamily },
+          { id: "anyfamily", label: "anyfamily", accent: colors.anyfamily },
           {
             id: "anyfamily-react",
-            label: "a | rx",
+            label: "anyfamily-react",
             accent: colors["anyfamily-react"],
           },
         ]}
       />
 
       <section
-        id="hero"
+        id="main"
         className="relative z-10 flex min-h-dvh snap-start flex-col items-center justify-center px-6 text-center"
       >
         <h1 className="sr-only">the any family</h1>
@@ -195,8 +197,9 @@ export default function Home() {
           className="h-auto w-56 sm:w-[26rem] lg:w-[32rem]"
         />
         <p className="mt-4 max-w-xl text-sm text-white/45 sm:mt-6 sm:text-base">
-          Seven tools, zero dependencies — because the dependency is your
-          browser. Dates, money, lists, names, durations, plurals, words:{" "}
+          Eight tools, zero dependencies — because the dependency is your
+          browser. Dates, money, lists, names, durations, plurals, words,
+          locale facts:{" "}
           <span className="text-white/70">one function each, any locale</span>.
         </p>
         <div className="mt-10 flex h-9 w-5 justify-center rounded-full border border-white/15 pt-2 sm:mt-16">

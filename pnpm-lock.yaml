@@ -20,6 +20,9 @@ importers:
       anyaround:
         specifier: workspace:*
         version: link:packages/anyaround
+      anylocale:
+        specifier: workspace:*
+        version: link:packages/anylocale
       anylong:
         specifier: workspace:*
         version: link:packages/anylong

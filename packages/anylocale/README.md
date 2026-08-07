@@ -14,7 +14,7 @@
 <p align="center">
   <strong>Micro locale-info reader built on native <code>Intl</code>.</strong>
   <br />
-  Text direction, first day of the week, weekend days, calendars and time zones — for any locale.
+  Ask a locale how it behaves — <code>"rtl"</code>, week starts <code>1</code>, weekend <code>[5]</code>, <code>"Africa/Cairo"</code>.
 </p>
 
 <p align="center">

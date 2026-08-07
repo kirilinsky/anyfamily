@@ -1,7 +1,7 @@
 {
   "name": "anylocale",
-  "version": "0.0.0",
-  "description": "Micro locale-info reader — text direction, first day of week, weekend, calendars and time zones for any locale, straight from native Intl.",
+  "version": "1.0.0",
+  "description": "Small locale-info reader — when you need to know text direction, first day of week, weekend, calendars and time zones for any locale, straight from native Intl.",
   "type": "module",
   "sideEffects": false,
   "main": "./dist/index.cjs",

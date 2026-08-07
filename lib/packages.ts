@@ -22,8 +22,6 @@ export type Pkg = {
   npm: string;
   /** Source directory inside this monorepo — the old per-package repos are archived. */
   github: string;
-  /** Scroll-rail label on the landing page. */
-  navLabel: string;
   /**
    * Standalone demo site, for a package whose demo has not been folded into
    * this app yet. Every package is migrated as of 2026-07, so nothing sets it
@@ -53,7 +51,6 @@ export const PACKAGES: Pkg[] = [
     tags: ["dates", "datetimeformat", "relative"],
     npm: "https://www.npmjs.com/package/anywhen",
     github: "https://github.com/kirilinsky/anyfamily/tree/main/packages/anywhen",
-    navLabel: "a | w",
     hasDocs: true,
     footerLine: "Intl is powerful. anywhen makes it usable.",
   },
@@ -67,7 +64,6 @@ export const PACKAGES: Pkg[] = [
     tags: ["currency", "numberformat", "units"],
     npm: "https://www.npmjs.com/package/anyamount",
     github: "https://github.com/kirilinsky/anyfamily/tree/main/packages/anyamount",
-    navLabel: "a | a",
     hasDocs: true,
     footerLine: "Intl is powerful. anyamount makes it usable.",
   },
@@ -81,7 +77,6 @@ export const PACKAGES: Pkg[] = [
     tags: ["lists", "listformat", "sort"],
     npm: "https://www.npmjs.com/package/anymany",
     github: "https://github.com/kirilinsky/anyfamily/tree/main/packages/anymany",
-    navLabel: "a | m",
     hasDocs: true,
     footerLine: "Intl is powerful. anymany makes it usable.",
   },
@@ -95,7 +90,6 @@ export const PACKAGES: Pkg[] = [
     tags: ["flags", "displaynames", "ssr"],
     npm: "https://www.npmjs.com/package/anyaround",
     github: "https://github.com/kirilinsky/anyfamily/tree/main/packages/anyaround",
-    navLabel: "a | r",
     hasDocs: true,
     footerLine: "Intl knows every name. anyaround adds the flag.",
   },
@@ -109,7 +103,6 @@ export const PACKAGES: Pkg[] = [
     tags: ["duration", "durationformat", "elapsed"],
     npm: "https://www.npmjs.com/package/anylong",
     github: "https://github.com/kirilinsky/anyfamily/tree/main/packages/anylong",
-    navLabel: "a | l",
     hasDocs: true,
     footerLine: "Intl is powerful. anylong makes it usable.",
   },
@@ -123,7 +116,6 @@ export const PACKAGES: Pkg[] = [
     tags: ["plurals", "pluralrules", "ordinal"],
     npm: "https://www.npmjs.com/package/anyplural",
     github: "https://github.com/kirilinsky/anyfamily/tree/main/packages/anyplural",
-    navLabel: "a | p",
     hasDocs: true,
     footerLine: "Intl knows the rules. anyplural makes them one call.",
   },
@@ -137,9 +129,22 @@ export const PACKAGES: Pkg[] = [
     tags: ["segmenter", "grapheme", "truncate"],
     npm: "https://www.npmjs.com/package/anyword",
     github: "https://github.com/kirilinsky/anyfamily/tree/main/packages/anyword",
-    navLabel: "a | wd",
     hasDocs: true,
     footerLine: "Intl knows the boundaries. anyword hands them to you.",
+  },
+  {
+    id: "anylocale",
+    suffix: "locale",
+    accent: colors.anylocale,
+    tagline: "locale behaviour",
+    description:
+      "How a locale actually behaves — text direction, first day of the week, weekend days, calendars and time zones. One function over Intl.Locale info.",
+    tags: ["rtl", "week-start", "locale-info"],
+    npm: "https://www.npmjs.com/package/anylocale",
+    github: "https://github.com/kirilinsky/anyfamily/tree/main/packages/anylocale",
+    // No /docs/anylocale yet — flip to true when the reference page lands.
+    hasDocs: false,
+    footerLine: "Intl knows the conventions. anylocale hands them to you.",
   },
 ];
 
