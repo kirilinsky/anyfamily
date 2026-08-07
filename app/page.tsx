@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { CyclingLogo } from "@/components/cycling-logo";
 import { FamilyLogo } from "@/components/family-logo";
 import { InstallChip } from "@/components/install-chip";
 import { SectionNav } from "@/components/section-nav";
@@ -190,20 +191,28 @@ export default function Home() {
         className="relative z-10 flex min-h-dvh snap-start flex-col items-center justify-center px-6 text-center"
       >
         <h1 className="sr-only">the any family</h1>
-        <FamilyLogo
-          suffix="family"
-          accent={colors.anyfamily}
-          mark="bar"
-          className="h-auto w-56 sm:w-[26rem] lg:w-[32rem]"
-        />
-        <p className="mt-4 max-w-xl text-sm text-white/45 sm:mt-6 sm:text-base">
+        <CyclingLogo className="w-56 sm:w-[26rem] lg:w-[32rem]" />
+
+        <p className="mt-8 max-w-lg text-sm text-white/45 sm:mt-12 sm:text-base">
           Eight tools, zero dependencies — because the dependency is your
-          browser. Dates, money, lists, names, durations, plurals, words,
-          locale facts:{" "}
-          <span className="text-white/70">one function each, any locale</span>.
+          browser.{" "}
+          <span className="text-white/70">One function each, any locale.</span>
         </p>
-        <div className="mt-10 flex h-9 w-5 justify-center rounded-full border border-white/15 pt-2 sm:mt-16">
-          <span className="animate-scroll-cue-dot h-1.5 w-1 rounded-full bg-white/50" />
+
+        {/* Each badge carries its package's accent and jumps to its section, so
+            the list doubles as the page's table of contents. */}
+        <div className="mt-8 flex max-w-2xl flex-wrap items-center justify-center gap-2 sm:mt-12 sm:gap-2.5">
+          {PACKAGES.map((p) => (
+            <a
+              key={p.id}
+              href={`#${p.id}`}
+              title={p.id}
+              style={{ borderColor: `${p.accent}33`, color: `${p.accent}cc` }}
+              className="rounded-full border bg-white/[0.02] px-3.5 py-1.5 font-mono text-[11px] lowercase transition-colors hover:bg-white/[0.06] sm:px-4 sm:py-2 sm:text-xs"
+            >
+              {p.tagline}
+            </a>
+          ))}
         </div>
       </section>
 

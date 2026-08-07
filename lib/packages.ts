@@ -142,8 +142,7 @@ export const PACKAGES: Pkg[] = [
     tags: ["rtl", "week-start", "locale-info"],
     npm: "https://www.npmjs.com/package/anylocale",
     github: "https://github.com/kirilinsky/anyfamily/tree/main/packages/anylocale",
-    // No /docs/anylocale yet — flip to true when the reference page lands.
-    hasDocs: false,
+    hasDocs: true,
     footerLine: "Intl knows the conventions. anylocale hands them to you.",
   },
 ];

@@ -12,17 +12,26 @@ export function FamilyLogo({
   className,
   mark = "bar",
   animate = false,
+  widthChars,
 }: {
   suffix: string;
   accent: string;
   className?: string;
   mark?: "bar" | "star";
   animate?: boolean;
+  /**
+   * Pins the viewBox to this many suffix characters instead of measuring the
+   * current one. Only needed where the suffix changes while the mark stays on
+   * screen: without it a longer word widens the viewBox, and since the element
+   * is sized by CSS width, the whole wordmark — "any" included — would rescale
+   * on every swap.
+   */
+  widthChars?: number;
 }) {
   const CHAR = 56; // approx mono glyph advance at fontSize 100
   const suffixLen = suffix.length * CHAR;
   const suffixX = 230;
-  const width = suffixX + suffixLen + 20;
+  const width = suffixX + (widthChars ?? suffix.length) * CHAR + 20;
 
   return (
     <svg
