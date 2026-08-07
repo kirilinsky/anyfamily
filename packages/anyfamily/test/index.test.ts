@@ -7,10 +7,11 @@ import {
   anylong,
   anyplural,
   anyword,
+  anylocale,
 } from "../src/index";
 
 describe("anyfamily", () => {
-  it("re-exports all seven, one name each", () => {
+  it("re-exports all eight, one name each", () => {
     expect(typeof anywhen).toBe("function");
     expect(typeof anyamount).toBe("function");
     expect(typeof anymany).toBe("function");
@@ -18,6 +19,7 @@ describe("anyfamily", () => {
     expect(typeof anylong).toBe("function");
     expect(typeof anyplural).toBe("function");
     expect(typeof anyword).toBe("function");
+    expect(typeof anylocale).toBe("function");
   });
 
   it("anywhen formats relative time", () => {
@@ -66,5 +68,13 @@ describe("anyfamily", () => {
 
   it.skipIf(!anyword.supported)("anyword.truncate cuts on a grapheme boundary", () => {
     expect(anyword.truncate("héllo 👨‍👩‍👧", 5, { ellipsis: "…" })).toBe("héllo…");
+  });
+
+  it.skipIf(!anylocale.supported)("anylocale reads how a locale behaves", () => {
+    expect(anylocale("ar-EG").direction).toBe("rtl");
+    // en-GB starts the week on Monday, en-US on Sunday — the clearest proof
+    // the info is per-locale rather than a constant.
+    expect(anylocale("en-GB").weekStart).toBe(1);
+    expect(anylocale("en-US").weekStart).toBe(7);
   });
 });

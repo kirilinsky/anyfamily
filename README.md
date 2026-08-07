@@ -26,6 +26,7 @@ demo sites have been folded in.
 | **anylong** | durations | `Intl.DurationFormat` | [demo](https://anyfamily.site/anylong) · [docs](https://anyfamily.site/docs/anylong) · [npm](https://www.npmjs.com/package/anylong) · [source](https://github.com/kirilinsky/anyfamily/tree/main/packages/anylong) |
 | **anyplural** | cardinal / ordinal plurals | `Intl.PluralRules` | [demo](https://anyfamily.site/anyplural) · [docs](https://anyfamily.site/docs/anyplural) · [npm](https://www.npmjs.com/package/anyplural) · [source](https://github.com/kirilinsky/anyfamily/tree/main/packages/anyplural) |
 | **anyword** | words / graphemes / sentences, count + truncate | `Intl.Segmenter` | [demo](https://anyfamily.site/anyword) · [docs](https://anyfamily.site/docs/anyword) · [npm](https://www.npmjs.com/package/anyword) · [source](https://github.com/kirilinsky/anyfamily/tree/main/packages/anyword) |
+| **anylocale** | how a locale behaves: direction, week, calendars, time zones | `Intl.Locale` info | [demo](https://anyfamily.site/anylocale) · [docs](https://anyfamily.site/docs/anylocale) · [npm](https://www.npmjs.com/package/anylocale) · [source](https://github.com/kirilinsky/anyfamily/tree/main/packages/anylocale) |
 
 ## how it works
 
@@ -47,7 +48,7 @@ demo sites have been folded in.
 
 ## dev
 
-This is a pnpm workspace: the landing app at the root, and all nine packages
+This is a pnpm workspace: the landing app at the root, and all ten packages
 under `packages/`.
 
 ```bash

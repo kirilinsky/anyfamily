@@ -12,12 +12,13 @@ const PKGS = [
   { name: "anylong", tagline: "durations", accent: "#2cc2c9" },
   { name: "anyplural", tagline: "plurals", accent: "#e879c5" },
   { name: "anyword", tagline: "words & graphemes", accent: "#c9f53c" },
+  { name: "anylocale", tagline: "locale behaviour", accent: "#8497f5" },
 ];
 
-// Seven cards wrap unevenly on their own, so the rows are split by hand into a
-// centered 4 / 3 pyramid. CARD_W is fixed to keep the columns aligned; it holds
-// the widest content (the "anyamount" name row, "words & graphemes" tagline)
-// with room to spare, and four of them plus gaps stay inside ROW_MAX.
+// Cards wrap unevenly on their own, so the rows are split by hand into two even
+// rows of four. CARD_W is fixed to keep the columns aligned; it holds the widest
+// content (the "anyamount" name row, "words & graphemes" tagline) with room to
+// spare, and four of them plus gaps stay inside ROW_MAX.
 const CARD_W = 232;
 const ROW_MAX = 1040;
 const ROWS = [PKGS.slice(0, 4), PKGS.slice(4)];

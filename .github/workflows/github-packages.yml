@@ -1,0 +1,88 @@
+name: github packages
+
+# Mirrors the meta-packages to GitHub Packages after changesets tags a release.
+# npm remains the primary registry; this is a second home for people whose
+# install already goes through GitHub.
+#
+# GitHub Packages only accepts names scoped to the repository owner, so the
+# packages land there as `@kirilinsky/anyfamily` and
+# `@kirilinsky/anyfamily-react`. Their dependencies keep their bare npm names
+# and resolve from npmjs — a consumer maps only the `@kirilinsky` scope to this
+# registry, so the eight leaf packages do not have to move with them.
+#
+# Runs after the npm release, never instead of it: `pnpm publish` turns the
+# `workspace:^` ranges into published versions, which only exist once the leaf
+# packages are actually on npmjs.
+
+on:
+  push:
+    tags:
+      - "anyfamily@*"
+      - "anyfamily-react@*"
+  workflow_dispatch:
+    inputs:
+      package:
+        description: "Meta-package to mirror: anyfamily or anyfamily-react"
+        required: true
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: resolve package from the tag
+        id: pkg
+        run: |
+          if [ -n "${{ inputs.package }}" ]; then
+            name="${{ inputs.package }}"
+          else
+            # refs/tags/anyfamily-react@2.1.0 -> anyfamily-react
+            name="${GITHUB_REF_NAME%@*}"
+          fi
+          echo "name=$name" >> "$GITHUB_OUTPUT"
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.32.1
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: pnpm
+          registry-url: https://npm.pkg.github.com
+          scope: "@kirilinsky"
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm --filter "${{ steps.pkg.outputs.name }}" build
+
+      # The manifest is rewritten in place for the publish only. The checkout is
+      # thrown away with the runner, so there is nothing to restore — and the
+      # name on npm is deliberately left unscoped.
+      - name: scope the manifest
+        working-directory: packages/${{ steps.pkg.outputs.name }}
+        run: |
+          node -e '
+            const fs = require("node:fs");
+            const pkg = JSON.parse(fs.readFileSync("package.json", "utf8"));
+            pkg.name = "@kirilinsky/" + pkg.name;
+            pkg.publishConfig = {
+              ...pkg.publishConfig,
+              registry: "https://npm.pkg.github.com",
+            };
+            fs.writeFileSync("package.json", JSON.stringify(pkg, null, 2) + "\n");
+          '
+
+      # `pnpm publish`, not `npm publish`: only pnpm resolves the `workspace:^`
+      # dependencies to real version ranges — npm would ship the protocol
+      # literally and every install would fail.
+      - name: publish
+        working-directory: packages/${{ steps.pkg.outputs.name }}
+        run: pnpm publish --no-git-checks
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

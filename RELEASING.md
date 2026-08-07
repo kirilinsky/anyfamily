@@ -6,7 +6,8 @@ There is no per-package repo and no per-package publish flow any more.
 
 ```
 packages/
-  anywhen  anyamount  anymany  anyaround  anylong  anyplural  anyword   ← the seven
+  anywhen  anyamount  anymany  anyaround                                 ← the eight
+  anylong  anyplural  anyword  anylocale                                   leaf packages
   anyfamily  anyfamily-react                                            ← the two metas
 ```
 
@@ -56,37 +57,34 @@ by hand.**
 anywhen(date) now returns … ; anywhenParts is gone, use anywhen.parts(date).
 ```
 
-## migrating the family to v2, one package at a time
+## adding a package to the family
 
-The v2 shape lands package by package, but the two metas get **one** major at
-the end rather than a major per package. That only works if each migration keeps
-the metas non-breaking, so the rule is:
-
-**When a package drops an export, the meta keeps it as a deprecated alias.**
-
-```ts
-// packages/anyfamily/src/index.ts
-export { anywhen } from "anywhen";
-
-import { anywhen as anywhenFn } from "anywhen";
-
-/** @deprecated Use `anywhen.parts` instead. Removed in anyfamily 2.0. */
-export const anywhenParts = anywhenFn.parts;
-```
-
-Cover each bridge with a test — that it still resolves, and that its output
-matches the new call — so the aliases cannot rot while they exist.
-
-Version levels for a single package's migration:
+A new leaf package ships on its own (`1.0.0`, its first changeset is a `minor`
+on a package that does not exist yet — changesets treats that as the initial
+release). Folding it into the metas is a **separate, later** changeset, once the
+package is actually on npm:
 
 | Package | Level | Why |
 | --- | --- | --- |
-| the migrated package | `major` | its exports changed |
-| `anyfamily` | `minor` | gains a bridge, loses nothing |
-| `anyfamily-react` | `patch` or nothing | it calls the bare function, which never changes shape |
+| the new package | — | already published on its own |
+| `anyfamily` | `minor` | gains an export, loses nothing |
+| `anyfamily-react` | `minor` | gains a hook |
 
-When the seventh package lands, one final changeset takes both metas to `2.0.0`
-and deletes every bridge at once.
+Order matters. The metas depend on the leaf through `workspace:^`, which
+resolves to a published range at pack time — so the leaf has to exist on the
+registry before the metas that require it do.
+
+The checklist for the meta side, all of which has to land in the same changeset:
+
+- `packages/anyfamily/src/index.ts` — re-export the one name, plus its public
+  types. Alias only what collides with a name another package already exports.
+- `packages/anyfamily-react/src/index.tsx` — the hook, its types, and the
+  `<pkg>Supported` forward if the package has a support flag.
+- both `package.json`s — the `workspace:^` dependency, the description, the
+  keywords.
+- both test suites — the export-surface assertion, and one behaviour test that
+  could only pass through the real package.
+- both READMEs, the root README table, and `app/opengraph-image.tsx`.
 
 ## picking a bump level
 
@@ -129,6 +127,41 @@ Tags are prefixed per package — `anywhen-v2.0.0`, `anyamount-v1.1.0` — becau
 bare `v1.0.0` existed in three of the seven repos before they were merged and
 would have collided. `changeset publish` creates the modern form, `anywhen@2.0.0`;
 both are fine, they cannot clash with each other.
+
+## registries
+
+| Registry | What goes there | How |
+| --- | --- | --- |
+| npmjs | all ten packages, unscoped | `pnpm release`, by hand |
+| JSR | the eight leaf packages | `.github/workflows/jsr.yml`, on the release tag |
+| GitHub Packages | the two metas, as `@kirilinsky/*` | `.github/workflows/github-packages.yml`, on the release tag |
+
+npmjs is the primary registry and the name people are told to install. The other
+two are mirrors and neither is allowed to gate a release.
+
+GitHub Packages only accepts names scoped to the repository owner, so the metas
+are published there as `@kirilinsky/anyfamily` and `@kirilinsky/anyfamily-react`
+— the workflow rewrites `name` in the manifest just before publishing, and the
+npm name stays unscoped. Their dependencies keep their bare npm names and
+resolve from npmjs, which is why the eight leaf packages do not need to be
+mirrored too: a consumer points only the `@kirilinsky` scope at GitHub.
+
+To install from there, a consumer needs a `.npmrc` with a GitHub token that has
+`read:packages` — GitHub Packages requires authentication even for public
+packages:
+
+```
+@kirilinsky:registry=https://npm.pkg.github.com
+//npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}
+```
+
+```bash
+npm install @kirilinsky/anyfamily
+```
+
+The workflow runs on the release tag, so it lands **after** the npm publish —
+`pnpm publish` turns `workspace:^` into a real version range, and those versions
+have to exist on npmjs first.
 
 ## before publishing
 

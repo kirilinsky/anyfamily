@@ -134,14 +134,14 @@ export const FAMILY_PRESETS: Preset[] = [
     run: () => anyplural(5, { one: "item", other: "items" }, { locale: "en" }),
   },
   {
-    fn: `import { anylocale } from "anyfamily";`,
-    call: `import { anylocale } from "anyfamily";\n\nanylocale("ar-EG").direction`,
-    run: () => anylocale("ar-EG").direction,
-  },
-  {
     fn: `import { anyword } from "anyfamily";`,
     call: `import { anyword } from "anyfamily";\n\nanyword("don't stop 世界")`,
     run: () => arr(anyword("don't stop 世界", { locale: "en" })),
+  },
+  {
+    fn: `import { anylocale } from "anyfamily";`,
+    call: `import { anylocale } from "anyfamily";\n\nanylocale("ar-EG").direction`,
+    run: () => anylocale("ar-EG").direction,
   },
 ];
 
@@ -183,6 +183,11 @@ export const REACT_PRESETS: Preset[] = [
     fn: `useAnyword`,
     call: `useAnyword("don't stop 世界")`,
     run: () => arr(anyword("don't stop 世界", { locale: "en" })),
+  },
+  {
+    fn: `useAnylocale`,
+    call: `useAnylocale("ar-EG").direction`,
+    run: () => anylocale("ar-EG").direction,
   },
 ];
 

@@ -16,6 +16,7 @@ import {
 } from "anyamount";
 import { anymany, type AnymanyOptions } from "anymany";
 import { anyaround, type AnyaroundOptions } from "anyaround";
+import { anylocale, type AnylocaleInfo } from "anylocale";
 import { anylong, type AnylongOptions, type DurationInput } from "anylong";
 import { anywhen, type AnywhenOptions, type DateInput, type Locale } from "anywhen";
 import { anyplural, type AnypluralOptions, type Forms } from "anyplural";
@@ -29,6 +30,7 @@ export type { AnyamountOptions } from "anyamount";
 export type { AnyamountSymbolOptions };
 export type { AnymanyOptions } from "anymany";
 export type { AnyaroundOptions } from "anyaround";
+export type { AnylocaleInfo, Direction, Weekday } from "anylocale";
 export type { AnylongOptions, DurationInput } from "anylong";
 export type { AnywhenOptions, DateInput } from "anywhen";
 export type { AnypluralOptions, Forms } from "anyplural";
@@ -38,6 +40,7 @@ export type { AnywordOptions, AnywordTruncateOptions, Granularity } from "anywor
  * underlying packages. Since v2 each package carries its own flag, so these are
  * plain forwards rather than the disambiguating aliases they used to be.
  */
+export const anylocaleSupported = anylocale.supported;
 export const anylongSupported = anylong.supported;
 export const anywordSupported = anyword.supported;
 
@@ -188,4 +191,33 @@ export function useAnywordTruncate(
 ): string {
   const locale = useAnyfamilyLocale();
   return anyword.truncate(text, limit, withLocale(options, locale));
+}
+
+/**
+ * Like `anylocale`, reading the tag from the nearest {@linkcode AnyfamilyProvider}
+ * when none is passed.
+ *
+ * Two things differ from the formatting hooks:
+ *
+ * - `anylocale` takes the tag as its argument rather than as an option, and has
+ *   no "whatever the runtime uses" default, so with neither an argument nor a
+ *   provider the hook resolves the runtime's own locale the way `Intl` would;
+ * - it returns an object, so the result is memoized — the same tag keeps the
+ *   same reference, and passing it to a `useEffect` or a `memo`'d child doesn't
+ *   retrigger on every render.
+ *
+ * Locale info is a static fact about the tag, so there is nothing to refresh.
+ */
+export function useAnylocale(input?: Locale): AnylocaleInfo {
+  const contextLocale = useAnyfamilyLocale();
+  const tag = input ?? contextLocale;
+  // An inline array of fallback tags is a fresh reference every render, so key
+  // the memo on the tags themselves rather than on their identity.
+  const key = Array.isArray(tag) ? tag.join(",") : (tag as string | undefined);
+  return useMemo(
+    () =>
+      anylocale(tag ?? new Intl.DateTimeFormat().resolvedOptions().locale),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- `key` stands in for `tag`
+    [key],
+  );
 }

@@ -290,9 +290,9 @@ export default function Home() {
           {/* Left: identity */}
           <div className="flex flex-col items-start gap-3 md:gap-5">
             <h2 className="sr-only">
-              anyfamily — all seven any* packages in one install: anywhen,
-              anyamount, anymany, anyaround, anylong, anyplural and anyword
-              behind a single import.
+              anyfamily — all eight any* packages in one install: anywhen,
+              anyamount, anymany, anyaround, anylong, anyplural, anyword and
+              anylocale behind a single import.
             </h2>
             <FamilyLogo
               suffix="family"
@@ -300,7 +300,7 @@ export default function Home() {
               className="h-auto w-32 sm:w-40 md:w-48"
             />
             <p className="max-w-sm text-sm leading-relaxed text-white/55">
-              One install, all seven — named re-exports, fully typed,
+              One install, all eight — named re-exports, fully typed,
               tree-shakeable.
             </p>
             <div className="mt-1">

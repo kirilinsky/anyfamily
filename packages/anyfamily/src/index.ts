@@ -1,14 +1,14 @@
 /**
  * anyfamily — the whole any* family in one install.
  *
- * Every package exports exactly one name, so this file re-exports seven of
+ * Every package exports exactly one name, so this file re-exports eight of
  * them. Extras hang off those names — `anywhen.parts`, `anyword.count`,
  * `anylong.supported` — which is why there are no prefixed aliases here any
  * more: nothing collides.
  *
  * Types still need aliasing where names repeat across packages (`Mode`,
  * `Style`, `SmartOptions`, `CurrencyOptions`); `Locale` is structurally
- * identical across the seven, so it is exported once.
+ * identical across all eight, so it is exported once.
  */
 
 // anywhen — dates, times, relative phrasing (Intl.DateTimeFormat)
@@ -89,3 +89,11 @@ export type {
   AnywordTruncateOptions,
   Granularity,
 } from "anyword";
+
+// anylocale — how a locale behaves: direction, week, calendars (Intl.Locale info)
+export { anylocale } from "anylocale";
+export type {
+  AnylocaleInfo,
+  Direction,
+  Weekday,
+} from "anylocale";

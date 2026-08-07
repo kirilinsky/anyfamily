@@ -138,6 +138,9 @@ importers:
       anyaround:
         specifier: workspace:^
         version: link:../anyaround
+      anylocale:
+        specifier: workspace:^
+        version: link:../anylocale
       anylong:
         specifier: workspace:^
         version: link:../anylong
@@ -154,6 +157,9 @@ importers:
         specifier: workspace:^
         version: link:../anyword
     devDependencies:
+      publint:
+        specifier: ^0.3.21
+        version: 0.3.22
       tsup:
         specifier: ^8.5.0
         version: 8.5.1(jiti@2.7.0)(postcss@8.5.16)(typescript@5.9.3)
@@ -172,6 +178,9 @@ importers:
       anyaround:
         specifier: workspace:^
         version: link:../anyaround
+      anylocale:
+        specifier: workspace:^
+        version: link:../anylocale
       anylong:
         specifier: workspace:^
         version: link:../anylong
@@ -200,6 +209,9 @@ importers:
       jsdom:
         specifier: ^25.0.1
         version: 25.0.1
+      publint:
+        specifier: ^0.3.21
+        version: 0.3.22
       react:
         specifier: ^19
         version: 19.2.4

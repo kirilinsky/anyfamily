@@ -172,7 +172,7 @@ reference.
 9. `## vs the alternatives` — only where a real alternative exists
 10. `## stability` — the semver promise, plus a `### migrating from Nx` diff
 11. `## compatibility`
-12. `## the any family` — the table of all seven plus the metas
+12. `## the any family` — the table of all eight plus the metas
 13. the MIT line
 
 Badges point at the monorepo CI, never at a per-package workflow.

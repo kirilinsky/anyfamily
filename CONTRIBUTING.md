@@ -39,8 +39,8 @@ hardcode a return value.
 
 ## packages
 
-This is a pnpm workspace. All nine packages live under `packages/` — the seven
-formatters plus the two metas — each with its own `package.json`, tests and
+This is a pnpm workspace. All ten packages live under `packages/` — the eight
+leaf packages plus the two metas — each with its own `package.json`, tests and
 build. They used to be separate repositories; their history came along, so
 `git log packages/anywhen/` and `git blame` work across the move.
 

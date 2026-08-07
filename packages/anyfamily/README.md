@@ -1,8 +1,8 @@
 # a\*
 
-[![anyfamily — anywhen · anyamount · anymany · anyaround · anylong · anyplural · anyword](https://anyfamily.site/opengraph-image?v7)](https://anyfamily.site)
+[![anyfamily — anywhen · anyamount · anymany · anyaround · anylong · anyplural · anyword · anylocale](https://anyfamily.site/opengraph-image?v8)](https://anyfamily.site)
 
-**anyfamily — install one, get seven.** The whole **any\*** family — micro
+**anyfamily — install one, get eight.** The whole **any\*** family — micro
 `Intl`-powered tools, each with zero dependencies of its own — behind a single
 import.
 
@@ -10,8 +10,28 @@ import.
 npm install anyfamily
 ```
 
+<details>
+<summary>installing from GitHub Packages instead</summary>
+
+Also published to GitHub Packages, where names must carry the owner's scope:
+`@kirilinsky/anyfamily`. GitHub requires auth even for public packages, so add a
+token with `read:packages` to your `.npmrc`:
+
+```
+@kirilinsky:registry=https://npm.pkg.github.com
+//npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}
+```
+
+```bash
+npm install @kirilinsky/anyfamily
+```
+
+Same code, same version, different name — npmjs is the primary registry.
+
+</details>
+
 ```ts
-import { anywhen, anyamount, anymany, anyaround, anylong, anyplural, anyword } from "anyfamily";
+import { anywhen, anyamount, anymany, anyaround, anylong, anyplural, anyword, anylocale } from "anyfamily";
 ```
 
 ESM + CJS, fully typed, `sideEffects: false` — bundlers tree-shake away whatever
@@ -125,18 +145,36 @@ anyword.truncate("héllo 👨‍👩‍👧", 5, { ellipsis: "…" }); // "héll
 `Intl.Segmenter` is missing on older runtimes — branch on `anyword.supported`
 if you target them.
 
+## anylocale — how a locale behaves
+
+Not what things are called, but how the locale works: text direction, which day
+the week starts on, which days are the weekend, the calendars and time zones it
+uses. One read over `Intl.Locale` info.
+[docs](https://anyfamily.site/docs/anylocale) ·
+[npm](https://www.npmjs.com/package/anylocale)
+
+```ts
+anylocale("ar-EG").direction; // "rtl"
+anylocale("en-GB").weekStart; // 1 — Monday, while en-US is 7
+anylocale("fa-IR").weekend;   // [5] — Friday only, not two days
+```
+
+Locale info is a late addition — branch on `anylocale.supported` if you target
+older runtimes.
+
 ## types
 
-Every public type from all seven packages is re-exported. Names that collide
+Every public type from all eight packages is re-exported. Names that collide
 across packages (`Mode`, `Style`, `SmartOptions`, `CurrencyOptions`) carry their
 package prefix — `AnywhenMode`, `AnyamountStyle`, `AnyaroundCurrencyOptions`, …
-`Locale` is structurally identical across the seven, so it is exported once.
+`Locale` is structurally identical across all eight, so it is exported once.
 
 ## react
 
 Using React? [**anyfamily-react**](https://www.npmjs.com/package/anyfamily-react)
 wraps every package as a hook — `useAnywhen`, `useAnyamount`, `useAnymany`,
-`useAnyaround`, `useAnylong`, `useAnyplural`, `useAnyword` — sharing one locale
+`useAnyaround`, `useAnylong`, `useAnyplural`, `useAnyword`, `useAnylocale` —
+sharing one locale
 via `AnyfamilyProvider`, with relative time that keeps itself fresh.
 
 ```bash
@@ -148,31 +186,7 @@ npm install anyfamily-react
 anyfamily follows [semver](https://semver.org/) and tracks the packages it
 re-exports: a major in any of them is a major here.
 
-### migrating from 1.x
-
-2.0 drops every secondary export. Each one moved onto its package's own name,
-which also removed the prefixed aliases that only existed to avoid collisions:
-
-```diff
-- import { anywhen, anywhenParts, anywordCount, anylongSupported } from "anyfamily";
-+ import { anywhen, anyword, anylong } from "anyfamily";
-
-- anywhenParts(date);         →  anywhen.parts(date)
-- anymanyParts(items);        →  anymany.parts(items)
-- anyaroundInfo("US");        →  anyaround.info("US")
-- anylongParts("2h");         →  anylong.parts("2h")
-- anylongSupported;           →  anylong.supported
-- anyamountParts(1999);       →  anyamount.parts(1999)
-- anyamountSymbol("USD");     →  anyamount.symbol("USD")
-- anypluralParts(5, forms);   →  anyplural.parts(5, forms)
-- anywordParts(text);         →  anyword.parts(text)
-- anywordCount(text);         →  anyword.count(text)
-- anywordTruncate(text, 20);  →  anyword.truncate(text, 20)
-- anywordSupported;           →  anyword.supported
-```
-
-Arguments, return values and throwing behaviour are unchanged. Types are
-unaffected.
+ 
 
 ## license
 

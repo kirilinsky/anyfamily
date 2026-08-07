@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     template: "%s · anyfamily",
   },
   description:
-    "The any* family: seven micro, zero-dependency JavaScript tools built on native Intl. Names & flags, money, dates, durations, lists, plurals, and words — in any locale.",
+    "The any* family: eight micro, zero-dependency JavaScript tools built on native Intl. Names & flags, money, dates, durations, lists, plurals, words, and locale behaviour — in any locale.",
   keywords: [
     "intl",
     "i18n",
@@ -41,14 +41,14 @@ export const metadata: Metadata = {
     url: "https://anyfamily.site",
     title: "anyfamily — micro Intl tools for any locale",
     description:
-      "Seven micro, zero-dependency tools on native Intl: names & flags, money, dates, durations, lists, plurals, words. Any locale.",
+      "Eight micro, zero-dependency tools on native Intl: names & flags, money, dates, durations, lists, plurals, words, locale behaviour. Any locale.",
     siteName: "anyfamily",
     locale: "en_US",
   },
   twitter: {
     card: "summary_large_image",
     title: "anyfamily — micro Intl tools for any locale",
-    description: "Seven micro Intl tools. Zero data. Any locale.",
+    description: "Eight micro Intl tools. Zero data. Any locale.",
   },
   robots: { index: true, follow: true },
   alternates: { canonical: "https://anyfamily.site" },

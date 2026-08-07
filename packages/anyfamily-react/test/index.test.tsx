@@ -4,10 +4,12 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import {
   AnyfamilyProvider,
+  anylocaleSupported,
   anylongSupported,
   anywordSupported,
   useAnyaround,
   useAnyfamilyLocale,
+  useAnylocale,
   useAnylong,
   useAnyamount,
   useAnyamountSymbol,

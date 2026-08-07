@@ -1,6 +1,6 @@
 # anyfamily-react
 
-[![anyfamily — anywhen · anyamount · anymany · anyaround · anylong · anyplural · anyword](https://anyfamily.site/opengraph-image?v7)](https://anyfamily.site)
+[![anyfamily — anywhen · anyamount · anymany · anyaround · anylong · anyplural · anyword · anylocale](https://anyfamily.site/opengraph-image?v8)](https://anyfamily.site)
 
 React hooks for the **any\*** family:
 [anywhen](https://www.npmjs.com/package/anywhen),
@@ -8,8 +8,9 @@ React hooks for the **any\*** family:
 [anymany](https://www.npmjs.com/package/anymany),
 [anyaround](https://www.npmjs.com/package/anyaround),
 [anylong](https://www.npmjs.com/package/anylong),
-[anyplural](https://www.npmjs.com/package/anyplural) and
-[anyword](https://www.npmjs.com/package/anyword) as hooks, sharing one
+[anyplural](https://www.npmjs.com/package/anyplural),
+[anyword](https://www.npmjs.com/package/anyword) and
+[anylocale](https://www.npmjs.com/package/anylocale) as hooks, sharing one
 locale and keeping relative time fresh without hand-rolled `setInterval`
 plumbing.
 
@@ -18,6 +19,26 @@ plumbing.
 ```bash
 npm install anyfamily-react
 ```
+
+<details>
+<summary>installing from GitHub Packages instead</summary>
+
+Also published to GitHub Packages, where names must carry the owner's scope:
+`@kirilinsky/anyfamily-react`. GitHub requires auth even for public packages, so add a
+token with `read:packages` to your `.npmrc`:
+
+```
+@kirilinsky:registry=https://npm.pkg.github.com
+//npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}
+```
+
+```bash
+npm install @kirilinsky/anyfamily-react
+```
+
+Same code, same version, different name — npmjs is the primary registry.
+
+</details>
 
 ```tsx
 import { AnyfamilyProvider, useAnywhen, useAnyamount } from "anyfamily-react";
@@ -72,29 +93,24 @@ function Post({ publishedAt, price }: { publishedAt: Date; price: number }) {
 - `useAnywordTruncate(text, limit, options?)` — see `anyword.truncate`.
   `anywordSupported` is re-exported for feature-detecting `Intl.Segmenter`,
   which all three anyword hooks require.
+- `useAnylocale(tag?)` — see `anylocale`. Unlike the others it takes the tag as
+  its argument, so with no argument it falls back to the provider's locale and
+  then to the runtime's. Returns an object, memoized on the tag, so it is safe
+  as an effect dependency. `anylocaleSupported` is re-exported for
+  feature-detecting `Intl.Locale` info.
 
 `useAnyfamilyLocale()` reads the locale from the nearest provider directly,
 for anything not covered by the hooks above.
 
-## stability
-
-anyfamily-react follows [semver](https://semver.org/) and tracks the packages it
-wraps.
-
-The 2.0 wave across the `any*` packages reshaped **their** exports — one name
-each, extras hanging off it — but the hook surface here is unchanged. Every hook
-keeps its name and signature, and `anylongSupported` / `anywordSupported` are
-still exported; they are now plain forwards of `anylong.supported` and
-`anyword.supported` rather than the disambiguating aliases they used to be.
-
-If you call the underlying packages directly as well, see their migration notes:
+ 
 [anywhen](https://anyfamily.site/docs/anywhen#migrating) ·
 [anyamount](https://anyfamily.site/docs/anyamount#migrating) ·
 [anymany](https://anyfamily.site/docs/anymany#migrating) ·
 [anyaround](https://anyfamily.site/docs/anyaround#migrating) ·
 [anylong](https://anyfamily.site/docs/anylong#migrating) ·
 [anyplural](https://anyfamily.site/docs/anyplural#migrating) ·
-[anyword](https://anyfamily.site/docs/anyword#migrating)
+[anyword](https://anyfamily.site/docs/anyword#migrating) ·
+[anylocale](https://anyfamily.site/docs/anylocale)
 
 ## license
 
