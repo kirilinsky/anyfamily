@@ -77,17 +77,26 @@ jobs:
       - name: build
         run: pnpm --filter "./packages/*" build
 
+      # No --if-present: all ten packages declare `typecheck`, and a package
+      # that quietly stops declaring it should fail here rather than be skipped.
+      # That is exactly how the metas went unchecked until 2026-08-09.
       - name: typecheck
-        run: pnpm --filter "./packages/*" --if-present typecheck
+        run: pnpm --filter "./packages/*" typecheck
 
       - name: test
         run: pnpm --filter "./packages/*" test
+
+      # Only the metas run knip: they are the packages where an unused
+      # dependency or a dropped re-export can hide, since nothing but the
+      # re-export list itself says what they are supposed to contain.
+      - name: knip
+        run: pnpm --filter "./packages/*" --if-present knip
 
       # Validates the published shape — exports map, types resolution, files.
       # More important now than per-repo: changesets publishes automatically, so
       # a broken exports map would ship without anyone looking at it.
       - name: publint
-        run: pnpm --filter "./packages/*" --if-present publint
+        run: pnpm --filter "./packages/*" publint
 
   site:
     name: landing site

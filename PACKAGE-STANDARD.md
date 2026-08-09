@@ -4,8 +4,10 @@ Every `any*` package under `packages/` is built the same way, so moving between
 them costs nothing. **`packages/anywhen` is the reference implementation** — when
 this document and anywhen disagree, anywhen is right and this document is stale.
 
-Status: anywhen conforms as of 2.0. The other six are being brought in line one
-at a time.
+Status (2026-08-09): **all eight core libraries conform.** The two metas —
+`anyfamily` and `anyfamily-react` — conform to the tier described in
+[meta packages](#meta-packages); they are deliberately not held to every rule
+here.
 
 ## the API shape
 
@@ -65,6 +67,33 @@ Optional, add when it earns its place:
 
 - `src/ssr.test.ts` — where server/client output could diverge
 - `scripts/check-size.mjs` — a gzip budget guard
+
+## meta packages
+
+`anyfamily` and `anyfamily-react` are a second tier. They ship no `Intl` code of
+their own — one re-exports the eight libraries, the other wraps them in hooks —
+so parts of the standard above do not apply, and pretending otherwise just
+produces empty files.
+
+**Same as a core library:** `tsdown` (one bundler in this repo, no exceptions),
+`dist/index.mjs` + `dist/index.cjs` + `scripts/cjs-types.mjs` for the `.d.cts`,
+`vitest.config.ts`, and the full script set — `build`, `lint`, `publint`, `test`,
+`test:coverage`, `typecheck`.
+
+**Different, on purpose:**
+
+| | Core library | Meta |
+| --- | --- | --- |
+| tests | `src/index.test.ts`, beside the source | `test/index.test.ts(x)` — they import the siblings by **package name**, so they test the built artifact, not the source |
+| `logo.png` | required | none — the README leads with the family logo |
+| `jsr.json` | required | absent; JSR takes the eight leaves, GitHub Packages takes the metas |
+| `knip` | not used | **required** — `knip.json` + a `knip` script |
+| needs a build first | no | **yes** — sibling `dist/` must exist before test or typecheck |
+
+`knip` is the meta-only rule worth explaining. A library's dead code shows up in
+coverage; a meta's does not, because its whole job *is* re-exporting. A
+dependency that stopped being re-exported, or an export nothing points at, is
+invisible to every other check here. CI runs it in the `packaging` job.
 
 ## never in a package
 
