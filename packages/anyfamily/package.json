@@ -27,6 +27,7 @@
   ],
   "scripts": {
     "build": "tsdown && node scripts/cjs-types.mjs",
+    "knip": "knip",
     "lint": "oxlint src",
     "publint": "publint",
     "test": "vitest run",
@@ -98,6 +99,7 @@
   },
   "devDependencies": {
     "@vitest/coverage-v8": "^3.2.4",
+    "knip": "^6.32.0",
     "oxlint": "^1.71.0",
     "publint": "^0.3.21",
     "tsdown": "^0.22.3",

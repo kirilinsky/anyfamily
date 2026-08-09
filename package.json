@@ -2,7 +2,7 @@
   "name": "anyfamily",
   "version": "1.0.0",
   "private": true,
-  "description": "Landing page for the any* family \u2014 micro, zero-dependency Intl tools.",
+  "description": "Landing page for the any* family — micro, zero-dependency Intl tools.",
   "homepage": "https://anyfamily.site",
   "repository": {
     "type": "git",
@@ -46,6 +46,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.2.1",
+    "knip": "^6.32.0",
     "tailwindcss": "^4",
     "typescript": "^5"
   },
