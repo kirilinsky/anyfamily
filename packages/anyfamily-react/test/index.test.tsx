@@ -193,3 +193,21 @@ describe("useAnywhen", () => {
     vi.useRealTimers();
   });
 });
+
+describe("the built bundle", () => {
+  // rolldown keeps the "use client" directive on its own, where esbuild stripped
+  // it and needed a banner step. Nothing in the source can prove that — only the
+  // artifact can, and a client component without the directive breaks silently
+  // in any React Server Components app.
+  for (const file of ["dist/index.mjs", "dist/index.cjs"]) {
+    it(`starts ${file} with the "use client" directive, exactly once`, async () => {
+      const { readFile } = await import("node:fs/promises");
+      const { resolve } = await import("node:path");
+      // vitest runs with the package root as cwd.
+      const contents = await readFile(resolve(process.cwd(), file), "utf8");
+
+      expect(contents.startsWith('"use client";')).toBe(true);
+      expect(contents.split('"use client";').length - 1).toBe(1);
+    });
+  }
+});
