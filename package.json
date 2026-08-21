@@ -12,6 +12,7 @@
   "license": "MIT",
   "scripts": {
     "versions": "node scripts/versions.mjs",
+    "bench": "node scripts/bench.mjs",
     "predev": "pnpm run build:packages && node scripts/versions.mjs",
     "prebuild": "pnpm run build:packages && node scripts/versions.mjs",
     "dev": "next dev",
