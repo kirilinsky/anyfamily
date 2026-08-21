@@ -1,6 +1,6 @@
 {
   "name": "anyplural",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Micro smart pluralizer — pick the plural form and interpolate the count in any Intl locale, one function.",
   "type": "module",
   "sideEffects": false,

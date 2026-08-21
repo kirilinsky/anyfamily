@@ -1,6 +1,6 @@
 {
   "name": "anyamount",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Tiny smart number formatter — one function, three modes (smart, currency, unit), any Intl locale.",
   "type": "module",
   "sideEffects": false,

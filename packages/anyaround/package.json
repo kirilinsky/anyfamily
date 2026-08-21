@@ -1,6 +1,6 @@
 {
   "name": "anyaround",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Micro smart locale display — one function, any region, language, script, currency or calendar code to its localized name, with country flags. Any Intl locale.",
   "type": "module",
   "sideEffects": false,

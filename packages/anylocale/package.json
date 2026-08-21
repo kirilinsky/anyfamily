@@ -1,6 +1,6 @@
 {
   "name": "anylocale",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Small locale-info reader — when you need to know text direction, first day of week, weekend, calendars and time zones for any locale, straight from native Intl.",
   "type": "module",
   "sideEffects": false,

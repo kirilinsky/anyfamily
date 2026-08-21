@@ -1,6 +1,6 @@
 {
   "name": "anyword",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Micro text segmenter — locale-correct words, graphemes and sentences, safe counting and truncation, one native Intl wrapper.",
   "type": "module",
   "sideEffects": false,
