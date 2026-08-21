@@ -145,9 +145,27 @@ export interface AnyaroundInfo {
 
 const CACHE_LIMIT = 50;
 
+/**
+ * Formatter cache. LRU, but only once it is full.
+ *
+ * Keeping Map order in step with recency costs a delete + re-set on every hit —
+ * ~120ns, real money against a format call that takes ~500ns. Below the limit
+ * nothing can be evicted, so that order buys nothing and the hit stays a bare
+ * `Map.get`. Once the cache is full, eviction is possible and recency starts to
+ * matter: a plain FIFO would drop the app's one hot locale every 50 misses, and
+ * rebuilding a formatter costs ~50-90µs.
+ */
 function cacheGet<V>(cache: Map<string, V>, k: string, create: () => V): V {
   const hit = cache.get(k);
-  if (hit) return hit;
+  if (hit !== undefined) {
+    if (cache.size >= CACHE_LIMIT) {
+      // Move to the end — Map iterates in insertion order, and the eviction
+      // below takes the first key it sees.
+      cache.delete(k);
+      cache.set(k, hit);
+    }
+    return hit;
+  }
   const v = create();
   if (cache.size >= CACHE_LIMIT) cache.delete(cache.keys().next().value!);
   cache.set(k, v);

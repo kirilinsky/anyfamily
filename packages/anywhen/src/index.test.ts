@@ -651,6 +651,21 @@ describe("anywhen.parts", () => {
 });
 
 describe("public surface", () => {
+  it("keeps formatting correctly after more locales than the cache holds", () => {
+    // The formatter cache is bounded and evicts. Correctness must not depend on
+    // whether an entry survived: format once, flood the cache well past its
+    // limit, format again, expect the same string. What the cache costs when it
+    // thrashes is a question for `pnpm bench`, not for a test.
+    const opts = { mode: "relative", locale: "en", now: new Date(NOW) } as const;
+    const before = anywhen(NOW - 3_600_000, opts);
+
+    for (let i = 0; i < 120; i++) {
+      anywhen(NOW - 3_600_000, { mode: "relative", locale: `de-DE-u-nu-latn-x-${i}` });
+    }
+
+    expect(anywhen(NOW - 3_600_000, opts)).toBe(before);
+  });
+
   it("exports exactly one name, with extras hanging off it", async () => {
     const mod = await import("./index");
     expect(Object.keys(mod)).toEqual(["anywhen"]);

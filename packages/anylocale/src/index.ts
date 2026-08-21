@@ -75,7 +75,48 @@ function probe(): boolean {
 const supported: boolean = probe();
 
 const CACHE_LIMIT = 50;
-const cache = new Map<string, AnylocaleInfo>();
+
+/**
+ * Two caches, because resolving a tag costs far more than reading one.
+ *
+ * `byTag` is keyed on the canonical tag, so `"en-us"` and `"en-US"` share one
+ * record. Reaching it means having already run `new Intl.Locale()` and
+ * `supportedLocalesOf()` — together ~3.6µs, which dwarfs the ~0.2µs the record
+ * itself costs to read.
+ *
+ * `byInput` is keyed on the argument exactly as it arrived and is consulted
+ * first, so a repeated call skips resolution entirely. The two are bounded
+ * separately; a chain and the tag it resolves to are different keys pointing at
+ * the same record.
+ */
+const byTag = new Map<string, AnylocaleInfo>();
+const byInput = new Map<string, AnylocaleInfo>();
+
+/**
+ * `"s:"` and `"a:"` keep a string apart from a one-element chain, and stop
+ * `"en\u0000de"` from colliding with `["en", "de"]`.
+ */
+const inputKey = (input: Locale): string =>
+  typeof input === "string" ? `s:${input}` : `a:${input.join("\u0000")}`;
+
+function remember(cache: Map<string, AnylocaleInfo>, key: string, value: AnylocaleInfo) {
+  if (cache.size >= CACHE_LIMIT) cache.delete(cache.keys().next().value!);
+  cache.set(key, value);
+}
+
+/**
+ * A hit, with recency refreshed only when the cache is full — the same policy
+ * the rest of the family uses. Below the limit nothing can be evicted, so the
+ * delete + re-set (~120ns, against a ~200ns read) would buy nothing.
+ */
+function touch(cache: Map<string, AnylocaleInfo>, key: string): AnylocaleInfo | undefined {
+  const hit = cache.get(key);
+  if (hit !== undefined && cache.size >= CACHE_LIMIT) {
+    cache.delete(key);
+    cache.set(key, hit);
+  }
+  return hit;
+}
 
 const isWeekday = (n: unknown): n is Weekday =>
   typeof n === "number" && Number.isInteger(n) && n >= 1 && n <= 7;
@@ -178,15 +219,20 @@ function info(input: Locale): AnylocaleInfo {
     );
   }
 
+  // The input cache goes first: everything below it — walking the chain,
+  // constructing Intl.Locale, asking whether the runtime has data — is the
+  // expensive part, and a repeated call needs none of it. Invalid input throws
+  // during resolution, so it never reaches either cache.
+  const key = inputKey(input);
+  const seen = touch(byInput, key);
+  if (seen !== undefined) return seen;
+
   const locale = toLocale(input);
-  const key = locale.toString();
+  const tag = locale.toString();
 
-  const hit = cache.get(key);
-  if (hit) return hit;
-
-  const built = build(locale);
-  if (cache.size >= CACHE_LIMIT) cache.delete(cache.keys().next().value!);
-  cache.set(key, built);
+  const built = touch(byTag, tag) ?? build(locale);
+  remember(byTag, tag, built);
+  remember(byInput, key, built);
   return built;
 }
 

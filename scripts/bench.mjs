@@ -11,8 +11,13 @@
  * - **hot**   — steady state, same options every time: pure cache hit plus the
  *               native format call. This is the number most apps live on.
  * - **churn** — rotating over more distinct locales than `CACHE_LIMIT`, so every
- *               call misses and evicts. This is where a FIFO cache and an LRU
- *               cache diverge, and where key-building cost shows up.
+ *               call misses and evicts. Where key-building cost shows up.
+ * - **mixed** — one hot locale interleaved with the rotating cold ones, timing
+ *               *only* the hot call. This is the shape of a real app — one or
+ *               two locales plus the occasional odd one — and the only scenario
+ *               that separates a FIFO cache from an LRU one: under FIFO the hot
+ *               entry is evicted every `CACHE_LIMIT` misses no matter how often
+ *               it is used, and has to be rebuilt at cold-call prices.
  *
  * Usage:
  *   node scripts/bench.mjs                # run, and diff against the baseline
@@ -105,6 +110,22 @@ function measure(fn, { minMs = 40, rounds = 7 } = {}) {
 }
 
 /**
+ * ns for the hot call, while cold locales stream past it.
+ *
+ * Timed by subtraction rather than by wrapping the hot call: `performance.now()`
+ * around a ~500ns call costs as much as the call and the variance swamped the
+ * result. So time the whole interleaved loop with the same batching every other
+ * number uses, then take the churn cost — measured on its own — back out.
+ */
+function measureMixed(mod, kase, churnNs) {
+  const perIteration = measure((i) => {
+    kase.job(mod, "en-US");
+    kase.job(mod, LOCALES[i % LOCALES.length]);
+  });
+  return Math.max(0, perIteration - churnNs);
+}
+
+/**
  * ns for a first call in a module instance that has never formatted anything.
  * A fresh import per sample, so the formatter cache inside starts empty.
  */
@@ -160,9 +181,10 @@ for (const [pkg, kase] of Object.entries(CASES)) {
 
   const hot = measure(() => kase.job(mod, "en-US"));
   const churn = measure((i) => kase.job(mod, LOCALES[i % LOCALES.length]));
+  const mixed = measureMixed(mod, kase, churn);
   const cold = await measureCold(pkg, kase);
 
-  results[pkg] = { cold, hot, churn, ...sizes(pkg) };
+  results[pkg] = { cold, hot, churn, mixed, ...sizes(pkg) };
 }
 
 const pad = baseline ? 13 : 8;
@@ -170,6 +192,7 @@ const header =
   "package".padEnd(11) +
   "cold".padStart(9) +
   "hot".padStart(pad) +
+  "mixed".padStart(pad) +
   "churn".padStart(pad) +
   "gzip".padStart(pad);
 console.log(`\nnode ${process.version}   ${new Date().toISOString()}`);
@@ -188,6 +211,7 @@ for (const [pkg, r] of Object.entries(results)) {
     pkg.padEnd(11) +
       fmtNs(r.cold).padStart(9) +
       cell(fmtNs(r.hot), baseline && delta(r.hot, was?.hot)) +
+      cell(fmtNs(r.mixed), baseline && delta(r.mixed, was?.mixed)) +
       cell(fmtNs(r.churn), baseline && delta(r.churn, was?.churn)) +
       cell(`${r.gzip}B`, baseline && delta(r.gzip, was?.gzip)),
   );
@@ -196,6 +220,7 @@ for (const [pkg, r] of Object.entries(results)) {
 console.log(
   "\ncold = first call in a fresh module (builds the Intl formatter)" +
     "\nhot  = same options every call (cache hit)" +
+    "\nmixed= the hot call only, with cold locales streaming past it (does the hot entry survive?)" +
     "\nchurn= 64 rotating locales, past the 50-entry cache (every call misses)",
 );
 

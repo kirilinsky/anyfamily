@@ -210,11 +210,14 @@ function formatter(locale: Locale | undefined, opts: DurationFormatOptions): Dur
     );
   const k = `${localeKey(locale)}|${JSON.stringify(opts)}`;
   const hit = dfCache.get(k);
-  if (hit) {
-    // Refresh recency: delete + re-set moves this key to the end of
-    // Map's iteration order, which is what the eviction below reads.
-    dfCache.delete(k);
-    dfCache.set(k, hit);
+  if (hit !== undefined) {
+    if (dfCache.size >= CACHE_LIMIT) {
+      // Refresh recency: delete + re-set moves this key to the end of Map's
+      // iteration order, which is what the eviction below reads. Only worth its
+      // ~120ns once the cache is full and something can actually be evicted.
+      dfCache.delete(k);
+      dfCache.set(k, hit);
+    }
     return hit;
   }
   const v = new DF(locale, opts);

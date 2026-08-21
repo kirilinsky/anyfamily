@@ -130,6 +130,25 @@ describe.skipIf(!anylocale.supported)("the returned record", () => {
   it("treats differently-cased tags as one locale", () => {
     expect(anylocale("en-us")).toBe(anylocale("en-US"));
   });
+
+  it("gives a chain the same record as the tag it resolved to", () => {
+    // The chain and the bare tag are different cache keys; they must still
+    // land on one record, or the two caches have drifted apart.
+    expect(anylocale(["xx-Nope", "de-DE"])).toBe(anylocale("de-DE"));
+  });
+
+  it("keeps answering after more distinct inputs than the cache holds", () => {
+    const first = anylocale("en-US").direction;
+    for (let i = 0; i < 120; i++) anylocale(`de-DE-u-nu-latn-x-${i}`);
+    expect(anylocale("en-US").direction).toBe(first);
+    expect(anylocale("ar-EG").direction).toBe("rtl");
+  });
+
+  it("still throws on bad input after a good call has been cached", () => {
+    anylocale("en-US");
+    expect(() => anylocale([])).toThrow(TypeError);
+    expect(() => anylocale("!!not-a-tag")).toThrow(RangeError);
+  });
 });
 
 describe("public surface", () => {
