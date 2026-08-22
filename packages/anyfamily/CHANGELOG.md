@@ -1,5 +1,15 @@
 # anyfamily
 
+## 2.1.1
+
+### Patch Changes
+
+- Build both meta packages with tsdown, the same bundler the eight libraries use, instead of tsup.
+
+  The published output is equivalent, with one filename change: the ESM entry is now `dist/index.mjs` rather than `dist/index.js`, matching every other package in the family. It is reached through the `exports` map, which was updated with it, so nothing an importer writes has to change.
+
+  `anyfamily-react` no longer needs its post-build step — rolldown keeps the `"use client"` directive on its own, where esbuild stripped it — and a test now asserts the directive is present exactly once at the top of both bundles.
+
 ## 2.1.0
 
 ### Minor Changes

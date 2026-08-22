@@ -31,7 +31,8 @@ git add -A && git commit -m "chore: version packages" && git push
 # 3. publish to npm (this also creates the tags, locally)
 pnpm release
 
-# 4. push the tags — this is what starts JSR and GitHub Packages
+# 4. push the tags — this is what starts JSR and GitHub Packages.
+#    Three at a time, never more: see below.
 git push --follow-tags
 ```
 
@@ -39,7 +40,7 @@ Check afterwards: `npm view anyfamily version` shows the new number, and the
 Actions tab shows one green `jsr` run per leaf and one green `github packages`
 run per meta.
 
-### four things that trip people up
+### five things that trip people up
 
 **A changeset does not publish anything.** It is a file describing intent.
 Without one, `pnpm version-packages` finds nothing, versions stay put, and
@@ -55,6 +56,30 @@ the tree.
 sit locally. If several releases go by without a `--follow-tags`, the next push
 sends them all at once, and every stale tag re-triggers its workflow: JSR then
 fails on "version already exists". Those failures are noise — nothing to fix.
+
+**Never push more than three tags in one go.** GitHub Actions does not create
+workflow runs for a push carrying more than three tags — no error, no skipped
+run, nothing in the Actions tab. A family-wide release tags eight or ten
+packages at once, so the mirrors silently do not run. This is why JSR sat at
+`anywhen@1.0.4` while npm was on `2.0.1`: the 2.0.0 wave (nine tags) and the
+2.0.1 wave (eight tags) both vanished, and the only `jsr` runs that ever
+happened were for two meta tags, which have no `jsr.json` and skipped
+themselves.
+
+Push them in batches instead:
+
+```bash
+git push origin anywhen@2.0.1 anyamount@2.0.1 anymany@2.0.1
+git push origin anyaround@2.0.1 anylong@2.0.1 anyplural@2.0.1
+git push origin anyword@2.0.1 anylocale@1.0.1
+```
+
+Or fix it after the fact — both mirror workflows take a `workflow_dispatch` with
+the package directory:
+
+```bash
+gh workflow run jsr.yml -f package=anywhen
+```
 
 **npm first, mirrors second.** `pnpm publish` turns each `workspace:^` into a
 real version range, so the leaf versions must already be on npmjs before a meta
@@ -77,16 +102,32 @@ for each. Push the tags afterwards: `git push --follow-tags`.
 
 ## the one thing changesets will not do for you
 
-Dependents are bumped automatically, but only by a **patch** — that is the
-`updateInternalDependencies: "patch"` setting in `.changeset/config.json`.
+Dependents are bumped **only when the bump breaks the range they declare**, and
+then only by a patch — that is the `updateInternalDependencies: "patch"` setting
+in `.changeset/config.json`.
 
-Verified: a `major` on `anywhen` produced `anywhen@2.0.0` plus `anyfamily@1.3.1`
-and `anyfamily-react@1.3.1`. A patch on the metas is wrong whenever the change
-is breaking, because both metas re-export the package's public surface, so their
-own surface breaks too.
+Verified twice, in both directions:
 
-**Rule: when a change is breaking, list every affected package in the changeset
-by hand.**
+- A `major` on `anywhen` produced `anywhen@2.0.0` plus `anyfamily@1.3.1` and
+  `anyfamily-react@1.3.1`. `^1.x` cannot cover `2.0.0`, so the metas had to move.
+- A `patch` on all eight (2026-08-21) produced **no meta bump at all**. The metas
+  declare `workspace:^`, which publishes as `^2.0.0`, and that range already
+  covers `2.0.1` — there was nothing to rewrite, so changesets left them alone.
+
+The second case is fine for consumers: `anyfamily@2.1.0` on npm resolves
+`^2.0.0` to the new `2.0.1` by itself. It is **not** fine if the metas changed
+too — their own change then sits unpublished behind a version that never moved.
+That is exactly how the metas' tsdown migration missed the 2.0.1 release.
+
+**Two rules follow:**
+
+- When a change is breaking, list every affected package in the changeset by
+  hand — a patch on the metas is wrong whenever their re-exported surface breaks.
+- When the metas themselves changed, give them their **own** changeset. Never
+  assume a dependent bump will carry them along; on a patch wave it will not
+  happen at all.
+
+A breaking change, spelled out by hand:
 
 ```markdown
 ---
