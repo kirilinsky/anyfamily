@@ -300,8 +300,8 @@ export default function Home() {
               className="h-auto w-32 sm:w-40 md:w-48"
             />
             <p className="max-w-sm text-sm leading-relaxed text-white/55">
-              One install, all eight — named re-exports, fully typed,
-              tree-shakeable.
+              The whole family in one install — every formatter behind a
+              single import, nothing unused shipped.
             </p>
             <div className="mt-1">
               <InstallChip
@@ -381,8 +381,8 @@ export default function Home() {
               className="h-auto w-32 sm:w-40 md:w-48"
             />
             <p className="max-w-sm text-sm leading-relaxed text-white/55">
-              Every any* formatter as a hook — one locale provider, and
-              relative time that keeps itself fresh.
+              Every formatter as a hook, one locale for the whole app, and
+              relative time that stays fresh.
             </p>
             <div className="mt-1">
               <InstallChip

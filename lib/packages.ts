@@ -47,7 +47,7 @@ export const PACKAGES: Pkg[] = [
     accent: colors.anywhen,
     tagline: "dates & times",
     description:
-      "Dates and times into localized strings and relative phrasing. Built on native Intl, no data files.",
+      "Dates and times the way your reader expects them: written out, shortened, or just 3 hours ago.",
     tags: ["dates", "datetimeformat", "relative"],
     npm: "https://www.npmjs.com/package/anywhen",
     github: "https://github.com/kirilinsky/anyfamily/tree/main/packages/anywhen",
@@ -60,7 +60,7 @@ export const PACKAGES: Pkg[] = [
     accent: colors.anyamount,
     tagline: "money & numbers",
     description:
-      "Numbers, currency, and units into localized, human-readable strings. One function, three modes, any locale.",
+      "Prices, quantities and units written the way each locale writes them. One call, any currency.",
     tags: ["currency", "numberformat", "units"],
     npm: "https://www.npmjs.com/package/anyamount",
     github: "https://github.com/kirilinsky/anyfamily/tree/main/packages/anyamount",
@@ -73,7 +73,7 @@ export const PACKAGES: Pkg[] = [
     accent: colors.anymany,
     tagline: "lists",
     description:
-      "String arrays into localized lists — sort and join in any locale with the native list formatter.",
+      "An array into a sentence — sorted and joined the way the locale does it, not the way English does.",
     tags: ["lists", "listformat", "sort"],
     npm: "https://www.npmjs.com/package/anymany",
     github: "https://github.com/kirilinsky/anyfamily/tree/main/packages/anymany",
@@ -86,7 +86,7 @@ export const PACKAGES: Pkg[] = [
     accent: colors.anyaround,
     tagline: "names & flags",
     description:
-      "Region, language, script, currency, and calendar codes into their localized names — decorated with country flags. Any Intl locale.",
+      "Country, language, script and currency codes into the names people actually read, flag included.",
     tags: ["flags", "displaynames", "ssr"],
     npm: "https://www.npmjs.com/package/anyaround",
     github: "https://github.com/kirilinsky/anyfamily/tree/main/packages/anyaround",
@@ -99,7 +99,7 @@ export const PACKAGES: Pkg[] = [
     accent: colors.anylong,
     tagline: "durations",
     description:
-      "Any duration in — a number, two Dates, an ISO 8601 string, shorthand, or a duration record — into a localized string. One function over Intl.DurationFormat.",
+      "Durations that read like language: two hours thirty, from whatever shape you already have.",
     tags: ["duration", "durationformat", "elapsed"],
     npm: "https://www.npmjs.com/package/anylong",
     github: "https://github.com/kirilinsky/anyfamily/tree/main/packages/anylong",
@@ -112,7 +112,7 @@ export const PACKAGES: Pkg[] = [
     accent: colors.anyplural,
     tagline: "plurals",
     description:
-      "Any count into its correct plural form — cardinal or ordinal, in any locale. One function over Intl.PluralRules, no rule tables.",
+      "One item or five, first or twenty-first — the right wording every time, even where there are six forms.",
     tags: ["plurals", "pluralrules", "ordinal"],
     npm: "https://www.npmjs.com/package/anyplural",
     github: "https://github.com/kirilinsky/anyfamily/tree/main/packages/anyplural",
@@ -125,7 +125,7 @@ export const PACKAGES: Pkg[] = [
     accent: colors.anyword,
     tagline: "words & graphemes",
     description:
-      "Text into locale-correct words, graphemes and sentences — count and truncate without ripping an emoji in half. One function over Intl.Segmenter.",
+      "Words, characters and sentences counted the way people see them, emoji and spaceless scripts included.",
     tags: ["segmenter", "grapheme", "truncate"],
     npm: "https://www.npmjs.com/package/anyword",
     github: "https://github.com/kirilinsky/anyfamily/tree/main/packages/anyword",
@@ -138,7 +138,7 @@ export const PACKAGES: Pkg[] = [
     accent: colors.anylocale,
     tagline: "locale behaviour",
     description:
-      "How a locale actually behaves — text direction, first day of the week, weekend days, calendars and time zones. One function over Intl.Locale info.",
+      "How a locale behaves: which way text runs, when the week starts, which days are the weekend.",
     tags: ["rtl", "week-start", "locale-info"],
     npm: "https://www.npmjs.com/package/anylocale",
     github: "https://github.com/kirilinsky/anyfamily/tree/main/packages/anylocale",
