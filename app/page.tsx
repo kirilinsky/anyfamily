@@ -223,7 +223,7 @@ export default function Home() {
           id={p.id}
           className="relative z-10 flex min-h-dvh snap-start items-center px-5 py-6 md:px-10 md:py-16"
         >
-          <div className="mx-auto grid w-full max-w-6xl items-center gap-4 md:grid-cols-[minmax(0,300px)_1fr] md:gap-16">
+          <div className="mx-auto grid w-full max-w-6xl items-center gap-4 md:grid-cols-[minmax(0,318px)_1fr] md:gap-16">
             {/* Left: identity */}
             <div className="flex flex-col items-start gap-3 md:gap-5">
               <h2 className="sr-only">
@@ -286,7 +286,7 @@ export default function Home() {
         id="anyfamily"
         className="relative z-10 flex min-h-dvh snap-start items-center px-5 py-6 md:px-10 md:py-16"
       >
-        <div className="mx-auto grid w-full max-w-6xl items-center gap-4 md:grid-cols-[minmax(0,300px)_1fr] md:gap-16">
+        <div className="mx-auto grid w-full max-w-6xl items-center gap-4 md:grid-cols-[minmax(0,318px)_1fr] md:gap-16">
           {/* Left: identity */}
           <div className="flex flex-col items-start gap-3 md:gap-5">
             <h2 className="sr-only">
@@ -367,7 +367,7 @@ export default function Home() {
         id="anyfamily-react"
         className="relative z-10 flex min-h-dvh snap-start items-center px-5 py-6 md:px-10 md:py-16"
       >
-        <div className="mx-auto grid w-full max-w-6xl items-center gap-4 md:grid-cols-[minmax(0,300px)_1fr] md:gap-16">
+        <div className="mx-auto grid w-full max-w-6xl items-center gap-4 md:grid-cols-[minmax(0,318px)_1fr] md:gap-16">
           {/* Left: identity */}
           <div className="flex flex-col items-start gap-3 md:gap-5">
             <h2 className="sr-only">
