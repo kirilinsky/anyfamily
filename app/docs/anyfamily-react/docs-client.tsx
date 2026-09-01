@@ -14,6 +14,8 @@ const NAV: DocsNavItem[] = [
   { id: "install", label: "Install" },
   { id: "provider", label: "Provider" },
   { id: "hooks", label: "Hooks" },
+  { id: "functions", label: "Plain functions" },
+  { id: "defaults", label: "Defaults" },
   { id: "locale", label: "Locale resolution" },
   { id: "ticking", label: "Ticking" },
   { id: "memoized", label: "Memoized hooks" },
@@ -65,6 +67,11 @@ const HOOKS: [string, string, string][] = [
     "useAnyfamilyLocale",
     "() => Locale | undefined",
     "The locale from the nearest provider, for anything the hooks above do not cover.",
+  ],
+  [
+    "useAnyfamilyDefaults",
+    "() => AnyfamilyDefaults | undefined",
+    "The option defaults from the nearest provider, for wrapping a hook of your own.",
   ],
 ];
 
@@ -163,6 +170,10 @@ yarn add anyfamily-react`}</Code>
           exactly what calling the function bare would do.
         </p>
         <p>
+          It carries option defaults too — see{" "}
+          <Mono>defaults</Mono> below.
+        </p>
+        <p>
           Nesting works the way any context does: the nearest provider wins, so a
           subtree can run in another locale.
         </p>
@@ -215,17 +226,121 @@ const teaser  = useAnywordTruncate(text, 140)
 const info    = useAnylocale()`}</Code>
       </Section>
 
-      <Section id="locale" title="Locale resolution">
-        <p>Three levels, nearest first:</p>
-        <Code>{`options.locale        // the hook's own — always wins
-provider locale       // the nearest AnyfamilyProvider
-runtime default       // whatever Intl resolves, when neither is set`}</Code>
+      <Section id="functions" title="Plain functions">
         <p>
-          The merge is deliberately narrow: the provider fills in{" "}
-          <Mono>locale</Mono> only when the hook did not pass one. Every other
-          option is yours alone — the provider carries no defaults for{" "}
-          <Mono>mode</Mono>, <Mono>currency</Mono> or anything else.
+          All eight are re-exported, so formatting outside a hook — in an event
+          handler, inside a <Mono>useMemo</Mono>, in a callback handed downward —
+          does not mean adding the underlying package as a second dependency.
         </p>
+        <Code>{`import { anywhen, anyword } from 'anyfamily-react'
+
+<button onClick={() => copy(anywhen(post.createdAt, { mode: 'absolute' }))}>
+  copy timestamp
+</button>`}</Code>
+        <p>
+          They are the same bindings the hooks call, extras included —{" "}
+          <Mono>anyword.count</Mono>, <Mono>anyamount.symbol</Mono>,{" "}
+          <Mono>anylong.supported</Mono>. What they do not read is the provider:
+          a plain call takes the locale you pass it, or the runtime&apos;s. Reach
+          for <Mono>useAnyfamilyLocale()</Mono> when you want the tree&apos;s.
+        </p>
+        <Code>{`const locale = useAnyfamilyLocale()
+
+const onCopy = () => copy(anywhen(post.createdAt, { mode: 'absolute', locale }))`}</Code>
+        <p style={{ color: "var(--text-muted)" }} className="text-xs">
+          They carry this module&apos;s <Mono>&quot;use client&quot;</Mono>{" "}
+          boundary with them. To format in a server component, import from{" "}
+          <Mono>anyfamily</Mono> instead.
+        </p>
+      </Section>
+
+      <Section id="defaults" title="Defaults">
+        <p>
+          A currency, a style, a tick — the settings that never vary across an
+          app, and get retyped at every call site. The provider takes them once,
+          one slot per hook family.
+        </p>
+        <Code>{`<AnyfamilyProvider
+  locale="de-DE"
+  defaults={{
+    anyamount: { mode: 'currency', currency: 'EUR' },
+    anywhen: { refresh: 30_000 },
+    anywordTruncate: { ellipsis: '…' },
+  }}
+>
+  <App />
+</AnyfamilyProvider>
+
+useAnyamount(1999)              // "1.999,00 €" — nothing to pass
+useAnywordTruncate(body, 140)   // ellipsis already set`}</Code>
+        <p>
+          The slots are <Mono>anywhen</Mono>, <Mono>anyamount</Mono>,{" "}
+          <Mono>anyamountSymbol</Mono>, <Mono>anymany</Mono>,{" "}
+          <Mono>anyaround</Mono>, <Mono>anylong</Mono>, <Mono>anyplural</Mono>,{" "}
+          <Mono>anyword</Mono> and <Mono>anywordTruncate</Mono> — each taking
+          that hook&apos;s own options. <Mono>anywhen</Mono> takes{" "}
+          <Mono>refresh</Mono> along with the rest, so the tick is settable
+          tree-wide.
+        </p>
+        <p>
+          <Mono>anyword</Mono> covers <Mono>useAnyword</Mono> and{" "}
+          <Mono>useAnywordCount</Mono> but deliberately not{" "}
+          <Mono>useAnywordTruncate</Mono>, which has its own slot: truncate
+          segments by grapheme where the other two segment by word, so sharing
+          one slot would silently move where text gets cut.
+        </p>
+        <p>
+          A call&apos;s own options win, key by key. One rule beyond that:
+        </p>
+        <div
+          style={{ borderColor: "var(--border)" }}
+          className="rounded-xl border p-4"
+        >
+          <p
+            style={{ color: "var(--text-primary)" }}
+            className="mb-1 text-sm font-medium"
+          >
+            A different <Mono>mode</Mono> replaces the default, it does not layer
+            onto it
+          </p>
+          <p style={{ color: "var(--text-muted)" }} className="text-sm">
+            The options types are discriminated unions on <Mono>mode</Mono>.
+            Merging across two modes would carry the default&apos;s
+            mode-specific keys — a <Mono>currency</Mono> — into a call that asked
+            for something else, so a call naming another mode takes the
+            default&apos;s place. <Mono>locale</Mono> is not mode-specific and
+            crosses either way.
+          </p>
+        </div>
+        <Code>{`// default: { mode: 'currency', currency: 'EUR' }
+
+useAnyamount(1999)                                      // "1.999,00 €"
+useAnyamount(1999, { mode: 'currency', currency: 'USD' })  // "1.999,00 $"
+useAnyamount(3.2,  { mode: 'unit', unit: 'gigabyte' })     // "3,2 GB" — no
+// stray currency; the locale from the provider still applies`}</Code>
+        <p>
+          Overriding one key of a union-typed default means restating its{" "}
+          <Mono>mode</Mono>, as above — TypeScript has no partial form of a
+          discriminated union, and the merge rule is the same shape as the type.
+        </p>
+        <p>
+          <Mono>useAnyfamilyDefaults()</Mono> reads the whole object back, for
+          building a hook of your own on top.
+        </p>
+        <p style={{ color: "var(--text-muted)" }} className="text-xs">
+          Written inline, <Mono>defaults</Mono> is a fresh object on every render
+          of whatever holds the provider. The provider keys its context on the
+          contents rather than the identity, so an inline literal does not
+          re-render the tree — no need to hoist it to a constant.
+        </p>
+      </Section>
+
+      <Section id="locale" title="Locale resolution">
+        <p>Four levels, nearest first:</p>
+        <Code>{`options.locale           // the hook's own — always wins
+defaults[slot].locale    // set for one hook family
+provider locale          // the nearest AnyfamilyProvider
+runtime default          // whatever Intl resolves, when none is set`}</Code>
         <Code>{`<AnyfamilyProvider locale="de-DE">
   {/* de-DE, from the provider */}
   useAnyamount(1999, { mode: 'currency', currency: 'EUR' })

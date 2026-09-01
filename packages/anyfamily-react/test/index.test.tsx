@@ -3,11 +3,21 @@ import { act, cleanup, renderHook } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import {
+  anyamount as anyamountDirect,
+} from "anyamount";
+import { anywhen as anywhenDirect } from "anywhen";
+import { anyword as anywordDirect } from "anyword";
+
+import {
   AnyfamilyProvider,
+  anyamount,
   anylocaleSupported,
   anylongSupported,
   anywordSupported,
+  anywhen,
+  anyword,
   useAnyaround,
+  useAnyfamilyDefaults,
   useAnyfamilyLocale,
   useAnylocale,
   useAnylong,
@@ -20,6 +30,7 @@ import {
   useAnywordCount,
   useAnywordTruncate,
 } from "../src/index";
+import type { AnyfamilyDefaults, AnywordOptions } from "../src/index";
 
 afterEach(cleanup);
 
@@ -102,6 +113,18 @@ describe("hooks wrap their underlying formatters", () => {
       useAnywordTruncate("héllo 👨‍👩‍👧", 5, { ellipsis: "…", locale: "en" }),
     );
     expect(result.current).toBe("héllo…");
+  });
+
+  it.skipIf(!anywordSupported)("useAnyword keeps the memo when the options are reordered", () => {
+    // Same options, different key order in the literal. Keying the memo on a
+    // stringified object would treat these as a change and drop the array.
+    const { result, rerender } = renderHook(
+      ({ options }: { options: AnywordOptions }) => useAnyword("one two three", options),
+      { initialProps: { options: { by: "word", locale: "en" } as AnywordOptions } },
+    );
+    const first = result.current;
+    rerender({ options: { locale: "en", by: "word" } });
+    expect(result.current).toBe(first);
   });
 
   it.skipIf(!anywordSupported)("useAnyword keeps the same array across re-renders", () => {
@@ -191,6 +214,135 @@ describe("useAnywhen", () => {
     });
     expect(result.current).not.toBe(before);
     vi.useRealTimers();
+  });
+});
+
+describe("AnyfamilyProvider defaults", () => {
+  function withDefaults(defaults: AnyfamilyDefaults, locale?: string) {
+    return function Wrapper({ children }: { children: ReactNode }) {
+      return (
+        <AnyfamilyProvider locale={locale} defaults={defaults}>
+          {children}
+        </AnyfamilyProvider>
+      );
+    };
+  }
+
+  it("useAnyfamilyDefaults reads the nearest provider", () => {
+    const defaults: AnyfamilyDefaults = { anyamount: { mode: "currency", currency: "EUR" } };
+    const { result } = renderHook(() => useAnyfamilyDefaults(), {
+      wrapper: withDefaults(defaults),
+    });
+    expect(result.current).toEqual(defaults);
+  });
+
+  it("fills in an option the call site left out", () => {
+    const { result } = renderHook(() => useAnyamount(1999), {
+      wrapper: withDefaults({ anyamount: { mode: "currency", currency: "EUR" } }, "en"),
+    });
+    expect(result.current).toBe("€1,999.00");
+  });
+
+  it("a call's own option wins over the default", () => {
+    // The mode is restated because AnyamountOptions is a discriminated union:
+    // TypeScript has no partial form of it, so an override names its mode.
+    const { result } = renderHook(
+      () => useAnyamount(1999, { mode: "currency", currency: "USD" }),
+      {
+        wrapper: withDefaults({ anyamount: { mode: "currency", currency: "EUR" } }, "en"),
+      },
+    );
+    expect(result.current).toBe("$1,999.00");
+  });
+
+  it("a call naming another mode drops the default's mode-specific keys", () => {
+    const { result } = renderHook(
+      () => useAnyamount(3.2, { mode: "unit", unit: "gigabyte" }),
+      {
+        wrapper: withDefaults({ anyamount: { mode: "currency", currency: "EUR" } }, "en"),
+      },
+    );
+    expect(result.current).toBe("3.2 GB");
+  });
+
+  it("keeps the locale even when the modes disagree", () => {
+    // `locale` is not mode-specific, so dropping the rest must not drop it —
+    // German writes the decimal separator as a comma.
+    const { result } = renderHook(
+      () => useAnyamount(3.2, { mode: "unit", unit: "gigabyte" }),
+      {
+        wrapper: withDefaults({ anyamount: { mode: "currency", currency: "EUR" } }, "de"),
+      },
+    );
+    expect(result.current).toContain(",");
+  });
+
+  it("a default locale beats the provider's locale", () => {
+    const { result } = renderHook(() => useAnymany(["a", "b"]), {
+      wrapper: withDefaults({ anymany: { locale: "en" } }, "de"),
+    });
+    expect(result.current).toBe("a and b");
+  });
+
+  it("the provider's locale still applies where the defaults set none", () => {
+    const { result } = renderHook(() => useAnymany(["a", "b"]), {
+      wrapper: withDefaults({ anymany: {} }, "en"),
+    });
+    expect(result.current).toBe("a and b");
+  });
+
+  it("can set the anywhen tick for the whole tree", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-01-01T12:00:00Z"));
+    const start = new Date("2026-01-01T11:59:00Z");
+
+    const { result } = renderHook(
+      () => useAnywhen(start, { mode: "relative", locale: "en" }),
+      { wrapper: withDefaults({ anywhen: { refresh: 5_000 } }) },
+    );
+    expect(result.current).toBe("1 minute ago");
+
+    act(() => {
+      vi.advanceTimersByTime(60_000);
+    });
+    expect(result.current).toBe("2 minutes ago");
+
+    vi.useRealTimers();
+  });
+
+  it.skipIf(!anywordSupported)("the anywordTruncate slot reaches truncate", () => {
+    const { result } = renderHook(() => useAnywordTruncate("héllo 👨‍👩‍👧", 5), {
+      wrapper: withDefaults({ anywordTruncate: { ellipsis: "…" } }, "en"),
+    });
+    expect(result.current).toBe("héllo…");
+  });
+
+  it.skipIf(!anywordSupported)("the anyword slot does not move where truncate cuts", () => {
+    // truncate segments by grapheme where anyword() segments by word, so the
+    // two must not share a slot — a `by` set for counting would silently
+    // change every cut.
+    const { result: bare } = renderHook(() =>
+      useAnywordTruncate("hello world", 7, { locale: "en" }),
+    );
+    const { result: withWordDefault } = renderHook(
+      () => useAnywordTruncate("hello world", 7),
+      { wrapper: withDefaults({ anyword: { by: "word" } }, "en") },
+    );
+    expect(withWordDefault.current).toBe(bare.current);
+  });
+});
+
+describe("the re-exported functions", () => {
+  it("are the packages' own bindings", () => {
+    expect(anywhen).toBe(anywhenDirect);
+    expect(anyamount).toBe(anyamountDirect);
+    expect(anyword).toBe(anywordDirect);
+  });
+
+  it("keep their extras", () => {
+    expect(anyamount.symbol("EUR", { locale: "en" })).toBe("€");
+    expect(typeof anyword.count).toBe("function");
+    expect(typeof anyword.truncate).toBe("function");
   });
 });
 

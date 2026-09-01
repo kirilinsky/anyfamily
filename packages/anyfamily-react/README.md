@@ -64,6 +64,29 @@ function Post({ publishedAt, price }: { publishedAt: Date; price: number }) {
   A hook's own `options.locale` always wins over the provider. Changing the
   provider's `locale` re-renders every hook under it, same as any React
   context.
+- **`defaults` for the settings that never vary** — a currency, a time zone, a
+  style, repeated at forty call sites, set once instead. One slot per hook
+  family; a call site's own options win key by key.
+
+  ```tsx
+  <AnyfamilyProvider
+    locale="de-DE"
+    defaults={{
+      anyamount: { mode: "currency", currency: "EUR" },
+      anywhen: { refresh: 30_000 },
+    }}
+  >
+  ```
+
+  ```tsx
+  useAnyamount(1999);                                    // "1.999,00 €"
+  useAnyamount(1999, { mode: "currency", currency: "USD" }); // the call wins
+  useAnyamount(3.2, { mode: "unit", unit: "gigabyte" });  // another mode: the
+  // default's currency is dropped rather than carried in. Only `locale` crosses
+  // modes.
+  ```
+
+  `useAnyfamilyDefaults()` reads them back, for wrapping a hook of your own.
 - **`useAnywhen` ticks itself** — relative output ("3 minutes ago") goes
   stale the instant the component stops re-rendering. The hook re-renders on
   an interval (default 60s, `refresh` to override, `refresh: false` to
@@ -101,6 +124,23 @@ function Post({ publishedAt, price }: { publishedAt: Date; price: number }) {
 
 `useAnyfamilyLocale()` reads the locale from the nearest provider directly,
 for anything not covered by the hooks above.
+
+## the plain functions, too
+
+All eight are re-exported, so formatting outside a hook — in an event handler,
+inside a `useMemo`, in a callback handed downward — doesn't need the underlying
+package as a second dependency:
+
+```tsx
+import { anywhen, anyword } from "anyfamily-react";
+
+<button onClick={() => copy(anywhen(post.createdAt, { mode: "absolute" }))}>
+```
+
+They are the same bindings the hooks call, extras included — `anyword.count`,
+`anyamount.symbol`, `anylong.supported`. They carry this package's
+`"use client"` boundary with them: to format in a server component, import from
+[`anyfamily`](https://www.npmjs.com/package/anyfamily) instead.
 
  
 [anywhen](https://anyfamily.site/docs/anywhen#migrating) ·
