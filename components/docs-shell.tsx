@@ -151,12 +151,19 @@ export function Rows({ children }: { children: ReactNode[] }) {
 
 export function DocsShell({
   pkgId,
+  backHref,
   nav,
   accentDark,
   accentLight,
   children,
 }: {
   pkgId: string;
+  /**
+   * Where the header's back link goes. Defaults to the package's demo route —
+   * the metas have no demo of their own, so they point at their landing
+   * section instead.
+   */
+  backHref?: string;
   nav: DocsNavItem[];
   /** Docs accent on the dark theme — normally the package's family color. */
   accentDark: string;
@@ -207,7 +214,7 @@ export function DocsShell({
         <div className="mx-auto flex h-12 max-w-6xl items-center justify-between gap-3 px-6">
           <div className="flex shrink-0 items-center gap-6">
             <Link
-              href={`/${pkgId}`}
+              href={backHref ?? `/${pkgId}`}
               style={{ color: "var(--text-muted)" }}
               className="cursor-pointer font-mono text-sm transition-opacity hover:opacity-80"
             >

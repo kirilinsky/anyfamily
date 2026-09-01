@@ -28,5 +28,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
         changeFrequency: "monthly" as const,
         priority: 0.6,
       })),
+    // The metas are not in PACKAGES — they have no demo route, only a landing
+    // section — so their docs are listed by hand.
+    {
+      url: `${BASE_URL}/docs/anyfamily-react`,
+      changeFrequency: "monthly",
+      priority: 0.6,
+    },
   ];
 }

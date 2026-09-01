@@ -65,6 +65,19 @@ function ExtLink({
 }
 
 /**
+ * Internal link to a docs route. Core packages reach their reference from their
+ * demo page; the metas have no demo, so their landing section links straight
+ * through.
+ */
+function DocsLink({ href, accent }: { href: string; accent: string }) {
+  return (
+    <Link href={href} style={{ borderColor: `${accent}44` }} className={LINK_CLASS}>
+      docs →
+    </Link>
+  );
+}
+
+/**
  * The demo button. Ported packages route inside this app; the rest still point
  * at their standalone site and keep the external arrow until they move.
  */
@@ -391,6 +404,10 @@ export default function Home() {
               />
             </div>
             <div className="mt-1 hidden flex-wrap items-center gap-2 md:flex">
+              <DocsLink
+                href="/docs/anyfamily-react"
+                accent={colors["anyfamily-react"]}
+              />
               <ExtLink
                 href="https://www.npmjs.com/package/anyfamily-react"
                 label="npm"
@@ -428,6 +445,10 @@ export default function Home() {
               presets={REACT_PRESETS}
             />
             <div className="mt-2 flex flex-wrap items-center gap-2 md:hidden">
+              <DocsLink
+                href="/docs/anyfamily-react"
+                accent={colors["anyfamily-react"]}
+              />
               <ExtLink
                 href="https://www.npmjs.com/package/anyfamily-react"
                 label="npm"
