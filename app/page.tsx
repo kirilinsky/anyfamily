@@ -255,6 +255,9 @@ export default function Home() {
               </div>
               <div className="mt-1 hidden flex-wrap items-center gap-2 md:flex">
                 <DemoLink pkg={p} />
+                {p.hasDocs && (
+                  <DocsLink href={`/docs/${p.id}`} accent={p.accent} />
+                )}
                 <ExtLink href={p.npm} label="npm" accent={p.accent} />
               </div>
             </div>
@@ -287,6 +290,9 @@ export default function Home() {
               <CodeAnimation fn={p.id} accent={p.accent} presets={PRESETS_BY_ID[p.id]} />
               <div className="mt-2 flex flex-wrap items-center gap-2 md:hidden">
                 <DemoLink pkg={p} />
+                {p.hasDocs && (
+                  <DocsLink href={`/docs/${p.id}`} accent={p.accent} />
+                )}
                 <ExtLink href={p.npm} label="npm" accent={p.accent} />
               </div>
             </div>
