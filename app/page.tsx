@@ -323,6 +323,7 @@ export default function Home() {
               />
             </div>
             <div className="mt-1 hidden flex-wrap items-center gap-2 md:flex">
+              <DocsLink href="/docs/anyfamily" accent={colors.anyfamily} />
               <ExtLink
                 href="https://www.npmjs.com/package/anyfamily"
                 label="npm"
@@ -360,6 +361,7 @@ export default function Home() {
               presets={FAMILY_PRESETS}
             />
             <div className="mt-2 flex flex-wrap items-center gap-2 md:hidden">
+              <DocsLink href="/docs/anyfamily" accent={colors.anyfamily} />
               <ExtLink
                 href="https://www.npmjs.com/package/anyfamily"
                 label="npm"
