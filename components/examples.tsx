@@ -332,7 +332,9 @@ export function CodeAnimation({
           you get
         </p>
         <div
-          className="flex min-h-[5rem] items-center gap-4 rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-4 transition-all duration-500 sm:min-h-[8rem] sm:px-5 sm:py-6"
+          // Only opacity and transform move here. `transition-all` also caught
+          // min-height and the paddings, which change at the breakpoints.
+          className="flex min-h-[5rem] items-center gap-4 rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-4 transition-[opacity,transform] duration-200 ease-out sm:min-h-[8rem] sm:px-5 sm:py-6"
           style={{
             opacity: out ? 1 : 0.25,
             transform: out ? "none" : "translateY(6px)",
@@ -365,8 +367,11 @@ export function CodeAnimation({
               aria-current={active ? "true" : undefined}
               className="group -my-2 cursor-pointer py-2"
             >
+              {/* The pill's own width is named rather than animated through
+                  `all`. It stays a width: scaling it would squash the progress
+                  fill inside, and this one only moves on hover or a click. */}
               <span
-                className="block h-1.5 overflow-hidden rounded-full transition-all duration-300"
+                className="block h-1.5 overflow-hidden rounded-full transition-[width,background-color] duration-150 ease-out"
                 style={{
                   width: active ? 24 : hovered ? 14 : 6,
                   background:
@@ -376,12 +381,15 @@ export function CodeAnimation({
                 }}
               >
                 {active && (
+                  // The countdown runs for the whole cycle, every cycle, so it
+                  // is the one worth keeping off the layout: scaleX from the
+                  // left paints the same sweep without reflowing anything.
                   <span
-                    className="block h-full rounded-full"
+                    className="block h-full w-full origin-left rounded-full"
                     style={{
-                      width: `${fill}%`,
+                      transform: `scaleX(${fill / 100})`,
                       background: accent,
-                      transition: `width ${fill === 0 ? 0 : cycleMs}ms linear`,
+                      transition: `transform ${fill === 0 ? 0 : cycleMs}ms linear`,
                     }}
                   />
                 )}

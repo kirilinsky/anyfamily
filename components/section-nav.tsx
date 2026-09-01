@@ -47,11 +47,12 @@ export function SectionNav({ items }: { items: NavItem[] }) {
               {item.label}
             </span>
             <span
-              className="h-2 w-2 rounded-full border transition-transform duration-200"
+              className={`nav-dot h-2 w-2 rounded-full border ${
+                isActive ? "nav-dot-active" : ""
+              }`}
               style={{
                 borderColor: item.accent,
                 background: isActive ? item.accent : "transparent",
-                transform: isActive ? "scale(1.3)" : "scale(1)",
               }}
             />
           </a>

@@ -43,6 +43,26 @@ body {
   }
 }
 
+/* Nav rail dot. The swell is movement, so reduced motion drops it — the fill
+   still marks which section is active, which is the part that carries meaning. */
+.nav-dot {
+  transition: transform 0.2s ease-out;
+}
+
+.nav-dot-active {
+  transform: scale(1.3);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-dot {
+    transition: none;
+  }
+
+  .nav-dot-active {
+    transform: none;
+  }
+}
+
 /* Terminal caret that settles into a blink once the typewriter finishes. */
 @keyframes caret-blink {
   0%,
