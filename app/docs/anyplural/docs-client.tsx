@@ -1,7 +1,9 @@
 "use client";
 
 import {
+  Cards,
   Code,
+  CompareTable,
   DocsShell,
   Mono,
   Prop,
@@ -20,10 +22,12 @@ const NAV: DocsNavItem[] = [
   { id: "categories", label: "Categories" },
   { id: "zero", label: "The zero form" },
   { id: "options", label: "Options" },
+  { id: "breaks", label: "What breaks" },
   { id: "recipes", label: "Recipes" },
   { id: "react", label: "React" },
   { id: "locales", label: "Locales" },
   { id: "ssr", label: "SSR" },
+  { id: "alternatives", label: "Alternatives" },
   { id: "compatibility", label: "Compatibility" },
   { id: "limitations", label: "Limitations" },
 ];
@@ -299,6 +303,30 @@ anyplural(2, { zero: 'No messages', one: 'message', other: 'messages' }, { local
         />
       </Section>
 
+      <Section id="breaks" title="What breaks without this">
+        <p>Every one of these is a ternary somebody shipped, and each is wrong somewhere.</p>
+        <Cards
+          items={[
+            {
+              title: "count === 1 ? 'item' : 'items'",
+              body: "That is a rule about English, written as if it were a rule about counting. Russian needs three forms, Arabic six, Welsh six. The ternary does not fail loudly — it just writes bad grammar to everyone who is not reading English.",
+            },
+            {
+              title: "Zero is not always the plural form",
+              body: "English says \"0 items\", French treats 0 like 1, and several locales have a distinct zero category. Special-casing zero in the code is a fourth wrong answer.",
+            },
+            {
+              title: "Ordinals follow different rules entirely",
+              body: "1st, 2nd, 3rd, 4th is a separate rule set from one/other, and the two disagree even in English — the plural of 2 is \"other\", the ordinal of 2 is \"two\". A suffix table stops working at 11th, 12th, 13th.",
+            },
+            {
+              title: "A fraction is not one",
+              body: "\"1.5 items\", not \"1.5 item\": 1.5 selects other in English even though it is between one and two. Comparing against 1 with === gets that wrong, and comparing with ranges gets it wrong somewhere else.",
+            },
+          ]}
+        />
+      </Section>
+
       <Section id="recipes" title="Recipes">
         <p>Copy, paste, move on.</p>
         <Code>{`// Item counter
@@ -387,6 +415,22 @@ anyplural(1999, { one: 'euro', other: 'euros' }, {
 export function ResultCount({ n }: { n: number }) {
   return <p>{anyplural(n, { one: 'result', other: 'results' }, { locale: 'en' })}</p>
 }`}</Code>
+      </Section>
+
+      <Section id="alternatives" title="vs the alternatives">
+        <p>
+          What you would otherwise reach for, and what changes if you do.
+        </p>
+        <CompareTable
+          head={["anyplural", "i18next", "intl-messageformat"]}
+          rows={[
+            ["gzip", "< 1kb", "~14kb", "~30kb"],
+            ["locale data bundled", "no", "yes", "yes"],
+            ["plural rules", "native Intl", "tables", "native Intl"],
+            ["dependencies", "0", "1+", "4+"],
+          ]}
+        />
+        <p>anyplural is not an i18n framework — it does one thing. Reach for i18next or ICU MessageFormat when you need message catalogs, interpolation grammars or gender selects.</p>
       </Section>
 
       <Section id="compatibility" title="Compatibility">

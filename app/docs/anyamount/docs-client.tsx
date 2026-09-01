@@ -1,7 +1,9 @@
 "use client";
 
 import {
+  Cards,
   Code,
+  CompareTable,
   DocsShell,
   Mono,
   Prop,
@@ -20,9 +22,11 @@ const NAV: DocsNavItem[] = [
   { id: "modes", label: "Modes" },
   { id: "units", label: "units" },
   { id: "options", label: "Options" },
+  { id: "breaks", label: "What breaks" },
   { id: "recipes", label: "Recipes" },
   { id: "react", label: "React / Next.js" },
   { id: "locales", label: "Locales" },
+  { id: "alternatives", label: "Alternatives" },
   { id: "compatibility", label: "Compatibility" },
   { id: "limitations", label: "Limitations" },
 ];
@@ -385,6 +389,30 @@ anyamount(2, { mode: 'unit', unit: 'meter-per-second' })       // "2 m/s"`}</Cod
         />
       </Section>
 
+      <Section id="breaks" title="What breaks without this">
+        <p>Every one of these is an assumption baked into a hand-written formatter, and each is wrong somewhere.</p>
+        <Cards
+          items={[
+            {
+              title: "The symbol is not always in front",
+              body: "'$' + value.toFixed(2) is a German price written backwards: de-DE puts the symbol last and swaps both separators — 1.999,00 €. Two locales sharing a currency need not write it the same way.",
+            },
+            {
+              title: "toFixed is not money rounding",
+              body: "It rounds a binary double, so the half-way cases go where the bits fall rather than where accounting expects. It also assumes two decimals, which JPY does not have and KWD exceeds — the right number of digits is a fact about the currency, and Intl already knows it.",
+            },
+            {
+              title: "Compact notation is not K and M",
+              body: "1.2M is English. Russian writes 1,2 млн; Japanese groups by ten-thousands and writes 123万, a different place value, not a translated suffix. A K/M/B table cannot be localized into being correct.",
+            },
+            {
+              title: "Units are a closed list, and they inflect",
+              body: "Writing \"3.2 GB\" by hand skips the part where the unit name agrees with the number and the locale. Intl takes a sanctioned list of units and handles both — outside that list there is no localized name to be had, from any library.",
+            },
+          ]}
+        />
+      </Section>
+
       <Section id="recipes" title="Recipes">
         <p>Copy, paste, move on.</p>
         <Code>{`// Dashboard stat
@@ -473,6 +501,25 @@ anyamount(120, { mode: 'unit', unit: 'kilometer-per-hour', locale: 'ru' })
           Output is pure — no clock reads, no environment sniffing — so server
           and client render identically. SSR-safe by construction.
         </p>
+      </Section>
+
+      <Section id="alternatives" title="vs the alternatives">
+        <p>
+          What you would otherwise reach for, and what changes if you do.
+        </p>
+        <CompareTable
+          head={["anyamount", "numeral.js", "accounting.js"]}
+          rows={[
+            ["locale data bundled", "none (Intl)", "one file per locale", "none, you configure it"],
+            ["locales", "200+", "registered by hand", "whatever you pass"],
+            ["currency rules", "from the currency", "manual symbol", "manual symbol"],
+            ["decimal digits", "per currency", "manual", "manual"],
+            ["units", "sanctioned list", "no", "no"],
+            ["compact notation", "every locale", "English forms", "no"],
+            ["dependencies", "0", "0", "0"],
+          ]}
+        />
+        <p>anyamount is 0.8kb gzipped and formats numbers. It is not a money type: it does not add prices, hold exchange rates, or protect you from floating-point arithmetic. Do the arithmetic in minor units or in a decimal library, then hand the result here to be written down.</p>
       </Section>
 
       <Section id="compatibility" title="Compatibility">

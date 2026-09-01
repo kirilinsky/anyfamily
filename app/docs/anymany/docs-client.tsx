@@ -1,7 +1,9 @@
 "use client";
 
 import {
+  Cards,
   Code,
+  CompareTable,
   DocsShell,
   Mono,
   Prop,
@@ -19,10 +21,12 @@ const NAV: DocsNavItem[] = [
   { id: "sort", label: "sort" },
   { id: "max", label: "max" },
   { id: "options", label: "Options" },
+  { id: "breaks", label: "What breaks" },
   { id: "recipes", label: "Recipes" },
   { id: "react", label: "React / Next.js" },
   { id: "locales", label: "Locales" },
   { id: "ssr", label: "SSR" },
+  { id: "alternatives", label: "Alternatives" },
   { id: "compatibility", label: "Compatibility" },
   { id: "limitations", label: "Limitations" },
 ];
@@ -237,6 +241,30 @@ anymany(['x', 'y', 'z', 'a', 'b'], { max: 3, overflow: (n) => \`\${n} more\` })
         />
       </Section>
 
+      <Section id="breaks" title="What breaks without this">
+        <p>Every one of these is a line people write by hand, and each is wrong somewhere.</p>
+        <Cards
+          items={[
+            {
+              title: "join(', ') plus ' and ' at the end",
+              body: "\"and\" is not a word every locale has in that position. Spanish switches y to e before a word starting with i or hi; Japanese joins with a particle, not a conjunction. The connector is data, not a string constant.",
+            },
+            {
+              title: "The Oxford comma is a locale fact",
+              body: "en-US writes \"a, b, and c\", en-GB writes \"a, b and c\". Same language, different list. Whichever one you hardcoded is wrong for half your English readers.",
+            },
+            {
+              title: "sort() sorts by code unit",
+              body: "['ä', 'z', 'a'].sort() puts ä after z, because that is the order of their code points and nothing else. Swedish files å ä ö after z on purpose; German does not. Collation is a locale rule, and Array.prototype.sort has never heard of it.",
+            },
+            {
+              title: "An or-list is not an and-list with a word swapped",
+              body: "\"a, b or c\" is a different list type, and some locales punctuate it differently. So is a bare unit list — \"3 ft 7 in\" joins without any connector at all.",
+            },
+          ]}
+        />
+      </Section>
+
       <Section id="recipes" title="Recipes">
         <p>Copy, paste, move on.</p>
         <Code>{`// Tag list
@@ -337,6 +365,25 @@ anymany(['a', 'b', 'c', 'd', 'e', 'f', 'g'], { max: 3, locale: 'ar-EG' })
 export function TagList({ tags }: { tags: string[] }) {
   return <p>{anymany(tags, { locale: 'en', sort: true, max: 5 })}</p>
 }`}</Code>
+      </Section>
+
+      <Section id="alternatives" title="vs the alternatives">
+        <p>
+          What you would otherwise reach for, and what changes if you do.
+        </p>
+        <CompareTable
+          head={["anymany", "join() by hand", "Intl.ListFormat direct"]}
+          rows={[
+            ["locale data bundled", "none (Intl)", "none", "none (Intl)"],
+            ["connector from the locale", "yes", "no", "yes"],
+            ["and / or / unit lists", "yes", "no", "yes"],
+            ["collation-aware sort", "yes", "no", "no"],
+            ["overflow to a rest count", "yes", "no", "no"],
+            ["parts, for styling", "yes", "no", "yes"],
+            ["dependencies", "0", "0", "0"],
+          ]}
+        />
+        <p>The honest comparison for anymany is the native API rather than a library, because there is barely a library to compare against. At 0.6kb gzipped it adds the sorting, the overflow and the fallback chain around Intl.ListFormat, and saves you constructing a formatter per call.</p>
       </Section>
 
       <Section id="compatibility" title="Compatibility">

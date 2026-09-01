@@ -189,6 +189,25 @@ job, not this one's.
 
 ---
 
+## vs the alternatives
+
+| | anymany | `join()` by hand | `Intl.ListFormat` direct |
+| --- | :---: | :---: | :---: |
+| locale data bundled | **none (Intl)** | none | none (Intl) |
+| connector from the locale | **yes** | no | yes |
+| and / or / unit lists | **yes** | no | yes |
+| collation-aware sort | **yes** | no | no |
+| overflow to a rest count | **yes** | no | no |
+| parts, for styling | **yes** | no | yes |
+| dependencies | **0** | 0 | 0 |
+
+The honest comparison for anymany is the native API rather than a library,
+because there is barely a library to compare against. At 0.6kb gzipped it adds
+the sorting, the overflow and the fallback chain around `Intl.ListFormat`, and
+saves you constructing a formatter per call.
+
+---
+
 ## stability
 
 anymany follows [semver](https://semver.org/). The public API is a single

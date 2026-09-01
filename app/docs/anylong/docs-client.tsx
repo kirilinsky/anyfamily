@@ -1,7 +1,9 @@
 "use client";
 
 import {
+  Cards,
   Code,
+  CompareTable,
   DocsShell,
   Mono,
   Prop,
@@ -21,10 +23,12 @@ const NAV: DocsNavItem[] = [
   { id: "styles", label: "styles" },
   { id: "clamping", label: "clamping" },
   { id: "options", label: "Options" },
+  { id: "breaks", label: "What breaks" },
   { id: "recipes", label: "Recipes" },
   { id: "react", label: "React / Next.js" },
   { id: "locales", label: "Locales" },
   { id: "support", label: "Support flag" },
+  { id: "alternatives", label: "Alternatives" },
   { id: "compatibility", label: "Compatibility" },
   { id: "limitations", label: "Limitations" },
 ];
@@ -351,6 +355,30 @@ anylong(1_500, { smallestUnit: "seconds" })
 // "0:05:00"`}</Code>
       </Section>
 
+      <Section id="breaks" title="What breaks without this">
+        <p>Every one of these is what a hand-rolled duration formatter gets wrong.</p>
+        <Cards
+          items={[
+            {
+              title: "Division by 3600 and a template string",
+              body: "\"2h 30m\" is Latin script, English abbreviations and a fixed separator, handed to every reader regardless of locale. The arithmetic is the easy half; the writing is the half that is wrong.",
+            },
+            {
+              title: "Units do not inflect in English only",
+              body: "Russian needs час, часа and часов depending on the number in front. A duration formatter that concatenates a number and a unit name is a plural bug in every language that has more than two forms.",
+            },
+            {
+              title: "Zero components in the middle",
+              body: "Naive assembly prints \"2 hr, 0 min, 30 sec\" — technically true, and something no one would say. Deciding which components to keep is part of the format, not a post-processing step.",
+            },
+            {
+              title: "\"2:30:00\" is a separate problem",
+              body: "The digital clock style is not the worded style with the units removed; it has its own padding and its own separator per locale. Both come from the same call here.",
+            },
+          ]}
+        />
+      </Section>
+
       <Section id="recipes" title="Recipes">
         <p>Copy, paste, move on.</p>
         <Code>{`// Video / track length
@@ -424,6 +452,24 @@ anylong.supported ? anylong(ms) : \`\${Math.round(ms / 60000)} min\``}</Code>
           <Mono>anylongSupported</Mono>, since <Mono>supported</Mono> collides
           with anyword&apos;s.
         </p>
+      </Section>
+
+      <Section id="alternatives" title="vs the alternatives">
+        <p>
+          What you would otherwise reach for, and what changes if you do.
+        </p>
+        <CompareTable
+          head={["anylong", "humanize-duration", "pretty-ms"]}
+          rows={[
+            ["locale data bundled", "none (Intl)", "its own strings", "none, English only"],
+            ["locales", "200+", "~80", "1"],
+            ["accepts milliseconds", "yes", "yes", "yes"],
+            ["accepts ISO 8601 / shorthand", "yes", "no", "no"],
+            ["accepts two dates", "yes", "no", "no"],
+            ["digital style (2:30:00)", "yes", "no", "no"],
+          ]}
+        />
+        <p>anylong is 2.5kb gzipped and writes a duration down. It does not measure one, and it does not do calendar arithmetic — the months between two dates are a question for a date library, because their length depends on which months they are. Its one hard requirement is Intl.DurationFormat, so branch on anylong.supported.</p>
       </Section>
 
       <Section id="compatibility" title="Compatibility">

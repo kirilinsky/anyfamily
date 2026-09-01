@@ -1,7 +1,9 @@
 "use client";
 
 import {
+  Cards,
   Code,
+  CompareTable,
   DocsShell,
   Mono,
   Prop,
@@ -20,11 +22,13 @@ const NAV: DocsNavItem[] = [
   { id: "truncate", label: "anyword.truncate()" },
   { id: "granularity", label: "Granularity" },
   { id: "options", label: "Options" },
+  { id: "breaks", label: "What breaks" },
   { id: "recipes", label: "Recipes" },
   { id: "react", label: "React / Next.js" },
   { id: "ssr", label: "SSR" },
   { id: "locales", label: "Locales" },
   { id: "support", label: "Support flag" },
+  { id: "alternatives", label: "Alternatives" },
   { id: "compatibility", label: "Compatibility" },
   { id: "limitations", label: "Limitations" },
 ];
@@ -284,6 +288,30 @@ anyword.truncate('short', 99)                         // "short"  — already fi
         />
       </Section>
 
+      <Section id="breaks" title="What breaks without this">
+        <p>Every one of these is a bug report waiting to be filed by a user with an emoji in their name.</p>
+        <Cards
+          items={[
+            {
+              title: "length counts code units, not characters",
+              body: "\"👨‍👩‍👧\".length is 8. A 280-character limit measured that way rejects a post that shows as 35 characters, and the number under the input is wrong for anyone writing outside ASCII.",
+            },
+            {
+              title: "slice cuts inside a character",
+              body: "Truncating by index splits a surrogate pair into two halves that render as a replacement glyph, or cuts a ZWJ sequence so a family emoji falls apart into three people. The cut has to land on a grapheme boundary.",
+            },
+            {
+              title: "split(' ') assumes spaces exist",
+              body: "Japanese, Chinese and Thai do not put them between words. A word count built on spaces returns 1 for an entire paragraph, and a preview truncated on spaces never truncates at all.",
+            },
+            {
+              title: "Regex word boundaries are ASCII rules",
+              body: "The \\b word boundary splits don't into two words and treats accented letters inconsistently depending on the flags. Word segmentation is a Unicode algorithm, and the runtime already implements it.",
+            },
+          ]}
+        />
+      </Section>
+
       <Section id="recipes" title="Recipes">
         <p>Copy, paste, move on.</p>
         <Code>{`// Word counter
@@ -379,6 +407,23 @@ anyword.supported ? anyword(text) : text.split(/\\s+/)`}</Code>
           exported as <Mono>anywordSupported</Mono>, since{" "}
           <Mono>supported</Mono> collides with anylong&apos;s.
         </p>
+      </Section>
+
+      <Section id="alternatives" title="vs the alternatives">
+        <p>
+          What you would otherwise reach for, and what changes if you do.
+        </p>
+        <CompareTable
+          head={["anyword", "grapheme-splitter", "words-count + lodash"]}
+          rows={[
+            ["gzip", "< 1kb", "~10kb", "~25kb"],
+            ["unicode data bundled", "no", "yes", "yes"],
+            ["boundary rules", "native Intl", "bundled tables", "regex"],
+            ["word / sentence mode", "yes", "grapheme only", "spaces only"],
+            ["dependencies", "0", "0", "1+"],
+          ]}
+        />
+        <p>anyword is not an NLP toolkit — it does one thing. Reach for a tokenizer or a full i18n framework when you need stemming, stop words or message catalogs.</p>
       </Section>
 
       <Section id="compatibility" title="Compatibility">

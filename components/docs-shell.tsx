@@ -149,6 +149,106 @@ export function Rows({ children }: { children: ReactNode[] }) {
   );
 }
 
+/**
+ * Bordered cards, one per point — the shape the "what breaks" and "limitations"
+ * sections use.
+ */
+export function Cards({ items }: { items: { title: string; body: string }[] }) {
+  return (
+    <div className="space-y-3">
+      {items.map(({ title, body }) => (
+        <div
+          key={title}
+          style={{ borderColor: "var(--border)" }}
+          className="rounded-xl border p-4"
+        >
+          <p
+            style={{ color: "var(--text-primary)" }}
+            className="mb-1 text-sm font-medium"
+          >
+            {title}
+          </p>
+          <p style={{ color: "var(--text-muted)" }} className="text-sm">
+            {body}
+          </p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/**
+ * The comparison grid. `head` names the columns after the axis column — the
+ * package itself first, which is the column that gets the accent. Rows lead
+ * with the axis, then one cell per column. Scrolls sideways on a narrow screen
+ * rather than squeezing the page.
+ */
+export function CompareTable({
+  head,
+  rows,
+}: {
+  head: string[];
+  rows: string[][];
+}) {
+  return (
+    <div
+      style={{ borderColor: "var(--border)" }}
+      className="overflow-x-auto rounded-xl border"
+    >
+      <table className="w-full min-w-[34rem] border-collapse text-sm">
+        <thead>
+          <tr>
+            <th />
+            {head.map((label, i) => (
+              <th
+                key={label}
+                style={{
+                  color: i === 0 ? "var(--doc-accent)" : "var(--text-muted)",
+                  borderColor: "var(--border)",
+                }}
+                className="border-b px-4 py-3 text-center font-mono text-xs font-normal whitespace-nowrap"
+              >
+                {label}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map(([axis, ...cells], r) => (
+            <tr
+              key={axis}
+              style={{
+                background: r % 2 === 0 ? "var(--table-alt)" : "transparent",
+              }}
+            >
+              <th
+                scope="row"
+                style={{ color: "var(--text-secondary)" }}
+                className="px-4 py-3 text-left text-sm font-normal"
+              >
+                {axis}
+              </th>
+              {cells.map((cell, i) => (
+                <td
+                  key={i}
+                  style={{
+                    color: i === 0 ? "var(--text-primary)" : "var(--text-muted)",
+                  }}
+                  className={`px-4 py-3 text-center text-sm ${
+                    i === 0 ? "font-medium" : ""
+                  }`}
+                >
+                  {cell}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
 export function DocsShell({
   pkgId,
   backHref,

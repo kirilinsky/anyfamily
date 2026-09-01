@@ -2,6 +2,7 @@
 
 import {
   Code,
+  CompareTable,
   DocsShell,
   Mono,
   Rows,
@@ -21,6 +22,7 @@ const NAV: DocsNavItem[] = [
   { id: "ssr", label: "SSR" },
   { id: "locales", label: "Locales" },
   { id: "support", label: "Support flag" },
+  { id: "alternatives", label: "Alternatives" },
   { id: "compatibility", label: "Compatibility" },
   { id: "limitations", label: "Limitations" },
 ];
@@ -350,6 +352,23 @@ const dir = anylocale.supported ? anylocale(tag).direction : 'ltr'`}</Code>
           same way — <Mono>anylocale.supported</Mono> — since every package now
           carries its own.
         </p>
+      </Section>
+
+      <Section id="alternatives" title="vs the alternatives">
+        <p>
+          What you would otherwise reach for, and what changes if you do.
+        </p>
+        <CompareTable
+          head={["anylocale", "rtl-detect", "hand-kept tables"]}
+          rows={[
+            ["gzip", "~1kb", "~2kb", "0 (yours)"],
+            ["locale data bundled", "no", "yes", "yes"],
+            ["covers", "direction, week, calendars, zones, clock, digits", "direction", "whatever you wrote"],
+            ["stays current", "with the runtime's ICU", "with releases", "never"],
+            ["dependencies", "0", "0", "0"],
+          ]}
+        />
+        <p>anylocale answers how a locale behaves. For what a code is called — US into United States — that is anyaround&apos;s job.</p>
       </Section>
 
       <Section id="compatibility" title="Compatibility">

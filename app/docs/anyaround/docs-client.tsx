@@ -1,7 +1,9 @@
 "use client";
 
 import {
+  Cards,
   Code,
+  CompareTable,
   DocsShell,
   Mono,
   Prop,
@@ -19,9 +21,11 @@ const NAV: DocsNavItem[] = [
   { id: "modes", label: "Modes" },
   { id: "flags", label: "flags" },
   { id: "options", label: "Options" },
+  { id: "breaks", label: "What breaks" },
   { id: "recipes", label: "Recipes" },
   { id: "react", label: "React / Next.js" },
   { id: "locales", label: "Locales" },
+  { id: "alternatives", label: "Alternatives" },
   { id: "compatibility", label: "Compatibility" },
   { id: "limitations", label: "Limitations" },
 ];
@@ -241,6 +245,30 @@ anyaround("US", { display: "name-flag" }); // "United States 🇺🇸"`}</Code>
         </p>
       </Section>
 
+      <Section id="breaks" title="What breaks without this">
+        <p>Every one of these is a file somebody is maintaining by hand right now.</p>
+        <Cards
+          items={[
+            {
+              title: "The hardcoded country list",
+              body: "250 rows, in one language, that go stale: Czechia, Türkiye and Eswatini all changed name in the last few years. Your runtime already ships the current list in 200+ languages and updates it with the platform.",
+            },
+            {
+              title: "Showing the code because the name is missing",
+              body: "\"DE\" in a dropdown, \"BRL\" on an invoice. The reader gets an identifier meant for machines, because translating the name looked like more work than it is.",
+            },
+            {
+              title: "An emoji table for flags",
+              body: "A flag emoji is not a lookup — it is the two letters of the region code rewritten as Regional Indicator symbols. The table is a data file you never needed to ship.",
+            },
+            {
+              title: "Languages and scripts, which are worse",
+              body: "Country lists at least exist to copy. Localized names for languages and scripts are far harder to find as a file, and are what Intl.DisplayNames is best at.",
+            },
+          ]}
+        />
+      </Section>
+
       <Section id="recipes" title="Recipes">
         <p>Copy, paste, move on.</p>
         <Code>{`// Country picker with flags
@@ -298,6 +326,25 @@ anyaround("US", { locale: ["sr-Latn-RS", "en"] });`}</Code>
           Output is pure — no <Mono>Date.now()</Mono>, no environment reads — so
           server and client render identically. SSR-safe by construction.
         </p>
+      </Section>
+
+      <Section id="alternatives" title="vs the alternatives">
+        <p>
+          What you would otherwise reach for, and what changes if you do.
+        </p>
+        <CompareTable
+          head={["anyaround", "i18n-iso-countries", "emoji-flags", "world-countries"]}
+          rows={[
+            ["bundled data", "none (Intl)", "~1 file / locale", "small", "~1MB JSON"],
+            ["localized names", "200+ locales", "bundled locales", "no", "no"],
+            ["languages", "yes", "no", "no", "no"],
+            ["scripts", "yes", "no", "no", "no"],
+            ["currency names", "yes", "no", "no", "partial"],
+            ["flags", "yes", "no", "yes", "emoji"],
+            ["dependencies", "0", "0", "0", "0"],
+          ]}
+        />
+        <p>anyaround carries no country data at all — it borrows the ICU tables already in your runtime. Zero payload, with the trade that exact strings track the runtime&apos;s ICU version rather than a version you pinned.</p>
       </Section>
 
       <Section id="compatibility" title="Compatibility">

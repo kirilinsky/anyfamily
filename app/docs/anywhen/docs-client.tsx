@@ -1,7 +1,9 @@
 "use client";
 
 import {
+  Cards,
   Code,
+  CompareTable,
   DocsShell,
   Mono,
   Prop,
@@ -19,12 +21,14 @@ const NAV: DocsNavItem[] = [
   { id: "modes", label: "Modes" },
   { id: "thresholds", label: "Thresholds" },
   { id: "options", label: "Options" },
+  { id: "breaks", label: "What breaks" },
   { id: "recipes", label: "Recipes" },
   { id: "react", label: "React / Next.js" },
   { id: "ssr", label: "SSR" },
   { id: "input-types", label: "Input types" },
   { id: "locales", label: "Locales" },
   { id: "calendars", label: "Calendars & eras" },
+  { id: "alternatives", label: "Alternatives" },
   { id: "compatibility", label: "Compatibility" },
   { id: "limitations", label: "Limitations" },
 ];
@@ -367,6 +371,30 @@ anywhen(date, { locale: 'en', thresholds: { second: 120 } })
       </Section>
 
 
+      <Section id="breaks" title="What breaks without this">
+        <p>Every one of these is a line people write by hand, and each is wrong somewhere.</p>
+        <Cards
+          items={[
+            {
+              title: "\"1 hours ago\"",
+              body: "Relative time built by subtracting timestamps and dividing gets the plural wrong at 1, prints \"0 hours ago\" for anything under an hour, and never decides on its own that a week-old post should show a date instead.",
+            },
+            {
+              title: "The server formats for the wrong reader",
+              body: "Rendered on a server, a date takes the server's time zone. A reader eight hours away sees the wrong day for anything near midnight. The time zone is an option because it has to be a decision, not an accident of where the code ran.",
+            },
+            {
+              title: "Relative time and hydration disagree",
+              body: "The server renders \"5 seconds ago\", the browser hydrates two seconds later and renders \"7 seconds ago\" — React reports a mismatch. Relative output is a clock read, so either render an absolute date on the server or let the first tick settle it.",
+            },
+            {
+              title: "Month names are not a translation table",
+              body: "Locales disagree on the order of the fields, on the separators between them, and sometimes on the calendar itself — fa-IR counts Persian years, th-TH Buddhist ones. Swapping English month names for translated ones fixes none of that.",
+            },
+          ]}
+        />
+      </Section>
+
       <Section id="recipes" title="Recipes">
         <p>Copy, paste, move on.</p>
         <Code>{`// Blog post date
@@ -581,6 +609,22 @@ anywhen(date, {
           local midnight too, so the boundaries line up — only the printed labels
           differ.
         </p>
+      </Section>
+
+      <Section id="alternatives" title="vs the alternatives">
+        <p>
+          What you would otherwise reach for, and what changes if you do.
+        </p>
+        <CompareTable
+          head={["anywhen", "dayjs", "date-fns"]}
+          rows={[
+            ["gzip", "~1.3kb", "~7kb", "~20kb"],
+            ["locale data bundled", "no", "yes", "yes"],
+            ["locales", "200+", "140", "100"],
+            ["dependencies", "0", "0", "0"],
+          ]}
+        />
+        <p>anywhen formats. It does not parse loose date strings, do calendar arithmetic, or diff two dates into a structure — reach for date-fns or Temporal when the job is manipulating dates rather than writing them down.</p>
       </Section>
 
       <Section id="compatibility" title="Compatibility">

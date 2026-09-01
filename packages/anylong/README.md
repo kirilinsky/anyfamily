@@ -184,6 +184,25 @@ anylong("2h 30m", { locale: ["sr-Latn-RS", "en"] });
 
 ---
 
+## vs the alternatives
+
+| | anylong | humanize-duration | pretty-ms |
+| --- | :---: | :---: | :---: |
+| locale data bundled | **none (Intl)** | its own strings | none, English only |
+| locales | **200+** | ~80 | 1 |
+| accepts milliseconds | **yes** | yes | yes |
+| accepts ISO 8601 / shorthand | **yes** | no | no |
+| accepts two dates | **yes** | no | no |
+| digital style (`2:30:00`) | **yes** | no | no |
+
+anylong is 2.5kb gzipped and writes a duration down. It does not measure one,
+and it does not do calendar arithmetic — the months between two dates are a
+question for a date library, because their length depends on which months they
+are. Its one hard requirement is `Intl.DurationFormat`, so branch on
+`anylong.supported`.
+
+---
+
 ## stability
 
 anylong follows [semver](https://semver.org/). The public API is a single

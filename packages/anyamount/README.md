@@ -215,6 +215,25 @@ anyamount(1999, { mode: "currency", currency: "INR", locale: "hi" }); // "₹1,9
 
 ---
 
+## vs the alternatives
+
+| | anyamount | numeral.js | accounting.js |
+| --- | :---: | :---: | :---: |
+| locale data bundled | **none (Intl)** | one file per locale | none, you configure it |
+| locales | **200+** | registered by hand | whatever you pass |
+| currency rules | **from the currency** | manual symbol | manual symbol |
+| decimal digits | **per currency** | manual | manual |
+| units | **sanctioned list** | no | no |
+| compact notation | **every locale** | English forms | no |
+| dependencies | **0** | 0 | 0 |
+
+anyamount is 0.8kb gzipped and formats numbers. It is not a money type: it does
+not add prices, hold exchange rates, or protect you from floating-point
+arithmetic. Do the arithmetic in minor units or in a decimal library, then hand
+the result here to be written down.
+
+---
+
 ## stability
 
 anyamount follows [semver](https://semver.org/). The public API is a single
