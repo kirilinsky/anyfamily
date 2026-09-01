@@ -3,6 +3,7 @@ import Link from "next/link";
 import { CyclingLogo } from "@/components/cycling-logo";
 import { FamilyLogo } from "@/components/family-logo";
 import { InstallChip } from "@/components/install-chip";
+import { ScrollHash } from "@/components/scroll-hash";
 import { SectionNav } from "@/components/section-nav";
 import { Tag } from "@/components/ui";
 import versions from "@/data/versions.json";
@@ -38,6 +39,23 @@ const PRESETS_BY_ID: Record<string, Preset[]> = {
   anyword: WORD_PRESETS,
   anylocale: LOCALE_PRESETS,
 };
+
+/**
+ * Every section of the tour, in scroll order. Feeds the nav rail and the URL
+ * sync, which have to agree on both the ids and their order.
+ */
+const NAV_ITEMS = [
+  { id: "main", label: "the family", accent: "#d6b3e2" },
+  ...PACKAGES.map((p) => ({ id: p.id, label: p.id, accent: p.accent })),
+  { id: "anyfamily", label: "anyfamily", accent: colors.anyfamily },
+  {
+    id: "anyfamily-react",
+    label: "anyfamily-react",
+    accent: colors["anyfamily-react"],
+  },
+];
+
+const SECTION_IDS = NAV_ITEMS.map((item) => item.id);
 
 const LINK_CLASS =
   "rounded-lg border bg-white/[0.03] px-2.5 py-1 font-mono text-[11px] lowercase tracking-wide text-white/50 transition-colors hover:bg-white/[0.06] hover:text-white/90";
@@ -182,22 +200,8 @@ export default function Home() {
         }}
       />
 
-      <SectionNav
-        items={[
-          { id: "main", label: "the family", accent: "#d6b3e2" },
-          ...PACKAGES.map((p) => ({
-            id: p.id,
-            label: p.id,
-            accent: p.accent,
-          })),
-          { id: "anyfamily", label: "anyfamily", accent: colors.anyfamily },
-          {
-            id: "anyfamily-react",
-            label: "anyfamily-react",
-            accent: colors["anyfamily-react"],
-          },
-        ]}
-      />
+      <ScrollHash ids={SECTION_IDS} />
+      <SectionNav items={NAV_ITEMS} />
 
       <section
         id="main"
