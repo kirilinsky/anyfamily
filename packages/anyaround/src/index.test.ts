@@ -173,3 +173,39 @@ describe("public surface", () => {
     expect(anyaround("US", opts)).toBe(`${flag} ${name}`);
   });
 });
+
+describe("name cache", () => {
+  it("returns a fresh info object on every call", () => {
+    const a = anyaround.info("US", { locale: "en" });
+    const b = anyaround.info("US", { locale: "en" });
+    expect(b).toEqual(a);
+    expect(b).not.toBe(a);
+    a.name = "mutated";
+    expect(anyaround.info("US", { locale: "en" }).name).toBe("United States");
+  });
+
+  it("remembers a miss as a miss", () => {
+    expect(anyaround.info("QZ", { mode: "region", locale: "en" }).found).toBe(false);
+    expect(anyaround.info("QZ", { mode: "region", locale: "en" }).found).toBe(false);
+    expect(anyaround("QZ", { mode: "region", locale: "en", fallback: "none" })).toBe("");
+  });
+
+  it("stays correct past its limit", () => {
+    // More distinct codes than the name cache holds; the early ones get
+    // evicted and must be resolved again, not answered wrong.
+    const codes: string[] = [];
+    for (let a = 65; a <= 90; a++)
+      for (let b = 65; b <= 90; b++) codes.push(String.fromCharCode(a, b));
+    const first = anyaround("AD", { locale: "en" });
+    for (const c of codes) anyaround(c, { locale: "en" });
+    expect(anyaround("AD", { locale: "en" })).toBe(first);
+    expect(anyaround("DE", { locale: "en" })).toBe("Germany");
+  });
+
+  it("keeps the same code apart per locale, kind and style", () => {
+    expect(anyaround("DE", { locale: "en" })).toBe("Germany");
+    expect(anyaround("DE", { locale: "de" })).toBe("Deutschland");
+    expect(anyaround("de", { locale: "en" })).toBe("German");
+    expect(anyaround("US", { locale: "en", style: "short" })).toBe("US");
+  });
+});

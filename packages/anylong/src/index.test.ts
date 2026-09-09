@@ -407,3 +407,19 @@ describe("public surface", () => {
     expect(typeof anylong.supported).toBe("boolean");
   });
 });
+
+describe("shorthand unit spellings", () => {
+  it.skipIf(!anylong.supported)("accepts plural and abbreviated units", () => {
+    const en = { locale: "en" } as const;
+    expect(anylong("2 hrs 30 mins", en)).toBe(anylong("2h 30m", en));
+    expect(anylong("1 yr 2 mos 3 wks", en)).toBe(anylong({ years: 1, months: 2, weeks: 3 }, en));
+    expect(anylong("5 secs 10 msecs", en)).toBe(anylong({ seconds: 5, milliseconds: 10 }, en));
+    expect(anylong("2 hours 30 minutes", en)).toBe(anylong("2h 30m", en));
+  });
+
+  it("parses before it formats, so a bad unit is a RangeError on every runtime", () => {
+    expect(() => anylong("2 fortnights")).toThrow(RangeError);
+    expect(() => anylong("2 fortnights")).toThrow(/Unknown unit "fortnights"/);
+    expect(() => anylong("2 m 3 min")).toThrow(/more than once/);
+  });
+});

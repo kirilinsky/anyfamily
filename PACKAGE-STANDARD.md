@@ -42,6 +42,29 @@ it("exports exactly one name, with extras hanging off it", async () => {
 });
 ```
 
+## shared helpers
+
+Every core library carries the same three private helpers, copied verbatim —
+there is no shared internal package, because each library ships as one
+dependency-free file (and JSR publishes the source as-is).
+
+```ts
+function cacheGet<V>(cache: Map<string, V>, k: string, create: () => V, limit = CACHE_LIMIT): V
+const localeKey = (locale?: Locale): string => …   // "" | tag | tags joined by "\0"
+function optKey(o: object): string                 // sorted keys, undefined skipped
+```
+
+- `cacheGet` is the one formatter cache policy in the family: a bare `Map.get`
+  below the limit, LRU once full. Every native `Intl` formatter goes through it.
+- Cache keys are built by hand from the option values a package knows about —
+  `${localeKey(l)}|${style}|${digits}` — never by `JSON.stringify(options)`.
+  `optKey` is for the one case where the caller supplies an open-ended `Intl`
+  options object (`anywhen`'s `format`, `anyplural`'s `format`, `anymany`'s
+  collator options, `anylong`'s passthrough); it is order-insensitive, so
+  `{ day, month }` and `{ month, day }` share a formatter.
+- A change to one of the helpers is a change to all eight. Diff them against
+  `packages/anywhen/src/index.ts` before shipping.
+
 ## required files
 
 ```

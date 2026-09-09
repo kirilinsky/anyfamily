@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.0.2
+
+### Patch Changes
+
+- Faster smart mode, same output. The fixed date/time/weekday formats are named presets keyed by name, so the default path no longer spreads an options object or stringifies it per call; a caller-supplied `format` is keyed order-insensitively, so `{ day, month }` and `{ month, day }` share one formatter. Formatter cache keys across the family are now built from option values instead of `JSON.stringify(options)`.
+
 ## 2.0.1
 
 ### Patch Changes

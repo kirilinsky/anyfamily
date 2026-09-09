@@ -1,5 +1,11 @@
 # anymany
 
+## 2.1.0
+
+### Minor Changes
+
+- `items` accepts any iterable — an array, a `Set`, a generator — not only arrays. The runtime always did; the new `Items` type says so. A bad `max` now throws before anything is pulled or sorted. Collator options are keyed order-insensitively.
+
 ## 2.0.1
 
 ### Patch Changes

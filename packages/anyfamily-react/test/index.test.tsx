@@ -17,6 +17,7 @@ import {
   anywhen,
   anyword,
   useAnyaround,
+  useAnyfamily,
   useAnyfamilyDefaults,
   useAnyfamilyLocale,
   useAnylocale,
@@ -362,4 +363,156 @@ describe("the built bundle", () => {
       expect(contents.split('"use client";').length - 1).toBe(1);
     });
   }
+});
+
+describe("useAnyfamily", () => {
+  function withDefaults(defaults: AnyfamilyDefaults, locale?: string) {
+    return function Wrapper({ children }: { children: ReactNode }) {
+      return (
+        <AnyfamilyProvider locale={locale} defaults={defaults}>
+          {children}
+        </AnyfamilyProvider>
+      );
+    };
+  }
+
+  it("binds every function to the provider's locale", () => {
+    const { result } = renderHook(() => useAnyfamily(), { wrapper: wrapper("de") });
+    const f = result.current;
+    expect(f.anyamount(1999, { mode: "currency", currency: "EUR" })).toBe(
+      anyamountDirect(1999, { mode: "currency", currency: "EUR", locale: "de" }),
+    );
+    expect(f.anymany(["a", "b"])).toBe("a und b");
+    expect(f.anyaround("US")).toBe("Vereinigte Staaten");
+    expect(f.anyplural(5, { one: "Datei", other: "Dateien" })).toBe("5 Dateien");
+    expect(
+      f.anywhen(new Date("2026-01-01T09:00:00Z"), {
+        mode: "relative",
+        now: new Date("2026-01-01T12:00:00Z"),
+      }),
+    ).toBe("vor 3 Stunden");
+  });
+
+  it("a call's own locale still wins", () => {
+    const { result } = renderHook(() => useAnyfamily(), { wrapper: wrapper("de") });
+    expect(result.current.anymany(["a", "b"], { locale: "en" })).toBe("a and b");
+  });
+
+  it("carries the extras, bound the same way", () => {
+    const { result } = renderHook(() => useAnyfamily(), { wrapper: wrapper("en") });
+    const f = result.current;
+    expect(f.anyamount.symbol("EUR")).toBe("€");
+    expect(f.anyaround.info("US").flag).toBe("🇺🇸");
+    expect(f.anywhen.parts(new Date("2026-01-01T09:00:00Z"), {
+      mode: "relative",
+      now: new Date("2026-01-01T12:00:00Z"),
+    })).toEqual(anywhenDirect.parts(new Date("2026-01-01T09:00:00Z"), {
+      mode: "relative",
+      now: new Date("2026-01-01T12:00:00Z"),
+      locale: "en",
+    }));
+    expect(f.anyplural.parts(2, { one: "item", other: "items" }).at(-1)).toEqual({
+      type: "literal",
+      value: " items",
+    });
+    expect(f.anylong.supported).toBe(anylongSupported);
+    expect(f.anyword.supported).toBe(anywordSupported);
+    expect(f.anylocale.supported).toBe(anylocaleSupported);
+  });
+
+  it.skipIf(!anywordSupported)("routes anyword.truncate to its own defaults slot", () => {
+    const { result } = renderHook(() => useAnyfamily(), {
+      wrapper: withDefaults({ anywordTruncate: { ellipsis: "…" }, anyword: { by: "word" } }, "en"),
+    });
+    const f = result.current;
+    expect(f.anyword.truncate("héllo 👨‍👩‍👧", 5)).toBe("héllo…");
+    expect(f.anyword.count("one two three")).toBe(3);
+    expect(f.anyword("one two")).toEqual(["one", "two"]);
+  });
+
+  it("applies the provider's defaults", () => {
+    const { result } = renderHook(() => useAnyfamily(), {
+      wrapper: withDefaults({ anyamount: { mode: "currency", currency: "EUR" } }, "en"),
+    });
+    expect(result.current.anyamount(1999)).toBe("€1,999.00");
+    expect(result.current.anyamount(3.2, { mode: "unit", unit: "gigabyte" })).toBe("3.2 GB");
+  });
+
+  it("anylocale falls back to the provider's locale, then the runtime's", () => {
+    const { result } = renderHook(() => useAnyfamily(), { wrapper: wrapper("fa-IR") });
+    expect(result.current.anylocale().tag).toBe("fa-IR");
+    expect(result.current.anylocale("en-GB").tag).toBe("en-GB");
+    const { result: bare } = renderHook(() => useAnyfamily());
+    expect(typeof bare.current.anylocale().tag).toBe("string");
+  });
+
+  it.skipIf(!anylongSupported)("keeps anylong's two-date form", () => {
+    const { result } = renderHook(() => useAnyfamily(), { wrapper: wrapper("en") });
+    const a = new Date("2026-01-01T09:00:00Z");
+    const b = new Date("2026-01-01T11:30:00Z");
+    expect(result.current.anylong(a, b)).toBe("2 hr, 30 min");
+    expect(result.current.anylong(a, b, { style: "long" })).toBe("2 hours, 30 minutes");
+    expect(result.current.anylong("PT2H30M")).toBe("2 hr, 30 min");
+  });
+
+  it("keeps its identity across re-renders, and changes with the provider", () => {
+    const { result, rerender } = renderHook(
+      ({ locale }: { locale: string }) => useAnyfamily(),
+      { wrapper: wrapper("en"), initialProps: { locale: "en" } },
+    );
+    const first = result.current;
+    rerender({ locale: "en" });
+    expect(result.current).toBe(first);
+  });
+
+  it("outside a provider it is the plain functions with no locale", () => {
+    const { result, rerender } = renderHook(() => useAnyfamily());
+    const first = result.current;
+    rerender();
+    expect(result.current).toBe(first);
+    expect(result.current.anymany(["a", "b"], { locale: "en" })).toBe("a and b");
+  });
+});
+
+describe("the shared tick", () => {
+  it("many ticking hooks share one interval", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-01-01T12:00:00Z"));
+    const start = new Date("2026-01-01T11:59:00Z");
+
+    const { result, unmount } = renderHook(() => [
+      useAnywhen(start, { mode: "relative", locale: "en" }),
+      useAnywhen(start, { mode: "relative", locale: "en" }),
+      useAnywhen(start, { mode: "relative", locale: "en" }),
+    ]);
+    expect(vi.getTimerCount()).toBe(1);
+
+    act(() => {
+      vi.advanceTimersByTime(60_000);
+    });
+    expect(result.current).toEqual(["2 minutes ago", "2 minutes ago", "2 minutes ago"]);
+
+    unmount();
+    expect(vi.getTimerCount()).toBe(0);
+    vi.useRealTimers();
+  });
+
+  it("different periods get their own interval, cleared by the last subscriber", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-01-01T12:00:00Z"));
+    const start = new Date("2026-01-01T11:59:00Z");
+
+    const fast = renderHook(() => useAnywhen(start, { mode: "relative", locale: "en", refresh: 1000 }));
+    const slow = renderHook(() => useAnywhen(start, { mode: "relative", locale: "en", refresh: 5000 }));
+    const slow2 = renderHook(() => useAnywhen(start, { mode: "relative", locale: "en", refresh: 5000 }));
+    expect(vi.getTimerCount()).toBe(2);
+
+    slow.unmount();
+    expect(vi.getTimerCount()).toBe(2);
+    slow2.unmount();
+    expect(vi.getTimerCount()).toBe(1);
+    fast.unmount();
+    expect(vi.getTimerCount()).toBe(0);
+    vi.useRealTimers();
+  });
 });

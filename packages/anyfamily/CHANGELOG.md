@@ -1,5 +1,27 @@
 # anyfamily
 
+## 2.1.2
+
+### Patch Changes
+
+- Re-exports the updated eight; `anymany` now accepts any iterable.
+- Updated dependencies
+- Updated dependencies
+- Updated dependencies
+- Updated dependencies
+- Updated dependencies
+- Updated dependencies
+- Updated dependencies
+- Updated dependencies
+  - anyamount@2.0.2
+  - anyaround@2.0.2
+  - anylocale@1.0.2
+  - anylong@2.0.2
+  - anymany@2.1.0
+  - anyplural@2.0.2
+  - anywhen@2.0.2
+  - anyword@2.0.2
+
 ## 2.1.1
 
 ### Patch Changes

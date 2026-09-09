@@ -155,10 +155,15 @@ const CACHE_LIMIT = 50;
  * matter: a plain FIFO would drop the app's one hot locale every 50 misses, and
  * rebuilding a formatter costs ~50-90µs.
  */
-function cacheGet<V>(cache: Map<string, V>, k: string, create: () => V): V {
+function cacheGet<V>(
+  cache: Map<string, V>,
+  k: string,
+  create: () => V,
+  limit = CACHE_LIMIT,
+): V {
   const hit = cache.get(k);
   if (hit !== undefined) {
-    if (cache.size >= CACHE_LIMIT) {
+    if (cache.size >= limit) {
       // Move to the end — Map iterates in insertion order, and the eviction
       // below takes the first key it sees.
       cache.delete(k);
@@ -167,18 +172,28 @@ function cacheGet<V>(cache: Map<string, V>, k: string, create: () => V): V {
     return hit;
   }
   const v = create();
-  if (cache.size >= CACHE_LIMIT) cache.delete(cache.keys().next().value!);
+  if (cache.size >= limit) cache.delete(cache.keys().next().value!);
   cache.set(k, v);
   return v;
 }
 
+const localeKey = (locale?: Locale): string =>
+  typeof locale === "string" ? locale : locale ? locale.join("\0") : "";
+
 const dnCache = new Map<string, Intl.DisplayNames>();
-const localeKey = (locale?: Locale) =>
-  Array.isArray(locale) ? locale.join("\0") : ((locale as string) ?? "");
-const dn = (l: Locale | undefined, o: Intl.DisplayNamesOptions) =>
-  cacheGet(dnCache, `${localeKey(l)}|${JSON.stringify(o)}`, () =>
-    new Intl.DisplayNames(l as Intl.LocalesArgument, o),
-  );
+
+/**
+ * Resolved names, keyed by formatter and code. `Intl.DisplayNames.of` is the
+ * whole cost of a call (~1.2µs), and a name is a fixed fact about
+ * (locale, kind, style, code), so remembering it makes a re-render of a
+ * 250-entry country picker cheap. Sized for that: a full list of regions in
+ * two styles still fits. `null` records a miss, so a code with no name is
+ * not looked up twice either.
+ */
+const nameCache = new Map<string, string | null>();
+const NAME_LIMIT = 500;
+
+const TYPES: readonly DisplayType[] = ["region", "language", "script", "currency", "calendar"];
 
 const REGION_M49 = /^\d{3}$/;
 const ALPHA4 = /^[A-Za-z]{4}$/;
@@ -215,17 +230,16 @@ function canonical(code: string, type: DisplayType): string {
 }
 
 /**
- * Derive the flag emoji from an ISO 3166-1 alpha-2 region code by mapping each
- * letter to its Regional Indicator Symbol. Returns `""` for anything that is
- * not exactly two ASCII letters (numeric M49 regions have no flag).
+ * The flag emoji for a canonical ISO 3166-1 alpha-2 region code: each letter
+ * becomes its Regional Indicator Symbol. `""` for anything that is not two
+ * uppercase ASCII letters (numeric M49 regions have no flag).
  */
-function toFlag(code: string): string {
-  const c = code.toUpperCase();
-  if (!UPPER2.test(c)) return "";
-  return c.replace(/./g, (ch) => String.fromCodePoint(127397 + ch.charCodeAt(0)));
-}
+const toFlag = (code: string): string =>
+  UPPER2.test(code)
+    ? String.fromCodePoint(127397 + code.charCodeAt(0), 127397 + code.charCodeAt(1))
+    : "";
 
-function resolve(code: string, options: AnyaroundOptions): AnyaroundInfo {
+function resolve(code: string, options: AnyaroundOptions = {}): AnyaroundInfo {
   if (typeof code !== "string" || code.trim() === "")
     throw new TypeError(`Invalid code: ${String(code)}`);
 
@@ -237,42 +251,44 @@ function resolve(code: string, options: AnyaroundOptions): AnyaroundInfo {
     languageDisplay,
   } = options as ResolvedOptions;
 
-  const type = mode === "smart" ? detect(code.trim()) : mode;
-  if (
-    type !== "region" &&
-    type !== "language" &&
-    type !== "script" &&
-    type !== "currency" &&
-    type !== "calendar"
-  )
-    throw new RangeError(`Invalid mode: ${String(mode)}`);
+  const trimmed = code.trim();
+  const type = mode === "smart" ? detect(trimmed) : mode;
+  if (!TYPES.includes(type)) throw new RangeError(`Invalid mode: ${String(mode)}`);
 
-  const c = canonical(code.trim(), type);
+  const c = canonical(trimmed, type);
+  const ld = type === "language" ? languageDisplay : undefined;
+  const key = `${localeKey(locale)}|${type}|${style}|${ld ?? ""}`;
 
   // Always ask ICU with fallback "none" so a miss surfaces as `undefined`;
-  // we then apply the caller's `fallback` ourselves and report it via `found`.
-  const dnOptions: Intl.DisplayNamesOptions = { type, style, fallback: "none" };
-  if (type === "language" && languageDisplay) dnOptions.languageDisplay = languageDisplay;
+  // the caller's `fallback` is applied here and reported via `found`.
+  const resolved = cacheGet(
+    nameCache,
+    `${key}|${c}`,
+    () =>
+      cacheGet(dnCache, key, () =>
+        new Intl.DisplayNames(locale, { type, style, fallback: "none", languageDisplay: ld }),
+      ).of(c) ?? null,
+    NAME_LIMIT,
+  );
 
-  const resolved = dn(locale, dnOptions).of(c);
-  const found = resolved != null;
-  const name = found ? resolved : fallback === "none" ? "" : c;
-  const flag = type === "region" ? toFlag(c) : "";
-  return { code: c, type, name, flag, found };
+  const found = resolved !== null;
+  return {
+    code: c,
+    type,
+    name: found ? resolved : fallback === "none" ? "" : c,
+    flag: type === "region" ? toFlag(c) : "",
+    found,
+  };
 }
 
 function format(code: string, options: AnyaroundOptions = {}): string {
-  const { display = "name" } = options as ResolvedOptions;
   const { name, flag } = resolve(code, options);
   if (!flag) return name;
+  const { display = "name" } = options as ResolvedOptions;
   if (display === "flag") return flag;
   if (display === "flag-name") return `${flag} ${name}`;
   if (display === "name-flag") return `${name} ${flag}`;
   return name;
-}
-
-function info(code: string, options: AnyaroundOptions = {}): AnyaroundInfo {
-  return resolve(code, options);
 }
 
 /**
@@ -282,6 +298,9 @@ function info(code: string, options: AnyaroundOptions = {}): AnyaroundInfo {
  * The default `smart` mode infers the kind from the code's shape (see
  * {@linkcode detect}); pass `mode` to pin it. Flags are derived from ISO
  * 3166-1 alpha-2 region codes and surfaced via the `display` option.
+ *
+ * The package exports this one name. Anything beyond the plain call hangs off
+ * it — currently {@linkcode anyaround.info}.
  *
  * @example
  * anyaround("US");                                  // "United States"
@@ -304,8 +323,8 @@ export const anyaround = Object.assign(format, {
   /**
    * Like calling {@linkcode anyaround} directly, but returns the structured
    * {@linkcode AnyaroundInfo} — the canonical `code`, resolved `type`,
-   * localized `name`, and `flag` (empty when not applicable) — so callers can
-   * compose their own output.
+   * localized `name`, `flag` (empty when not applicable) and `found` — so
+   * callers can compose their own output. Every call returns a fresh object.
    *
    * Takes the same arguments; `display` is ignored.
    *
@@ -319,5 +338,5 @@ export const anyaround = Object.assign(format, {
    * // { code: "QZ", type: "region", name: "QZ", flag: "🇶🇿", found: false }
    * ```
    */
-  info,
+  info: resolve,
 });

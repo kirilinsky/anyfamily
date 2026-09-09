@@ -1,5 +1,11 @@
 # anylocale
 
+## 1.0.2
+
+### Patch Changes
+
+- The two caches are the family's shared `cacheGet` helper nested; getter method names are precomputed instead of built on every read. No behaviour change.
+
 ## 1.0.1
 
 ### Patch Changes

@@ -155,10 +155,15 @@ const CACHE_LIMIT = 50;
  * matter: a plain FIFO would drop the app's one hot locale every 50 misses, and
  * rebuilding a formatter costs ~50-90µs.
  */
-function cacheGet<V>(cache: Map<string, V>, k: string, create: () => V): V {
+function cacheGet<V>(
+  cache: Map<string, V>,
+  k: string,
+  create: () => V,
+  limit = CACHE_LIMIT,
+): V {
   const hit = cache.get(k);
   if (hit !== undefined) {
-    if (cache.size >= CACHE_LIMIT) {
+    if (cache.size >= limit) {
       // Move to the end — Map iterates in insertion order, and the eviction
       // below takes the first key it sees.
       cache.delete(k);
@@ -167,20 +172,38 @@ function cacheGet<V>(cache: Map<string, V>, k: string, create: () => V): V {
     return hit;
   }
   const v = create();
-  if (cache.size >= CACHE_LIMIT) cache.delete(cache.keys().next().value!);
+  if (cache.size >= limit) cache.delete(cache.keys().next().value!);
   cache.set(k, v);
   return v;
 }
 
+const localeKey = (locale?: Locale): string =>
+  typeof locale === "string" ? locale : locale ? locale.join("\0") : "";
+
 const nfCache = new Map<string, Intl.NumberFormat>();
+const symbolCache = new Map<string, string>();
 
-const localeKey = (locale?: Locale) =>
-  Array.isArray(locale) ? locale.join("\0") : (locale ?? "");
-
-const nf = (l: Locale | undefined, o: Intl.NumberFormatOptions) =>
-  cacheGet(nfCache, `${localeKey(l)}|${JSON.stringify(o)}`, () =>
-    new Intl.NumberFormat(l as Intl.LocalesArgument, o),
-  );
+/**
+ * A currency formatter. `digits` is a ceiling: when it sits below the
+ * currency's own minimum (2 for EUR, 0 for JPY) the minimum is lowered with
+ * it — which is what current engines do on their own, and what older ones
+ * reject as `maximumFractionDigits < minimumFractionDigits`.
+ */
+function currencyFormat(
+  locale: Locale | undefined,
+  currency: string,
+  currencyDisplay: CurrencyDisplay | undefined,
+  digits: number | undefined,
+): Intl.NumberFormat {
+  const base: Intl.NumberFormatOptions = { style: "currency", currency, currencyDisplay };
+  if (digits === undefined) return new Intl.NumberFormat(locale, base);
+  const min = new Intl.NumberFormat(locale, base).resolvedOptions().minimumFractionDigits;
+  return new Intl.NumberFormat(locale, {
+    ...base,
+    minimumFractionDigits: Math.min(min ?? digits, digits),
+    maximumFractionDigits: digits,
+  });
+}
 
 function plan(value: number | bigint, options: AnyamountOptions): Intl.NumberFormat {
   const { mode = "smart", locale, currency, currencyDisplay, unit, style = "short", digits } =
@@ -189,51 +212,90 @@ function plan(value: number | bigint, options: AnyamountOptions): Intl.NumberFor
   if (!(typeof value === "bigint" || (typeof value === "number" && !Number.isNaN(value))))
     throw new TypeError(`Invalid amount: ${String(value)}`);
 
+  const lk = localeKey(locale);
+
   if (mode === "smart") {
     const abs = typeof value === "bigint" ? (value < 0 ? -value : value) : Math.abs(value);
-    const compact = abs >= COMPACT_MIN;
-    return nf(
-      locale,
-      compact
-        ? {
-            notation: "compact",
-            compactDisplay: style === "long" ? "long" : "short",
-            maximumFractionDigits: digits ?? 1,
-          }
-        : { maximumFractionDigits: digits ?? 2 },
+    if (abs >= COMPACT_MIN) {
+      const compactDisplay = style === "long" ? "long" : "short";
+      const max = digits ?? 1;
+      return cacheGet(nfCache, `${lk}|c|${compactDisplay}|${max}`, () =>
+        new Intl.NumberFormat(locale, {
+          notation: "compact",
+          compactDisplay,
+          maximumFractionDigits: max,
+        }),
+      );
+    }
+    const max = digits ?? 2;
+    return cacheGet(nfCache, `${lk}|p|${max}`, () =>
+      new Intl.NumberFormat(locale, { maximumFractionDigits: max }),
     );
   }
 
   if (mode === "currency") {
     if (!currency)
       throw new TypeError('anyamount: mode "currency" requires the `currency` option (ISO 4217 code, e.g. "EUR")');
-    return nf(
-      locale,
-      digits === undefined
-        ? { style: "currency", currency, currencyDisplay }
-        : { style: "currency", currency, currencyDisplay, maximumFractionDigits: digits },
+    return cacheGet(nfCache, `${lk}|$|${currency}|${currencyDisplay ?? ""}|${digits ?? ""}`, () =>
+      currencyFormat(locale, currency, currencyDisplay, digits),
     );
   }
 
   if (mode === "unit") {
     if (!unit)
       throw new TypeError('anyamount: mode "unit" requires the `unit` option (sanctioned identifier, e.g. "gigabyte")');
-    return nf(locale, {
-      style: "unit",
-      unit,
-      unitDisplay: style,
-      maximumFractionDigits: digits ?? 2,
-    });
+    const max = digits ?? 2;
+    return cacheGet(nfCache, `${lk}|u|${unit}|${style}|${max}`, () =>
+      new Intl.NumberFormat(locale, {
+        style: "unit",
+        unit,
+        unitDisplay: style,
+        maximumFractionDigits: max,
+      }),
+    );
   }
 
   throw new RangeError(`Invalid mode: ${String(mode)}`);
 }
 
+function format(value: number | bigint, options: AnyamountOptions = {}): string {
+  return plan(value, options).format(value);
+}
+
+function parts(value: number | bigint, options: AnyamountOptions = {}): AnyamountPart[] {
+  return plan(value, options).formatToParts(value);
+}
+
+/** Options for {@linkcode anyamount.symbol}. */
+export interface SymbolOptions {
+  /** Output locale. Defaults to the runtime locale. */
+  locale?: Locale;
+  /** Which spelling to return. Defaults to `"narrowSymbol"` — the bare symbol, never `"US$"`. */
+  display?: CurrencyDisplay;
+}
+
+function symbol(currency: string, options: SymbolOptions = {}): string {
+  if (!currency || typeof currency !== "string")
+    throw new TypeError('anyamount: anyamount.symbol requires an ISO 4217 currency code, e.g. "USD"');
+
+  const { locale, display = "narrowSymbol" } = options;
+  // The symbol is a fixed fact about (locale, currency, display), so the string
+  // itself is cached — the formatter behind it is only needed once.
+  return cacheGet(symbolCache, `${localeKey(locale)}|${currency}|${display}`, () => {
+    const f = new Intl.NumberFormat(locale, { style: "currency", currency, currencyDisplay: display });
+    return f.formatToParts(0).find((p) => p.type === "currency")!.value;
+  });
+}
+
 /**
- * Formats a number as a human-readable, localized string using native `Intl`.
+ * Formats a number as a human-readable, localized string using native
+ * `Intl.NumberFormat` — compact for big values, currency, or sanctioned units.
  *
  * `bigint` values work in every mode. `±Infinity` formats as the locale's
  * infinity symbol (`"∞"`); `NaN` throws.
+ *
+ * The package exports this one name. Anything beyond the plain call hangs off
+ * it: {@linkcode anyamount.parts} and {@linkcode anyamount.symbol}.
  *
  * @example
  * ```ts
@@ -249,126 +311,53 @@ function plan(value: number | bigint, options: AnyamountOptions): Intl.NumberFor
  * @throws {TypeError} If `value` is not a number or bigint, is `NaN`, currency mode is missing `currency`, or unit mode is missing `unit`.
  * @throws {RangeError} If `options.mode` is unknown.
  */
-function format(value: number | bigint, options: AnyamountOptions = {}): string {
-  return plan(value, options).format(value);
-}
-
-/**
- * Like {@linkcode anyamount}, but returns the output as
- * `Intl.NumberFormat.formatToParts` parts instead of a string — style the
- * number apart from the currency symbol or unit, or rebuild the output your
- * own way.
- *
- * @example
- * ```ts
- * anyamountParts(1999, { mode: "currency", currency: "EUR", locale: "en" });
- * // [
- * //   { type: "currency", value: "€" },
- * //   { type: "integer", value: "1" },
- * //   { type: "group", value: "," },
- * //   { type: "integer", value: "999" },
- * //   { type: "decimal", value: "." },
- * //   { type: "fraction", value: "00" },
- * // ]
- * ```
- *
- * @param value The number (or bigint) to format.
- * @param options See {@linkcode AnyamountOptions} — same options as {@linkcode anyamount}.
- * @returns The formatted output as an array of parts.
- * @throws {TypeError} If `value` is not a number or bigint, is `NaN`, currency mode is missing `currency`, or unit mode is missing `unit`.
- * @throws {RangeError} If `options.mode` is unknown.
- */
-function parts(
-  value: number | bigint,
-  options: AnyamountOptions = {},
-): AnyamountPart[] {
-  return plan(value, options).formatToParts(value);
-}
-
-/** Options for {@linkcode anyamount.symbol}. */
-export interface SymbolOptions {
-  /** Output locale. Defaults to the runtime locale. */
-  locale?: Locale;
-  /** Which spelling to return. Defaults to `"narrowSymbol"` — the bare symbol, never `"US$"`. */
-  display?: CurrencyDisplay;
-}
-
-/**
- * Resolves an ISO 4217 currency code to its localized symbol — `"USD"` → `"$"`,
- * `"EUR"` → `"€"` — with no number attached. For labels, dropdowns, and input
- * affixes, where the amount is rendered separately (or not at all).
- *
- * Codes without a symbol in the locale's data come back as the code itself
- * (`"XAU"` → `"XAU"`), which is what `Intl` renders too.
- *
- * @example
- * ```ts
- * anyamountSymbol("USD", { locale: "en" });                   // "$"
- * anyamountSymbol("EUR", { locale: "en" });                   // "€"
- * anyamountSymbol("JPY", { locale: "ja" });                   // "￥"
- * anyamountSymbol("USD", { locale: "en", display: "name" });  // "US dollars"
- * ```
- *
- * @param currency ISO 4217 currency code (case-insensitive).
- * @param options See {@linkcode SymbolOptions}.
- * @returns The currency symbol as a bare string.
- * @throws {TypeError} If `currency` is missing or not a string.
- * @throws {RangeError} If `currency` is not a well-formed ISO 4217 code — `Intl` decides.
- */
-function symbol(currency: string, options: SymbolOptions = {}): string {
-  if (!currency || typeof currency !== "string")
-    throw new TypeError('anyamount: anyamount.symbol requires an ISO 4217 currency code, e.g. "USD"');
-
-  const { locale, display = "narrowSymbol" } = options;
-  const parts = nf(locale, {
-    style: "currency",
-    currency,
-    currencyDisplay: display,
-  }).formatToParts(0);
-
-  return parts.find((p) => p.type === "currency")!.value;
-}
-
-/**
- * Formats a number as a localized string using native `Intl.NumberFormat` —
- * compact for big values, currency, or sanctioned units.
- *
- * The package exports this one name. Anything beyond the plain call hangs off
- * it: {@linkcode anyamount.parts} and {@linkcode anyamount.symbol}.
- *
- * @example
- * ```ts
- * anyamount(1234567);                                        // "1.2M"
- * anyamount(1999, { mode: "currency", currency: "EUR" });     // "€1,999.00"
- * anyamount(3.2, { mode: "unit", unit: "gigabyte" });         // "3.2 GB"
- * ```
- */
 export const anyamount = Object.assign(format, {
   /**
    * Like calling {@linkcode anyamount} directly, but returns the
    * `Intl.NumberFormat.formatToParts` output instead of a string — style the
-   * number apart from the currency symbol or unit.
+   * number apart from the currency symbol or unit, or rebuild the output your
+   * own way.
+   *
+   * Takes the same arguments and throws on the same inputs.
    *
    * @example
    * ```ts
    * anyamount.parts(1999, { mode: "currency", currency: "EUR", locale: "en" });
-   * // [{ type: "currency", value: "€" }, { type: "integer", value: "1" }, …]
+   * // [
+   * //   { type: "currency", value: "€" },
+   * //   { type: "integer", value: "1" },
+   * //   { type: "group", value: "," },
+   * //   { type: "integer", value: "999" },
+   * //   { type: "decimal", value: "." },
+   * //   { type: "fraction", value: "00" },
+   * // ]
    * ```
    */
   parts,
 
   /**
-   * Resolves an ISO 4217 currency code to its localized symbol, with no number
-   * attached — for labels, currency pickers and input affixes.
+   * Resolves an ISO 4217 currency code to its localized symbol — `"USD"` →
+   * `"$"`, `"EUR"` → `"€"` — with no number attached. For labels, currency
+   * pickers and input affixes, where the amount is rendered separately (or not
+   * at all).
    *
-   * Takes a currency code rather than an amount, so it is a static on the
-   * package name instead of hanging off a formatted result.
+   * Codes without a symbol in the locale's data come back as the code itself
+   * (`"XAU"` → `"XAU"`), which is what `Intl` renders too. Takes a currency
+   * code rather than an amount, so it is a static on the package name.
    *
    * @example
    * ```ts
    * anyamount.symbol("USD", { locale: "en" });                    // "$"
+   * anyamount.symbol("EUR", { locale: "en" });                    // "€"
+   * anyamount.symbol("JPY", { locale: "ja" });                    // "￥"
    * anyamount.symbol("USD", { locale: "en", display: "name" });   // "US dollars"
    * ```
+   *
+   * @param currency ISO 4217 currency code (case-insensitive).
+   * @param options See {@linkcode SymbolOptions}.
+   * @returns The currency symbol as a bare string.
+   * @throws {TypeError} If `currency` is missing or not a string.
+   * @throws {RangeError} If `currency` is not a well-formed ISO 4217 code — `Intl` decides.
    */
   symbol,
 });

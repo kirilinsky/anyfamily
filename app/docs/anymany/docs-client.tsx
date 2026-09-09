@@ -106,8 +106,9 @@ yarn add anymany`}</Code>
 
       <Section id="anymany" title="anymany()">
         <p>
-          The single entry point. Pass an array of strings, optionally pass
-          options. Non-string items are coerced via <Mono>String()</Mono>. An
+          The single entry point. Pass the items — an array, a <Mono>Set</Mono>,
+          any iterable — and optionally options. Non-string items are coerced
+          via <Mono>String()</Mono>. An
           empty array returns <Mono>&quot;&quot;</Mono>; a single item is
           returned as-is.
         </p>
@@ -383,7 +384,7 @@ export function TagList({ tags }: { tags: string[] }) {
             ["dependencies", "0", "0", "0"],
           ]}
         />
-        <p>The honest comparison for anymany is the native API rather than a library, because there is barely a library to compare against. At 0.6kb gzipped it adds the sorting, the overflow and the fallback chain around Intl.ListFormat, and saves you constructing a formatter per call.</p>
+        <p>The honest comparison for anymany is the native API rather than a library, because there is barely a library to compare against. At 0.7kb gzipped it adds the sorting, the overflow and the fallback chain around Intl.ListFormat, and saves you constructing a formatter per call.</p>
       </Section>
 
       <Section id="compatibility" title="Compatibility">

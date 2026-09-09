@@ -52,20 +52,16 @@ type WeekInfo = {
  * 22 ships only the properties, newer engines only the methods. Read whichever
  * the runtime has.
  */
-function read<T>(locale: Intl.Locale, name: string): T | undefined {
+function read<T>(locale: Intl.Locale, method: string, prop: string): T | undefined {
   const l = locale as unknown as Record<string, unknown>;
-  const method = l[`get${name[0].toUpperCase()}${name.slice(1)}`];
-  if (typeof method === "function") {
-    return (method as () => T).call(locale);
-  }
-  return l[name] as T | undefined;
+  const fn = l[method];
+  return typeof fn === "function" ? (fn as () => T).call(locale) : (l[prop] as T | undefined);
 }
 
 function probe(): boolean {
   if (typeof Intl?.Locale !== "function") return false;
   try {
-    const l = new Intl.Locale("en");
-    return read<WeekInfo>(l, "weekInfo") !== undefined;
+    return read<WeekInfo>(new Intl.Locale("en"), "getWeekInfo", "weekInfo") !== undefined;
   } catch {
     return false;
   }
@@ -75,6 +71,38 @@ function probe(): boolean {
 const supported: boolean = probe();
 
 const CACHE_LIMIT = 50;
+
+/**
+ * Formatter cache. LRU, but only once it is full.
+ *
+ * Keeping Map order in step with recency costs a delete + re-set on every hit —
+ * ~120ns, real money against a format call that takes ~500ns. Below the limit
+ * nothing can be evicted, so that order buys nothing and the hit stays a bare
+ * `Map.get`. Once the cache is full, eviction is possible and recency starts to
+ * matter: a plain FIFO would drop the app's one hot locale every 50 misses, and
+ * rebuilding a formatter costs ~50-90µs.
+ */
+function cacheGet<V>(
+  cache: Map<string, V>,
+  k: string,
+  create: () => V,
+  limit = CACHE_LIMIT,
+): V {
+  const hit = cache.get(k);
+  if (hit !== undefined) {
+    if (cache.size >= limit) {
+      // Move to the end — Map iterates in insertion order, and the eviction
+      // below takes the first key it sees.
+      cache.delete(k);
+      cache.set(k, hit);
+    }
+    return hit;
+  }
+  const v = create();
+  if (cache.size >= limit) cache.delete(cache.keys().next().value!);
+  cache.set(k, v);
+  return v;
+}
 
 /**
  * Two caches, because resolving a tag costs far more than reading one.
@@ -93,30 +121,11 @@ const byTag = new Map<string, AnylocaleInfo>();
 const byInput = new Map<string, AnylocaleInfo>();
 
 /**
- * `"s:"` and `"a:"` keep a string apart from a one-element chain, and stop
- * `"en\u0000de"` from colliding with `["en", "de"]`.
+ * `"s:"` and `"a:"` keep a string apart from a one-element chain, and the NUL
+ * joiner stops a tag from colliding with a chain that spells the same text.
  */
 const inputKey = (input: Locale): string =>
-  typeof input === "string" ? `s:${input}` : `a:${input.join("\u0000")}`;
-
-function remember(cache: Map<string, AnylocaleInfo>, key: string, value: AnylocaleInfo) {
-  if (cache.size >= CACHE_LIMIT) cache.delete(cache.keys().next().value!);
-  cache.set(key, value);
-}
-
-/**
- * A hit, with recency refreshed only when the cache is full — the same policy
- * the rest of the family uses. Below the limit nothing can be evicted, so the
- * delete + re-set (~120ns, against a ~200ns read) would buy nothing.
- */
-function touch(cache: Map<string, AnylocaleInfo>, key: string): AnylocaleInfo | undefined {
-  const hit = cache.get(key);
-  if (hit !== undefined && cache.size >= CACHE_LIMIT) {
-    cache.delete(key);
-    cache.set(key, hit);
-  }
-  return hit;
-}
+  typeof input === "string" ? `s:${input}` : `a:${input.join("\0")}`;
 
 const isWeekday = (n: unknown): n is Weekday =>
   typeof n === "number" && Number.isInteger(n) && n >= 1 && n <= 7;
@@ -174,40 +183,39 @@ function toLocale(input: Locale): Intl.Locale {
 
 function build(locale: Intl.Locale): AnylocaleInfo {
   // Each getter is lazy: asking for `direction` never builds the calendar list.
-  const info = {
+  // Getters in an object literal are own + enumerable, so spreading and
+  // JSON.stringify see every field.
+  const week = () => read<WeekInfo>(locale, "getWeekInfo", "weekInfo");
+  return {
     tag: locale.toString(),
     get direction(): Direction {
-      const d = read<{ direction?: string }>(locale, "textInfo")?.direction;
+      const d = read<{ direction?: string }>(locale, "getTextInfo", "textInfo")?.direction;
       return d === "rtl" ? "rtl" : "ltr";
     },
     get weekStart(): Weekday {
-      const day = read<WeekInfo>(locale, "weekInfo")?.firstDay;
+      const day = week()?.firstDay;
       return isWeekday(day) ? day : 1;
     },
     get weekend(): Weekday[] {
-      const days = read<WeekInfo>(locale, "weekInfo")?.weekend;
+      const days = week()?.weekend;
       return Array.isArray(days) ? days.filter(isWeekday) : [6, 7];
     },
     get minimalDays(): number {
-      return read<WeekInfo>(locale, "weekInfo")?.minimalDays ?? 1;
+      return week()?.minimalDays ?? 1;
     },
     get calendars(): string[] {
-      return read<string[]>(locale, "calendars") ?? [];
+      return read<string[]>(locale, "getCalendars", "calendars") ?? [];
     },
     get timeZones(): string[] {
-      return read<string[]>(locale, "timeZones") ?? [];
+      return read<string[]>(locale, "getTimeZones", "timeZones") ?? [];
     },
     get hourCycles(): string[] {
-      return read<string[]>(locale, "hourCycles") ?? [];
+      return read<string[]>(locale, "getHourCycles", "hourCycles") ?? [];
     },
     get numberingSystems(): string[] {
-      return read<string[]>(locale, "numberingSystems") ?? [];
+      return read<string[]>(locale, "getNumberingSystems", "numberingSystems") ?? [];
     },
   };
-
-  // Getters defined in an object literal are already own + enumerable, so
-  // spreading and JSON.stringify see every field.
-  return info;
 }
 
 function info(input: Locale): AnylocaleInfo {
@@ -223,17 +231,10 @@ function info(input: Locale): AnylocaleInfo {
   // constructing Intl.Locale, asking whether the runtime has data — is the
   // expensive part, and a repeated call needs none of it. Invalid input throws
   // during resolution, so it never reaches either cache.
-  const key = inputKey(input);
-  const seen = touch(byInput, key);
-  if (seen !== undefined) return seen;
-
-  const locale = toLocale(input);
-  const tag = locale.toString();
-
-  const built = touch(byTag, tag) ?? build(locale);
-  remember(byTag, tag, built);
-  remember(byInput, key, built);
-  return built;
+  return cacheGet(byInput, inputKey(input), () => {
+    const locale = toLocale(input);
+    return cacheGet(byTag, locale.toString(), () => build(locale));
+  });
 }
 
 /**

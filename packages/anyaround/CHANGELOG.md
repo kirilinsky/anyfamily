@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.0.2
+
+### Patch Changes
+
+- Resolved names are cached (500 entries, misses included), so a repeat call never reaches `Intl.DisplayNames.of` — re-rendering a country picker is ~5× cheaper. `anyaround.info()` still returns a fresh object on every call. Flag derivation and the mode check are simpler; JSDoc corrected.
+
 ## 2.0.1
 
 ### Patch Changes

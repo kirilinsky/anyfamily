@@ -85,15 +85,18 @@ const THRESHOLDS: [number, ThresholdUnit, number][] = [
   [28512000, "month", 2592e6],
 ];
 
-const DATE_OPTS: Intl.DateTimeFormatOptions = {
-  day: "numeric",
-  month: "short",
-  year: "numeric",
-};
-const TIME_OPTS: Intl.DateTimeFormatOptions = {
-  hour: "2-digit",
-  minute: "2-digit",
-};
+/**
+ * The fixed `Intl.DateTimeFormat` option sets smart mode uses. Keyed by name
+ * in the cache, so the hot path never spreads or stringifies an object.
+ */
+const PRESETS = {
+  date: { day: "numeric", month: "short", year: "numeric" },
+  time: { hour: "2-digit", minute: "2-digit" },
+  weekday: { weekday: "long" },
+  ymd: { day: "numeric", month: "numeric", year: "numeric" },
+} satisfies Record<string, Intl.DateTimeFormatOptions>;
+
+type Preset = keyof typeof PRESETS;
 
 const CACHE_LIMIT = 50;
 
@@ -107,10 +110,15 @@ const CACHE_LIMIT = 50;
  * matter: a plain FIFO would drop the app's one hot locale every 50 misses, and
  * rebuilding a formatter costs ~50-90µs.
  */
-function cacheGet<V>(cache: Map<string, V>, k: string, create: () => V): V {
+function cacheGet<V>(
+  cache: Map<string, V>,
+  k: string,
+  create: () => V,
+  limit = CACHE_LIMIT,
+): V {
   const hit = cache.get(k);
   if (hit !== undefined) {
-    if (cache.size >= CACHE_LIMIT) {
+    if (cache.size >= limit) {
       // Move to the end — Map iterates in insertion order, and the eviction
       // below takes the first key it sees.
       cache.delete(k);
@@ -119,28 +127,47 @@ function cacheGet<V>(cache: Map<string, V>, k: string, create: () => V): V {
     return hit;
   }
   const v = create();
-  if (cache.size >= CACHE_LIMIT) cache.delete(cache.keys().next().value!);
+  if (cache.size >= limit) cache.delete(cache.keys().next().value!);
   cache.set(k, v);
   return v;
+}
+
+const localeKey = (locale?: Locale): string =>
+  typeof locale === "string" ? locale : locale ? locale.join("\0") : "";
+
+/**
+ * Cache key for a caller-supplied options object. Keys are sorted, so
+ * `{ day, month }` and `{ month, day }` share one formatter; `undefined`
+ * values are skipped, as `Intl` skips them.
+ */
+function optKey(o: object): string {
+  const r = o as Record<string, unknown>;
+  let k = "";
+  for (const name of Object.keys(r).sort()) {
+    const v = r[name];
+    if (v !== undefined) k += `${name}=${v};`;
+  }
+  return k;
 }
 
 const rtfCache = new Map<string, Intl.RelativeTimeFormat>();
 const dtfCache = new Map<string, Intl.DateTimeFormat>();
 
-const localeKey = (locale?: Locale) =>
-  Array.isArray(locale) ? locale.join("\0") : (locale ?? "");
-
-const rtf = (l: Locale | undefined, n: "always" | "auto", s: Style) =>
-  cacheGet(rtfCache, `${localeKey(l)}|${n}|${s}`, () =>
-    new Intl.RelativeTimeFormat(l as Intl.LocalesArgument, {
-      numeric: n,
-      style: s,
-    }),
+const rtf = (l: Locale | undefined, numeric: "always" | "auto", style: Style) =>
+  cacheGet(rtfCache, `${localeKey(l)}|${numeric}|${style}`, () =>
+    new Intl.RelativeTimeFormat(l, { numeric, style }),
   );
 
-const dtf = (l: Locale | undefined, o: Intl.DateTimeFormatOptions) =>
-  cacheGet(dtfCache, `${localeKey(l)}|${JSON.stringify(o)}`, () =>
-    new Intl.DateTimeFormat(l as Intl.LocalesArgument, o),
+/** A formatter for one of the fixed presets, in a time zone. */
+const preset = (l: Locale | undefined, p: Preset, timeZone?: string) =>
+  cacheGet(dtfCache, `${localeKey(l)}|${p}|${timeZone ?? ""}`, () =>
+    new Intl.DateTimeFormat(l, { ...PRESETS[p], timeZone }),
+  );
+
+/** A formatter for caller-supplied `Intl.DateTimeFormatOptions`; `timeZone` wins over the object's own. */
+const custom = (l: Locale | undefined, o: Intl.DateTimeFormatOptions, timeZone?: string) =>
+  cacheGet(dtfCache, `${localeKey(l)}|f|${optKey(o)}|${timeZone ?? ""}`, () =>
+    new Intl.DateTimeFormat(l, timeZone ? { ...o, timeZone } : o),
   );
 
 const toDate = (i: DateInput): Date => {
@@ -149,31 +176,25 @@ const toDate = (i: DateInput): Date => {
   return d;
 };
 
-function dayParts(date: Date, timeZone?: string): [number, number, number] {
-  if (!timeZone) return [date.getFullYear(), date.getMonth(), date.getDate()];
-
-  const parts = dtf("en-US", {
-    day: "numeric",
-    month: "numeric",
-    timeZone,
-    year: "numeric",
-  }).formatToParts(date);
-
-  return [
-    Number(parts.find((p) => p.type === "year")?.value),
-    Number(parts.find((p) => p.type === "month")?.value) - 1,
-    Number(parts.find((p) => p.type === "day")?.value),
-  ];
+/** Days since the epoch, on the calendar of `timeZone` (or the runtime's when unset). */
+function dayIndex(date: Date, timeZone?: string): number {
+  let y: number, m: number, d: number;
+  if (timeZone) {
+    y = m = d = 0;
+    for (const p of preset("en-US", "ymd", timeZone).formatToParts(date)) {
+      if (p.type === "year") y = +p.value;
+      else if (p.type === "month") m = +p.value - 1;
+      else if (p.type === "day") d = +p.value;
+    }
+  } else {
+    y = date.getFullYear();
+    m = date.getMonth();
+    d = date.getDate();
+  }
+  return Math.floor(Date.UTC(y, m, d) / MS_DAY);
 }
 
-const dayIndex = (date: Date, timeZone?: string) => {
-  const [year, month, day] = dayParts(date, timeZone);
-  return Math.floor(Date.UTC(year, month, day) / MS_DAY);
-};
-
-const dayDiff = (date: Date, now: Date, timeZone?: string) =>
-  dayIndex(date, timeZone) - dayIndex(now, timeZone);
-
+/** Rounds half away from zero, so `-1.5` is `-2` like `1.5` is `2`. */
 const round = (n: number) => Math.sign(n) * Math.round(Math.abs(n));
 
 function unit(ms: number, t?: Thresholds): [number, RelativeUnit] {
@@ -183,33 +204,11 @@ function unit(ms: number, t?: Thresholds): [number, RelativeUnit] {
   return [round(ms / MS_YEAR), "year"];
 }
 
+/** One piece of planned output: a relative phrase, a date-time render, or a literal. */
 type Seg =
   | { f: Intl.RelativeTimeFormat; v: number; u: RelativeUnit }
   | { f: Intl.DateTimeFormat; d: Date }
   | { t: string };
-
-function relativeSegs(
-  date: Date,
-  now: Date,
-  locale: Locale | undefined,
-  numeric: boolean,
-  style: Style,
-  t?: Thresholds,
-): Seg[] {
-  const ms = date.getTime() - now.getTime();
-  const [v, u] = unit(ms, t);
-  return [{ f: rtf(locale, numeric ? "always" : "auto", style), v, u }];
-}
-
-function absoluteSegs(
-  date: Date,
-  locale: Locale | undefined,
-  format: Intl.DateTimeFormatOptions | undefined,
-  timeZone: string | undefined,
-): Seg[] {
-  const opts = format ?? DATE_OPTS;
-  return [{ f: dtf(locale, timeZone ? { ...opts, timeZone } : opts), d: date }];
-}
 
 function smartSegs(
   date: Date,
@@ -226,13 +225,7 @@ function smartSegs(
     { f: rtf(locale, "auto", style), v, u },
   ];
   const withTime = (segs: Seg[]): Seg[] =>
-    time
-      ? [
-          ...segs,
-          { t: ", " },
-          { f: dtf(locale, { ...TIME_OPTS, timeZone }), d: date },
-        ]
-      : segs;
+    time ? [...segs, { t: ", " }, { f: preset(locale, "time", timeZone), d: date }] : segs;
 
   if (abs < (t?.second ?? 45)) return rel(0, "second");
   if (abs < (t?.minute ?? 3600)) {
@@ -240,15 +233,13 @@ function smartSegs(
     if (Math.abs(m) < 60) return rel(m, "minute");
   }
 
-  const calendarDiff = dayDiff(date, now, timeZone);
+  const days = dayIndex(date, timeZone) - dayIndex(now, timeZone);
 
-  if (calendarDiff === 0) return withTime(rel(0, "day"));
-  if (calendarDiff === -1) return withTime(rel(-1, "day"));
-  if (calendarDiff === 1) return withTime(rel(1, "day"));
-  if (calendarDiff > -7 && calendarDiff < 7)
-    return withTime([{ f: dtf(locale, { timeZone, weekday: "long" }), d: date }]);
+  if (days >= -1 && days <= 1) return withTime(rel(days, "day"));
+  if (days > -7 && days < 7)
+    return withTime([{ f: preset(locale, "weekday", timeZone), d: date }]);
 
-  return [{ f: dtf(locale, { ...DATE_OPTS, timeZone }), d: date }];
+  return [{ f: preset(locale, "date", timeZone), d: date }];
 }
 
 function plan(input: DateInput, options: AnywhenOptions): Seg[] {
@@ -267,9 +258,12 @@ function plan(input: DateInput, options: AnywhenOptions): Seg[] {
   const date = toDate(input);
   const anchor = now === undefined ? new Date() : toDate(now);
 
-  if (mode === "relative")
-    return relativeSegs(date, anchor, locale, numeric, style, thresholds);
-  if (mode === "absolute") return absoluteSegs(date, locale, format, timeZone);
+  if (mode === "absolute")
+    return [{ f: format ? custom(locale, format, timeZone) : preset(locale, "date", timeZone), d: date }];
+  if (mode === "relative") {
+    const [v, u] = unit(date.getTime() - anchor.getTime(), thresholds);
+    return [{ f: rtf(locale, numeric ? "always" : "auto", style), v, u }];
+  }
   if (mode === "smart")
     return smartSegs(date, anchor, locale, time, timeZone, style, thresholds);
 
@@ -277,15 +271,13 @@ function plan(input: DateInput, options: AnywhenOptions): Seg[] {
 }
 
 function format(input: DateInput, options: AnywhenOptions = {}): string {
-  return plan(input, options)
-    .map((s) => ("t" in s ? s.t : "d" in s ? s.f.format(s.d) : s.f.format(s.v, s.u)))
-    .join("");
+  let out = "";
+  for (const s of plan(input, options))
+    out += "t" in s ? s.t : "d" in s ? s.f.format(s.d) : s.f.format(s.v, s.u);
+  return out;
 }
 
-function parts(
-  input: DateInput,
-  options: AnywhenOptions = {},
-): AnywhenPart[] {
+function parts(input: DateInput, options: AnywhenOptions = {}): AnywhenPart[] {
   return plan(input, options).flatMap((s) =>
     "t" in s
       ? { type: "literal", value: s.t }

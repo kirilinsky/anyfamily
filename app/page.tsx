@@ -150,7 +150,7 @@ const jsonLd = {
       "@type": "SoftwareApplication",
       name: "anyfamily-react",
       description:
-        "React hooks for the any* family — useAnywhen, useAnyamount, useAnymany, useAnyaround, useAnylong, useAnyplural, useAnyword and useAnylocale, sharing one locale provider.",
+        "React hooks for the any* family — useAnywhen, useAnyamount, useAnymany, useAnyaround, useAnylong, useAnyplural, useAnyword and useAnylocale, plus useAnyfamily for the whole set at once, sharing one locale provider.",
       applicationCategory: "DeveloperApplication",
       operatingSystem: "Any",
       url: BASE_URL,
@@ -397,8 +397,9 @@ export default function Home() {
           <div className="flex flex-col items-start gap-3 md:gap-5">
             <h2 className="sr-only">
               anyfamily-react — React hooks for the any* family: useAnywhen,
-              useAnyamount, useAnymany, useAnyaround, useAnylong, useAnyplural
-              and useAnyword, sharing one locale provider.
+              useAnyamount, useAnymany, useAnyaround, useAnylong, useAnyplural,
+              useAnyword and useAnylocale, plus useAnyfamily for the whole set
+              at once, sharing one locale provider.
             </h2>
             <FamilyLogo
               suffix="react"
