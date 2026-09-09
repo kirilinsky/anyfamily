@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.0.2
+
+### Patch Changes
+
+- `anyamount.symbol()` caches its result per locale, currency and display.
+- A `digits` below the currency's own minimum (`digits: 0` for EUR) lowers the minimum with it on every engine — older engines threw `RangeError: maximumFractionDigits < minimumFractionDigits`, newer ones already did this.
+- Formatter cache keys are built from the option values instead of `JSON.stringify(options)`; the options object is only created on a cache miss.
+
 ## 2.0.1
 
 ### Patch Changes

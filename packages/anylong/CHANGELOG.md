@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.0.2
+
+### Patch Changes
+
+- Shorthand units are stored singular and a trailing `s` is stripped on the second lookup — the same spellings are accepted from a smaller table. Options are split by destructuring instead of `void` juggling; the formatter cache uses the family's shared helper and an order-insensitive key. JSDoc corrected (`anylongParts` → `anylong.parts`).
+
 ## 2.0.1
 
 ### Patch Changes

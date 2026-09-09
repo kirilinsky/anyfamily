@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.0.2
+
+### Patch Changes
+
+- Segment walking is a visitor instead of a generator — `truncate` exits early, `count` allocates nothing. A fractional `truncate` limit keeps its floor instead of never cutting. Error message and JSDoc point at `anyword.supported` rather than a bare `supported` export.
+
 ## 2.0.1
 
 ### Patch Changes

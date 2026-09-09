@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.0.2
+
+### Patch Changes
+
+- Simpler internals: the plan is a formatter plus the word, not a segment array; the `format` passthrough is keyed order-insensitively. Stale 1.x names in JSDoc (`anypluralParts`) corrected.
+
 ## 2.0.1
 
 ### Patch Changes

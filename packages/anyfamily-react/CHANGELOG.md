@@ -1,5 +1,33 @@
 # anyfamily-react
 
+## 2.3.0
+
+### Minor Changes
+
+- **`useAnyfamily()`** — every function in the family bound to the nearest provider: same signatures as the packages, extras included (`anywhen.parts`, `anyaround.info`, `anyamount.symbol`, `anyword.count`), locale and defaults applied, memoized on the provider's value. For what a one-value hook doesn't cover — parts, a loop, an event handler.
+- `useAnywhen` hooks with the same `refresh` share one interval instead of one timer each.
+- One context backs the provider; `useAnyfamilyLocale` / `useAnyfamilyDefaults` are unchanged.
+- `useAnymany` accepts any iterable, matching anymany.
+
+### Patch Changes
+
+- Updated dependencies
+- Updated dependencies
+- Updated dependencies
+- Updated dependencies
+- Updated dependencies
+- Updated dependencies
+- Updated dependencies
+- Updated dependencies
+  - anyamount@2.0.2
+  - anyaround@2.0.2
+  - anylocale@1.0.2
+  - anylong@2.0.2
+  - anymany@2.1.0
+  - anyplural@2.0.2
+  - anywhen@2.0.2
+  - anyword@2.0.2
+
 ## 2.2.0
 
 ### Minor Changes
