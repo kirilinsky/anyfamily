@@ -89,7 +89,11 @@ function ExtLink({
  */
 function DocsLink({ href, accent }: { href: string; accent: string }) {
   return (
-    <Link href={href} style={{ borderColor: `${accent}44` }} className={LINK_CLASS}>
+    <Link
+      href={href}
+      style={{ borderColor: `${accent}44` }}
+      className={LINK_CLASS}
+    >
       docs →
     </Link>
   );
@@ -291,7 +295,11 @@ export default function Home() {
                   ))}
                 </div>
               </div>
-              <CodeAnimation fn={p.id} accent={p.accent} presets={PRESETS_BY_ID[p.id]} />
+              <CodeAnimation
+                fn={p.id}
+                accent={p.accent}
+                presets={PRESETS_BY_ID[p.id]}
+              />
               <div className="mt-2 flex flex-wrap items-center gap-2 md:hidden">
                 <DemoLink pkg={p} />
                 {p.hasDocs && (
@@ -323,8 +331,8 @@ export default function Home() {
               className="h-auto w-32 sm:w-40 md:w-48"
             />
             <p className="max-w-sm text-sm leading-relaxed text-white/55">
-              The whole family in one install — every formatter behind a
-              single import, nothing unused shipped.
+              The whole family in one install — every formatter behind a single
+              import, nothing unused shipped.
             </p>
             <div className="mt-1">
               <InstallChip
@@ -476,6 +484,12 @@ export default function Home() {
           </div>
         </div>
       </section>
+      <script
+        dangerouslySetInnerHTML={{
+          __html:
+            '(function(){var h=location.hash.slice(1);if(!h)return;var e=document.getElementById(h);if(e)e.scrollIntoView({behavior:"auto"})})()',
+        }}
+      />
     </main>
   );
 }

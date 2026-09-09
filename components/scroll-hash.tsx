@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useLayoutEffect } from "react";
 
 /**
  * Keeps the address bar in step with the section in view, and puts the reader
@@ -19,8 +19,7 @@ export function ScrollHash({ ids }: { ids: string[] }) {
   // A string, so an inline array literal doesn't re-run the effect every render.
   const key = ids.join(",");
 
-  // Restore first, once, before the observer starts writing.
-  useEffect(() => {
+  useLayoutEffect(() => {
     const id = window.location.hash.slice(1);
     if (!id || !key.split(",").includes(id)) return;
     // Instant, not smooth: this is where the reader already was, not a journey.

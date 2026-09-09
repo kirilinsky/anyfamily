@@ -79,18 +79,20 @@ export function AnylocaleDemo() {
         ))}
       </div>
 
-      <div className="w-full max-w-full rounded-xl border border-white/[0.07] bg-black/30 px-4 py-3.5 font-mono">
-        <div className="flex min-h-9 flex-wrap items-center justify-center gap-x-1 gap-y-1.5 text-sm sm:justify-start sm:text-base">
+      <div className="w-fit max-w-full rounded-xl border border-white/[0.07] bg-black/30 px-4 py-3.5 font-mono">
+        <div className="flex min-h-9 flex-wrap items-center justify-center gap-x-1 gap-y-1.5 text-sm sm:text-base">
           <span className="shrink-0 text-accent">anylocale</span>
           <span className="shrink-0 text-white/30">(</span>
           <span className="shrink-0 text-sky-300">&quot;</span>
+          {/* Two characters of slack past the text: one for the caret, one so
+              a glyph wider than `ch` (the mono font's "0") never clips the end. */}
           <input
             value={tag}
             onChange={(e) => setTag(e.target.value)}
             spellCheck={false}
             aria-label="BCP 47 locale tag"
-            style={{ width: `calc(${Math.max(tag.length, 4)}ch + 0.5rem)` }}
-            className="h-8 rounded-md border border-transparent bg-transparent px-1 text-sky-300 outline-none transition-colors hover:border-white/10 hover:bg-white/[0.05] focus:border-white/15 focus:bg-white/[0.05]"
+            style={{ width: `min(${tag.length + 2}ch, 100%)` }}
+            className="h-8 max-w-full min-w-[6ch] shrink rounded-md border border-transparent bg-transparent px-1.5 text-sky-300 outline-none transition-colors hover:border-white/10 hover:bg-white/[0.05] focus:border-white/15 focus:bg-white/[0.05]"
           />
           <span className="shrink-0 text-sky-300">&quot;</span>
           <span className="shrink-0 text-white/30">)</span>

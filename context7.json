@@ -1,0 +1,28 @@
+{
+  "$schema": "https://context7.com/schema/context7.json",
+  "projectTitle": "anyfamily",
+  "description": "The any* family: eight micro, zero-dependency JavaScript/TypeScript formatters over native Intl — anywhen (dates), anyamount (numbers, money, units), anymany (lists), anyaround (region/language/currency names + flags), anylong (durations), anyplural (plurals), anyword (words/graphemes/sentences), anylocale (locale behaviour) — plus anyfamily (all in one) and anyfamily-react (hooks).",
+  "folders": [
+    "packages/anywhen",
+    "packages/anyamount",
+    "packages/anymany",
+    "packages/anyaround",
+    "packages/anylong",
+    "packages/anyplural",
+    "packages/anyword",
+    "packages/anylocale",
+    "packages/anyfamily",
+    "packages/anyfamily-react"
+  ],
+  "excludeFolders": ["node_modules", "dist", "scripts", "test"],
+  "excludeFiles": ["CHANGELOG.md", "LICENSE", "jsr.json", "tsconfig.json", "tsdown.config.ts", "vitest.config.ts", "*.test.ts", "*.test.tsx"],
+  "rules": [
+    "Every package exports exactly one name, the package name. The bare call does the job; extras are statics on that name: anywhen.parts(date), anyword.count(text), anyamount.symbol('USD'), anylong.supported. There are no other runtime exports and no default export.",
+    "Options are always the last argument, a plain object. `locale` is a BCP 47 tag or an array used as a fallback chain; omit it to use the runtime locale.",
+    "Import from the package itself (`import { anywhen } from 'anywhen'`) or all eight from 'anyfamily'. In React use 'anyfamily-react': useAnywhen, useAnyamount, ... or useAnyfamily() for every function bound to the AnyfamilyProvider.",
+    "anylong needs Intl.DurationFormat (Node 23+, Baseline 2025), anyword needs Intl.Segmenter, anylocale needs Intl Locale Info; each exposes a `.supported` boolean to branch on.",
+    "Functions return plain strings (anyword returns a string[]; anylocale returns a record with lazy fields); `.parts()` returns Intl formatToParts-style arrays.",
+    "For SSR pass `now` to anywhen and an explicit `locale` everywhere so server and client render the same text."
+  ],
+  "previousVersions": []
+}

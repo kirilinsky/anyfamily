@@ -1,8 +1,7 @@
-# The seven any* packages under packages/ are their own git repositories —
-# they are gitignored here and pushed/published from their own folders. This
-# workspace only makes pnpm resolve them locally, so the landing app and the
-# meta packages build against the sources sitting next to them instead of the
-# last version published to npm.
+# All ten any* packages live under packages/ in this monorepo (the old
+# per-package repositories are archived). The workspace makes pnpm resolve
+# them locally, so the landing app and the meta packages build against the
+# sources sitting next to them instead of the last version published to npm.
 #
 # Consequence worth knowing: local resolution uses each package's `dist/`, not
 # its `src/`. After editing a package, rebuild it or the consumer sees stale
