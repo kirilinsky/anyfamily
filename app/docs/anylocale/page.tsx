@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 
 import { BASE_URL } from "@/lib/packages";
 import { DocsClient } from "./docs-client";
+import { LIMITATIONS } from "./limitations";
+import { lastModified } from "@/lib/site-content";
 
 const url = `${BASE_URL}/docs/anylocale`;
 
@@ -28,6 +30,7 @@ export const metadata: Metadata = {
 const jsonLd = {
   "@context": "https://schema.org",
   "@type": "TechArticle",
+  dateModified: lastModified().toISOString(),
   headline: "anylocale API reference",
   description:
     "API reference for anylocale: fields, ISO week numbering, fallback chains, the support flag and compatibility.",
@@ -40,12 +43,27 @@ const jsonLd = {
   },
 };
 
+/** The limitations, as the questions they answer — the part of a reference a search result can quote. */
+const faqLd = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: LIMITATIONS.map(({ title, body }) => ({
+    "@type": "Question",
+    name: title,
+    acceptedAnswer: { "@type": "Answer", text: body },
+  })),
+};
+
 export default function AnylocaleDocsPage() {
   return (
     <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }}
       />
       <DocsClient />
     </>

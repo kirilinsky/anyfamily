@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import { DemoShell } from "@/components/demo-shell";
+import versions from "@/data/versions.json";
 import { BASE_URL, getPackage } from "@/lib/packages";
 import { AnylocaleDemo } from "./anylocale-demo";
 
@@ -50,6 +51,7 @@ const jsonLd = {
   url,
   downloadUrl: pkg.npm,
   codeRepository: pkg.github,
+  softwareVersion: (versions as Record<string, string>)[pkg.id] || undefined,
   programmingLanguage: "TypeScript",
   offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
   author: { "@type": "Person", name: "kirilinsky" },

@@ -186,7 +186,7 @@ const jsonLd = {
 
 export default function Home() {
   return (
-    <main className="h-dvh snap-y snap-mandatory overflow-y-scroll bg-[#0a0a0a] [scrollbar-width:none]">
+    <main className="scroll-smooth-container h-dvh snap-y snap-mandatory overflow-y-scroll bg-[#0a0a0a] [scrollbar-width:none]">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}

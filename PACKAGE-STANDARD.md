@@ -176,6 +176,15 @@ that metadata cannot be rewritten.
 
 ## README vs docs — who owns what
 
+The README is also what machines read. The site serves `/llms.txt` (an index
+over `lib/packages.ts`) and `/llms-full.txt` (every README concatenated at
+build time, in family order) for AI crawlers and agents — so there is no
+separate `llms.txt` per package to maintain, and a README that goes stale goes
+stale there too. Per-page structured data (`SoftwareApplication` with the
+published version, `TechArticle` with `dateModified`, `FAQPage` from the docs
+page's limitations list in `app/docs/<pkg>/limitations.ts`) is generated from
+the same sources.
+
 The README is the npm page. It is read by someone **deciding whether to take the
 package**: does it solve my problem, will it run in my environment, what does it
 cost. The docs page at `app/docs/<package>/` is a reference, read by someone

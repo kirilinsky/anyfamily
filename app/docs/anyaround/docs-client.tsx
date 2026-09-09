@@ -11,6 +11,7 @@ import {
   Section,
   type DocsNavItem,
 } from "@/components/docs-shell";
+import { LIMITATIONS } from "./limitations";
 
 const NAV: DocsNavItem[] = [
   { id: "overview", label: "Overview" },
@@ -40,18 +41,6 @@ const COMPATIBILITY = [
   ["Deno", "✓"],
 ];
 
-const LIMITATIONS = [
-  ["No cities", "Intl has no city display names. Regions and countries only."],
-  [
-    "Names track ICU",
-    "Exact strings come from the runtime's ICU version — don't snapshot across environments.",
-  ],
-  ["No reverse lookup", "Code → name only; name → code is not provided."],
-  [
-    "Flags are alpha-2 only",
-    "Numeric regions and non-region kinds have no flag.",
-  ],
-];
 
 export function DocsClient() {
   return (
@@ -368,7 +357,7 @@ anyaround("US", { locale: ["sr-Latn-RS", "en"] });`}</Code>
 
       <Section id="limitations" title="Limitations">
         <div className="grid gap-3 sm:grid-cols-2">
-          {LIMITATIONS.map(([title, body]) => (
+          {LIMITATIONS.map(({ title, body }) => (
             <div
               key={title}
               className="rounded-lg border p-4"

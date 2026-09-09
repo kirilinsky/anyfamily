@@ -20,26 +20,89 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
-/* Hero wordmark swap: each suffix cuts in rather than crossfading, so the
-   word stays legible while the accent colour glides underneath. */
-@keyframes logo-swap {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.animate-logo-swap {
-  animation: logo-swap 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
+/* Smooth scrolling for in-page jumps — the hero badges, the nav rail, the
+   docs sidebar. The landing scrolls inside <main>, so both get it. Reduced
+   motion turns it off; a restore-on-return still asks for "auto" explicitly. */
+html,
+.scroll-smooth-container {
+  scroll-behavior: smooth;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .animate-logo-swap {
+  html,
+  .scroll-smooth-container {
+    scroll-behavior: auto;
+  }
+}
+
+/* Hero wordmark. "any" and the divider never move; only the suffix changes,
+   and it does so the way a system UI would — the old word dissolves upward
+   into a soft blur while the new one condenses out of one, both on screen at
+   once, and the whole mark glides to stay centred rather than jumping. One
+   easing throughout: fast out of the gate, long settle. */
+.hero-mark {
+  transform-box: view-box;
+  transition: transform 0.9s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.hero-divider {
+  transition: fill 0.9s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.hero-suffix {
+  transform-box: fill-box;
+  transform-origin: 0% 100%;
+  will-change: opacity, transform, filter;
+}
+
+@keyframes hero-suffix-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.985);
+    filter: blur(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes hero-suffix-out {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-14px) scale(1.01);
+    filter: blur(10px);
+  }
+}
+
+.hero-suffix-in {
+  animation: hero-suffix-in 0.85s cubic-bezier(0.32, 0.72, 0, 1) both;
+}
+
+.hero-suffix-out {
+  animation: hero-suffix-out 0.7s cubic-bezier(0.32, 0.72, 0, 1) both;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-mark,
+  .hero-divider {
+    transition: none;
+  }
+
+  .hero-suffix-in,
+  .hero-suffix-out {
     animation: none;
+  }
+
+  .hero-suffix-out {
+    display: none;
   }
 }
 
