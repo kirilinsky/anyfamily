@@ -49,7 +49,7 @@ export {
 
 export type { AnyamountOptions } from "anyamount";
 export type { AnyamountSymbolOptions };
-export type { AnymanyOptions, Items as AnymanyItems } from "anymany";
+export type { AnymanyOptions, Items } from "anymany";
 export type { AnyaroundOptions } from "anyaround";
 export type { AnylocaleInfo, Direction, Weekday } from "anylocale";
 export type { AnylongOptions, DurationInput } from "anylong";

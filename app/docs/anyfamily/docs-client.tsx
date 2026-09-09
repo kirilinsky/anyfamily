@@ -407,7 +407,7 @@ const elapsed = anylong.supported ? anylong(ms) : \`\${Math.round(ms / 1000)}s\`
   Locale,
   AnywhenOptions, DateInput, Thresholds,
   AnyamountOptions, Unit, SingleUnit,
-  AnymanyOptions, Sort,
+  AnymanyOptions, Items, Sort,
   AnyaroundOptions, AnyaroundInfo, Display,
   AnylongOptions, DurationInput, DurationRecord,
   AnypluralOptions, Forms, PluralCategory,

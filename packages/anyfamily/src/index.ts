@@ -41,7 +41,7 @@ export type {
 
 // anymany — localized string lists (Intl.ListFormat)
 export { anymany } from "anymany";
-export type { AnymanyOptions, AnymanyPart, Sort } from "anymany";
+export type { AnymanyOptions, AnymanyPart, Items, Sort } from "anymany";
 
 // anyaround — region / language / script / currency / calendar names + flags (Intl.DisplayNames)
 export { anyaround } from "anyaround";

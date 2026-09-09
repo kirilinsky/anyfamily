@@ -585,7 +585,7 @@ function SafeCounter({ text }) {
   Locale,
   AnywhenOptions, DateInput,
   AnyamountOptions, AnyamountSymbolOptions,
-  AnymanyOptions,
+  AnymanyOptions, Items,
   AnyaroundOptions,
   AnylongOptions, DurationInput,
   AnypluralOptions, Forms,
@@ -593,8 +593,9 @@ function SafeCounter({ text }) {
   AnylocaleInfo, Direction, Weekday,
 } from 'anyfamily-react'`}</Code>
         <p>
-          <Mono>UseAnywhenOptions</Mono> is the one type this package adds:{" "}
-          <Mono>AnywhenOptions</Mono> plus <Mono>refresh</Mono>.
+          Two types are this package&apos;s own: <Mono>UseAnywhenOptions</Mono>{" "}
+          — <Mono>AnywhenOptions</Mono> plus <Mono>refresh</Mono> — and{" "}
+          <Mono>Anyfamily</Mono>, what <Mono>useAnyfamily()</Mono> returns.
         </p>
         <Code>{`import type { UseAnywhenOptions } from 'anyfamily-react'
 

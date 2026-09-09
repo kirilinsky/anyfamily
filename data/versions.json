@@ -1,12 +1,12 @@
 {
-  "anyamount": "2.0.1",
-  "anyaround": "2.0.1",
-  "anyfamily": "2.1.1",
-  "anyfamily-react": "2.2.0",
-  "anylocale": "1.0.1",
-  "anylong": "2.0.1",
-  "anymany": "2.0.1",
-  "anyplural": "2.0.1",
-  "anywhen": "2.0.1",
-  "anyword": "2.0.1"
+  "anyamount": "2.0.2",
+  "anyaround": "2.0.2",
+  "anyfamily": "2.1.2",
+  "anyfamily-react": "2.3.0",
+  "anylocale": "1.0.2",
+  "anylong": "2.0.2",
+  "anymany": "2.1.0",
+  "anyplural": "2.0.2",
+  "anywhen": "2.0.2",
+  "anyword": "2.0.2"
 }

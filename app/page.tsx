@@ -407,8 +407,8 @@ export default function Home() {
               className="h-auto w-32 sm:w-40 md:w-48"
             />
             <p className="max-w-sm text-sm leading-relaxed text-white/55">
-              Every formatter as a hook, one locale for the whole app, and
-              relative time that stays fresh.
+              Every formatter as a hook — or the whole family from one — with
+              one locale for the app and relative time that stays fresh.
             </p>
             <div className="mt-1">
               <InstallChip

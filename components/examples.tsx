@@ -54,6 +54,7 @@ export const MANY_PRESETS: Preset[] = [
   { call: `anymany(["poire", "pomme"], { locale: "fr", sort: true })`, run: () => anymany(["poire", "pomme"], { locale: "fr", sort: true }) },
   { call: `anymany(["Öl", "Apfel", "Zebra"], { sort: true, locale: "de" })`, run: () => anymany(["Öl", "Apfel", "Zebra"], { sort: true, locale: "de" }) },
   { call: `anymany(["赤", "青"], { type: "disjunction", locale: "ja" })`, run: () => anymany(["赤", "青"], { type: "disjunction", locale: "ja" }) },
+  { call: `anymany(new Set(["read", "write", "read"]))`, run: () => anymany(new Set(["read", "write", "read"])) },
 ];
 
 export const LONG_PRESETS: Preset[] = [
@@ -188,6 +189,11 @@ export const REACT_PRESETS: Preset[] = [
     fn: `useAnylocale`,
     call: `useAnylocale("ar-EG").direction`,
     run: () => anylocale("ar-EG").direction,
+  },
+  {
+    fn: `useAnyfamily`,
+    call: `const { anyaround } = useAnyfamily();\n\nanyaround("DE", { display: "flag-name" })`,
+    run: () => anyaround("DE", { display: "flag-name", locale: "en" }),
   },
 ];
 

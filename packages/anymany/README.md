@@ -60,10 +60,8 @@ anymany(items, options);
 ```
 
 `items` is any iterable — an array, a `Set`, a generator. Non-string items
-are coerced with `String()`.
-
-`items` is an array of strings. Non-string items are coerced via `String()`.
-An empty array returns `""`; a single item is returned as-is.
+are coerced via `String()`. An empty input returns `""`; a single item is
+returned as-is.
 
 ```ts
 anymany(["read", "write"]);   // "read and write"
