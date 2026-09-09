@@ -243,3 +243,38 @@ describe("public surface", () => {
     );
   });
 });
+
+describe("iterable input", () => {
+  it("accepts a Set", () => {
+    expect(anymany(new Set(["read", "write"]), { locale: "en" })).toBe("read and write");
+  });
+
+  it("accepts a generator", () => {
+    function* items() {
+      yield "a";
+      yield "b";
+      yield "c";
+    }
+    expect(anymany(items(), { locale: "en" })).toBe("a, b, and c");
+  });
+
+  it("coerces numbers, bigints and booleans", () => {
+    expect(anymany([1, 2n, true], { locale: "en" })).toBe("1, 2, and true");
+  });
+
+  it("never mutates the input when sorting", () => {
+    const input = ["c", "a", "b"];
+    anymany(input, { sort: true, locale: "en" });
+    expect(input).toEqual(["c", "a", "b"]);
+  });
+
+  it("rejects a bad max before doing any work", () => {
+    let pulled = 0;
+    function* items() {
+      pulled++;
+      yield "a";
+    }
+    expect(() => anymany(items(), { max: 0 })).toThrow(RangeError);
+    expect(pulled).toBe(0);
+  });
+});

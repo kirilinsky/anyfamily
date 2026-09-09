@@ -27,7 +27,7 @@
 
 ---
 
-**One export. Smart defaults. Any locale. ~1.3kb gzip. Zero dependencies.**
+**One export. Smart defaults. Any locale. ~1.4kb gzip. Zero dependencies.**
 
 `Intl` is powerful. anywhen makes it usable. Built for feeds, chats,
 notifications, dashboards and docs — anywhere a raw timestamp should read like a
@@ -196,7 +196,7 @@ anywhen(date, { mode: "absolute", locale: "th-TH-u-ca-buddhist" });
 
 | | anywhen | dayjs | date-fns |
 | --- | :---: | :---: | :---: |
-| gzip | **~1.3kb** | ~7kb | ~20kb |
+| gzip | **~1.4kb** | ~7kb | ~20kb |
 | locale data bundled | **no** | yes | yes |
 | locales | **200+** | 140 | 100 |
 | dependencies | **0** | 0 | 0 |

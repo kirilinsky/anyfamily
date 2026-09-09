@@ -14,6 +14,7 @@ const NAV: DocsNavItem[] = [
   { id: "install", label: "Install" },
   { id: "provider", label: "Provider" },
   { id: "hooks", label: "Hooks" },
+  { id: "family", label: "useAnyfamily" },
   { id: "functions", label: "Plain functions" },
   { id: "defaults", label: "Defaults" },
   { id: "locale", label: "Locale resolution" },
@@ -64,6 +65,11 @@ const HOOKS: [string, string, string][] = [
     "anylocale as a hook. Takes the tag as its argument, not as an option; returns an object, memoized on the tag.",
   ],
   [
+    "useAnyfamily",
+    "() => Anyfamily",
+    "All eight functions bound to the provider — same signatures, extras included, locale and defaults applied. Memoized on the provider.",
+  ],
+  [
     "useAnyfamilyLocale",
     "() => Locale | undefined",
     "The locale from the nearest provider, for anything the hooks above do not cover.",
@@ -86,7 +92,7 @@ const LIMITATIONS = [
   },
   {
     title: "The tick is a poll, not a scheduler",
-    body: "useAnywhen re-renders on a fixed interval rather than on unit boundaries, so a transition like \"59 seconds ago\" to \"1 minute ago\" can lag up to one tick behind. Pass an explicit refresh where the alignment matters.",
+    body: "useAnywhen re-renders on a fixed interval rather than on unit boundaries, so a transition like \"59 seconds ago\" to \"1 minute ago\" can lag up to one tick behind. Pass an explicit refresh where the alignment matters. Hooks with the same interval share one timer, so they re-render together.",
   },
   {
     title: "It adds hooks, not behaviour",
@@ -224,6 +230,42 @@ const words   = useAnyword(text)
 const total   = useAnywordCount(text)
 const teaser  = useAnywordTruncate(text, 140)
 const info    = useAnylocale()`}</Code>
+      </Section>
+
+      <Section id="family" title="useAnyfamily">
+        <p>
+          One hook that returns the whole family, already bound to the nearest
+          provider. Every function keeps the signature of the package it wraps,
+          extras included — <Mono>anywhen.parts</Mono>,{" "}
+          <Mono>anyaround.info</Mono>, <Mono>anyamount.symbol</Mono>,{" "}
+          <Mono>anyword.count</Mono> — with the provider&apos;s locale and
+          defaults filled in and a call&apos;s own options still winning. It is
+          for what a one-value hook does not cover: parts, a list formatted in a
+          loop, a call inside an event handler.
+        </p>
+        <Code>{`const { anywhen, anyamount, anyaround } = useAnyfamily()
+
+// parts, styled
+anywhen.parts(post.createdAt, { mode: 'relative' }).map((p, i) =>
+  p.type === 'integer' ? <b key={i}>{p.value}</b> : p.value,
+)
+
+// a loop
+countries.map((c) => <li key={c}>{anyaround(c, { display: 'flag-name' })}</li>)
+
+// an event handler
+<button onClick={() => copy(anyamount(total, { mode: 'currency', currency }))} />`}</Code>
+        <p>
+          The object is memoized on the provider&apos;s value, so it is safe as an
+          effect dependency and safe to destructure once at the top of a
+          component. Two things it does not do: it never ticks — a relative time
+          that stays fresh is <Mono>useAnywhen</Mono>&apos;s job — and it never
+          memoizes results, so an array from <Mono>anyword</Mono> is a fresh
+          reference each call where <Mono>useAnyword</Mono> would keep one.{" "}
+          <Mono>anylocale</Mono> is the one signature that changes: its tag is
+          optional, falling back to the provider&apos;s locale and then the
+          runtime&apos;s, exactly like <Mono>useAnylocale</Mono>.
+        </p>
       </Section>
 
       <Section id="functions" title="Plain functions">

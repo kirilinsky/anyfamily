@@ -27,7 +27,7 @@ export type PluralCategory = "zero" | "one" | "two" | "few" | "many" | "other";
  */
 export type Forms = Partial<Record<PluralCategory, string>>;
 
-/** Options for {@linkcode anyplural} and {@linkcode anypluralParts}. */
+/** Options for {@linkcode anyplural} and {@linkcode anyplural.parts}. */
 export interface AnypluralOptions {
   /** Output locale. Defaults to the runtime locale. */
   locale?: Locale;
@@ -46,7 +46,7 @@ export interface AnypluralOptions {
   format?: Intl.NumberFormatOptions;
 }
 
-/** One piece of formatted output returned by {@linkcode anypluralParts}. */
+/** One piece of formatted output returned by {@linkcode anyplural.parts}. */
 export interface AnypluralPart {
   /** Part kind — `"integer"`, `"group"`, `"decimal"`, `"literal"`, … as reported by `Intl.NumberFormat`, or `"literal"` for the word. */
   type: string;
@@ -80,10 +80,15 @@ const CACHE_LIMIT = 50;
  * matter: a plain FIFO would drop the app's one hot locale every 50 misses, and
  * rebuilding a formatter costs ~50-90µs.
  */
-function cacheGet<V>(cache: Map<string, V>, k: string, create: () => V): V {
+function cacheGet<V>(
+  cache: Map<string, V>,
+  k: string,
+  create: () => V,
+  limit = CACHE_LIMIT,
+): V {
   const hit = cache.get(k);
   if (hit !== undefined) {
-    if (cache.size >= CACHE_LIMIT) {
+    if (cache.size >= limit) {
       // Move to the end — Map iterates in insertion order, and the eviction
       // below takes the first key it sees.
       cache.delete(k);
@@ -92,26 +97,37 @@ function cacheGet<V>(cache: Map<string, V>, k: string, create: () => V): V {
     return hit;
   }
   const v = create();
-  if (cache.size >= CACHE_LIMIT) cache.delete(cache.keys().next().value!);
+  if (cache.size >= limit) cache.delete(cache.keys().next().value!);
   cache.set(k, v);
   return v;
+}
+
+const localeKey = (locale?: Locale): string =>
+  typeof locale === "string" ? locale : locale ? locale.join("\0") : "";
+
+/**
+ * Cache key for a caller-supplied options object. Keys are sorted, so
+ * `{ style, currency }` and `{ currency, style }` share one formatter;
+ * `undefined` values are skipped, as `Intl` skips them.
+ */
+function optKey(o: object): string {
+  const r = o as Record<string, unknown>;
+  let k = "";
+  for (const name of Object.keys(r).sort()) {
+    const v = r[name];
+    if (v !== undefined) k += `${name}=${v};`;
+  }
+  return k;
 }
 
 const prCache = new Map<string, Intl.PluralRules>();
 const nfCache = new Map<string, Intl.NumberFormat>();
 
-const localeKey = (locale?: Locale) =>
-  Array.isArray(locale) ? locale.join("\0") : (locale ?? "");
-
-const pr = (l: Locale | undefined, t: PluralType) =>
-  cacheGet(prCache, `${localeKey(l)}|${t}`, () =>
-    new Intl.PluralRules(l as Intl.LocalesArgument, { type: t }),
-  );
+const pr = (l: Locale | undefined, type: PluralType) =>
+  cacheGet(prCache, `${localeKey(l)}|${type}`, () => new Intl.PluralRules(l, { type }));
 
 const nf = (l: Locale | undefined, o?: Intl.NumberFormatOptions) =>
-  cacheGet(nfCache, `${localeKey(l)}|${o ? JSON.stringify(o) : ""}`, () =>
-    new Intl.NumberFormat(l as Intl.LocalesArgument, o),
-  );
+  cacheGet(nfCache, `${localeKey(l)}|${o ? optKey(o) : ""}`, () => new Intl.NumberFormat(l, o));
 
 /** Resolve the word for `category`, walking the fallback chain to `other`. */
 function pick(forms: Forms, category: PluralCategory): string {
@@ -121,14 +137,17 @@ function pick(forms: Forms, category: PluralCategory): string {
     const v = forms[f];
     if (v !== undefined) return v;
   }
-  throw new RangeError(
-    `No form for plural category "${category}" and no "other" fallback`,
-  );
+  throw new RangeError(`No form for plural category "${category}" and no "other" fallback`);
 }
 
-type Seg = { f: Intl.NumberFormat; n: number } | { t: string };
+/**
+ * What a call renders: the number formatter plus the word (separator
+ * included), or a bare string when an explicit `zero` form replaces the whole
+ * output.
+ */
+type Plan = { f: Intl.NumberFormat; word: string } | string;
 
-function plan(count: number, forms: Forms, options: AnypluralOptions): Seg[] {
+function plan(count: number, forms: Forms, options: AnypluralOptions): Plan {
   if (typeof count !== "number" || !isFinite(count))
     throw new RangeError(`Invalid count: ${count}`);
 
@@ -136,34 +155,25 @@ function plan(count: number, forms: Forms, options: AnypluralOptions): Seg[] {
 
   // Exact-zero shortcut: an explicit `zero` form replaces the whole output,
   // number and all, before the plural select runs (`"нет писем"`).
-  if (count === 0 && forms.zero !== undefined) return [{ t: forms.zero }];
+  if (count === 0 && forms.zero !== undefined) return forms.zero;
 
   const category = pr(locale, type).select(count) as PluralCategory;
-  const word = pick(forms, category);
   // Ordinal forms are suffixes and attach to the number; cardinals get a space.
-  const separator = type === "ordinal" ? "" : " ";
-
-  return [{ f: nf(locale, format), n: count }, { t: separator + word }];
+  const word = (type === "ordinal" ? "" : " ") + pick(forms, category);
+  return { f: nf(locale, format), word };
 }
 
-function format(
-  count: number,
-  forms: Forms,
-  options: AnypluralOptions = {},
-): string {
-  return plan(count, forms, options)
-    .map((s) => ("t" in s ? s.t : s.f.format(s.n)))
-    .join("");
+function format(count: number, forms: Forms, options: AnypluralOptions = {}): string {
+  const p = plan(count, forms, options);
+  return typeof p === "string" ? p : p.f.format(count) + p.word;
 }
 
-function parts(
-  count: number,
-  forms: Forms,
-  options: AnypluralOptions = {},
-): AnypluralPart[] {
-  return plan(count, forms, options).flatMap((s) =>
-    "t" in s ? { type: "literal", value: s.t } : s.f.formatToParts(s.n),
-  );
+function parts(count: number, forms: Forms, options: AnypluralOptions = {}): AnypluralPart[] {
+  const p = plan(count, forms, options);
+  if (typeof p === "string") return [{ type: "literal", value: p }];
+  const out: AnypluralPart[] = p.f.formatToParts(count);
+  out.push({ type: "literal", value: p.word });
+  return out;
 }
 
 /**
@@ -186,7 +196,7 @@ function parts(
  * @param forms Word forms keyed by plural category — `other` is required.
  * @param options See {@linkcode AnypluralOptions}.
  * @returns The formatted string.
- * @throws {RangeError} If `count` is not a finite number.
+ * @throws {RangeError} If `count` is not a finite number, or no form resolves for its category.
  */
 export const anyplural = Object.assign(format, {
   /**

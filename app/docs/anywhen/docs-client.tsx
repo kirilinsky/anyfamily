@@ -618,7 +618,7 @@ anywhen(date, {
         <CompareTable
           head={["anywhen", "dayjs", "date-fns"]}
           rows={[
-            ["gzip", "~1.3kb", "~7kb", "~20kb"],
+            ["gzip", "~1.4kb", "~7kb", "~20kb"],
             ["locale data bundled", "no", "yes", "yes"],
             ["locales", "200+", "140", "100"],
             ["dependencies", "0", "0", "0"],

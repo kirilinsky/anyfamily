@@ -469,7 +469,7 @@ anylong.supported ? anylong(ms) : \`\${Math.round(ms / 60000)} min\``}</Code>
             ["digital style (2:30:00)", "yes", "no", "no"],
           ]}
         />
-        <p>anylong is 2.5kb gzipped and writes a duration down. It does not measure one, and it does not do calendar arithmetic — the months between two dates are a question for a date library, because their length depends on which months they are. Its one hard requirement is Intl.DurationFormat, so branch on anylong.supported.</p>
+        <p>anylong is 2.6kb gzipped and writes a duration down. It does not measure one, and it does not do calendar arithmetic — the months between two dates are a question for a date library, because their length depends on which months they are. Its one hard requirement is Intl.DurationFormat, so branch on anylong.supported.</p>
       </Section>
 
       <Section id="compatibility" title="Compatibility">

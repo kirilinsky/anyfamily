@@ -214,3 +214,15 @@ describe("public surface", () => {
     );
   });
 });
+
+describe.skipIf(!anyword.supported)("truncate — limit edge cases", () => {
+  it("keeps the floor of a fractional limit", () => {
+    expect(anyword.truncate("abcdef", 2.5)).toBe("ab");
+    expect(anyword.truncate("abcdef", 2.5, { ellipsis: "…" })).toBe("ab…");
+  });
+
+  it("a limit past the end returns the very same string", () => {
+    const s = "héllo 👨‍👩‍👧";
+    expect(anyword.truncate(s, 100)).toBe(s);
+  });
+});

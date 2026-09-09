@@ -27,7 +27,7 @@
 
 ---
 
-**One export. Smart defaults. Any locale. ~0.5kb gzip. Zero dependencies.**
+**One export. Smart defaults. Any locale. ~0.7kb gzip. Zero dependencies.**
 
 `Intl` is powerful. anymany makes it usable. Built for tags, participants, file
 lists, permissions and search filters — anywhere `array.join(", ")` should read
@@ -58,6 +58,9 @@ npm install anymany
 anymany(items);
 anymany(items, options);
 ```
+
+`items` is any iterable — an array, a `Set`, a generator. Non-string items
+are coerced with `String()`.
 
 `items` is an array of strings. Non-string items are coerced via `String()`.
 An empty array returns `""`; a single item is returned as-is.
@@ -202,7 +205,7 @@ job, not this one's.
 | dependencies | **0** | 0 | 0 |
 
 The honest comparison for anymany is the native API rather than a library,
-because there is barely a library to compare against. At 0.6kb gzipped it adds
+because there is barely a library to compare against. At 0.7kb gzipped it adds
 the sorting, the overflow and the fallback chain around `Intl.ListFormat`, and
 saves you constructing a formatter per call.
 

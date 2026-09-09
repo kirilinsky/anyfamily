@@ -27,7 +27,7 @@
 
 ---
 
-**One export. Any reasonable input. Any locale. ~2.5kb gzip. Zero dependencies.**
+**One export. Any reasonable input. Any locale. ~2.6kb gzip. Zero dependencies.**
 
 Throw a number, a `Date`, two `Date`s, an ISO 8601 duration, a shorthand string,
 or a plain object at it — get a localized duration string back. Detection is
@@ -195,7 +195,7 @@ anylong("2h 30m", { locale: ["sr-Latn-RS", "en"] });
 | accepts two dates | **yes** | no | no |
 | digital style (`2:30:00`) | **yes** | no | no |
 
-anylong is 2.5kb gzipped and writes a duration down. It does not measure one,
+anylong is 2.6kb gzipped and writes a duration down. It does not measure one,
 and it does not do calendar arithmetic — the months between two dates are a
 question for a date library, because their length depends on which months they
 are. Its one hard requirement is `Intl.DurationFormat`, so branch on

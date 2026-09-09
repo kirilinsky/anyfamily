@@ -45,17 +45,7 @@ const SEG =
     ? (Intl as { Segmenter?: typeof Intl.Segmenter }).Segmenter
     : undefined;
 
-/**
- * Whether `Intl.Segmenter` exists in this runtime. `false` on older engines —
- * every anyword function throws there, so branch on this flag if you support them.
- *
- * @example
- * ```ts
- * import { anyword, supported } from "anyword";
- *
- * supported ? anyword(text) : text.split(/\s+/);
- * ```
- */
+/** `true` when the runtime provides `Intl.Segmenter` (Baseline 2024). */
 const supported: boolean = typeof SEG === "function";
 
 const CACHE_LIMIT = 50;
@@ -70,10 +60,15 @@ const CACHE_LIMIT = 50;
  * matter: a plain FIFO would drop the app's one hot locale every 50 misses, and
  * rebuilding a formatter costs ~50-90µs.
  */
-function cacheGet<V>(cache: Map<string, V>, k: string, create: () => V): V {
+function cacheGet<V>(
+  cache: Map<string, V>,
+  k: string,
+  create: () => V,
+  limit = CACHE_LIMIT,
+): V {
   const hit = cache.get(k);
   if (hit !== undefined) {
-    if (cache.size >= CACHE_LIMIT) {
+    if (cache.size >= limit) {
       // Move to the end — Map iterates in insertion order, and the eviction
       // below takes the first key it sees.
       cache.delete(k);
@@ -82,176 +77,95 @@ function cacheGet<V>(cache: Map<string, V>, k: string, create: () => V): V {
     return hit;
   }
   const v = create();
-  if (cache.size >= CACHE_LIMIT) cache.delete(cache.keys().next().value!);
+  if (cache.size >= limit) cache.delete(cache.keys().next().value!);
   cache.set(k, v);
   return v;
 }
 
+const localeKey = (locale?: Locale): string =>
+  typeof locale === "string" ? locale : locale ? locale.join("\0") : "";
+
 const segCache = new Map<string, Intl.Segmenter>();
 
-const localeKey = (locale?: Locale) =>
-  Array.isArray(locale) ? locale.join("\0") : (locale ?? "");
+const GRANULARITIES: readonly Granularity[] = ["word", "grapheme", "sentence"];
 
-const GRANULARITIES: Granularity[] = ["word", "grapheme", "sentence"];
-
-function segmenter(locale: Locale | undefined, by: Granularity) {
+function segmenter(locale: Locale | undefined, by: Granularity): Intl.Segmenter {
   if (!SEG)
     throw new Error(
       "Intl.Segmenter is not available in this runtime. " +
-        "Check the exported `supported` flag before calling anyword.",
+        "Check the `anyword.supported` flag before calling anyword.",
     );
   if (!GRANULARITIES.includes(by)) throw new RangeError(`Invalid granularity: ${String(by)}`);
 
-  return cacheGet(
-    segCache,
-    `${localeKey(locale)}|${by}`,
-    () => new SEG(locale as Intl.LocalesArgument, { granularity: by }),
+  return cacheGet(segCache, `${localeKey(locale)}|${by}`, () =>
+    new SEG(locale, { granularity: by }),
   );
 }
 
-/** Segment `text`, dropping non-word segments unless `raw` or a non-word granularity. */
-function* walk(text: string, options: AnywordOptions) {
+/**
+ * Visits each segment of `text` in order. In word mode, non-word segments —
+ * spaces and punctuation — are skipped unless `raw`; the other granularities
+ * keep everything. `visit` returns `true` to stop early.
+ */
+function each(
+  text: string,
+  options: AnywordOptions,
+  visit: (s: Intl.SegmentData) => boolean | void,
+): void {
   if (typeof text !== "string") throw new TypeError(`Invalid text: ${String(text)}`);
 
   const { by = "word", locale, raw = false } = options;
   const keepAll = raw || by !== "word";
 
   for (const s of segmenter(locale, by).segment(text))
-    if (keepAll || s.isWordLike) yield s;
+    if ((keepAll || s.isWordLike) && visit(s)) return;
 }
 
-/**
- * Splits text into locale-correct segments using native `Intl.Segmenter` —
- * words by default, or graphemes and sentences via `by`.
- *
- * Unlike `.split(" ")` it finds words in scripts without spaces, and unlike
- * `[...str]` it never rips a composite emoji or a combining accent apart.
- *
- * @example
- * ```ts
- * anyword("don't stop 世界");                 // ["don't", "stop", "世界"]
- * anyword("don't stop", { raw: true });      // ["don't", " ", "stop"]
- * anyword("👨‍👩‍👧 hi", { by: "grapheme" });      // ["👨‍👩‍👧", " ", "h", "i"]
- * anyword("Hi. Go now!", { by: "sentence" }); // ["Hi. ", "Go now!"]
- * ```
- *
- * @param text The text to segment.
- * @param options See {@linkcode AnywordOptions}.
- * @returns The segments, in order.
- * @throws {TypeError} If `text` is not a string.
- * @throws {RangeError} If `options.by` is unknown.
- * @throws {Error} If `Intl.Segmenter` is unavailable in the runtime (check {@linkcode anyword.supported}).
- */
 function segment(text: string, options: AnywordOptions = {}): string[] {
   const out: string[] = [];
-  for (const s of walk(text, options)) out.push(s.segment);
+  each(text, options, (s) => {
+    out.push(s.segment);
+  });
   return out;
 }
 
-/**
- * Like {@linkcode anyword}, but returns `{ segment, index, isWordLike? }` parts
- * instead of plain strings — the offsets let you highlight, slice, or animate
- * the original text without re-searching it.
- *
- * @example
- * ```ts
- * anywordParts("世界 test");
- * // [
- * //   { segment: "世界", index: 0, isWordLike: true },
- * //   { segment: "test", index: 3, isWordLike: true },
- * // ]
- * ```
- *
- * @param text The text to segment.
- * @param options See {@linkcode AnywordOptions} — same options as {@linkcode anyword}.
- * @returns The segments as parts, in order.
- * @throws {TypeError} If `text` is not a string.
- * @throws {RangeError} If `options.by` is unknown.
- * @throws {Error} If `Intl.Segmenter` is unavailable in the runtime (check {@linkcode anyword.supported}).
- */
-function parts(
-  text: string,
-  options: AnywordOptions = {},
-): AnywordPart[] {
+function parts(text: string, options: AnywordOptions = {}): AnywordPart[] {
   const out: AnywordPart[] = [];
-  for (const s of walk(text, options))
+  each(text, options, (s) => {
     out.push(
       s.isWordLike === undefined
         ? { segment: s.segment, index: s.index }
         : { segment: s.segment, index: s.index, isWordLike: s.isWordLike },
     );
+  });
   return out;
 }
 
-/**
- * Counts segments — words by default, graphemes or sentences via `by`.
- *
- * A grapheme count is the character count users actually see: `"👨‍👩‍👧".length`
- * is 8, `anywordCount("👨‍👩‍👧", { by: "grapheme" })` is 1.
- *
- * @example
- * ```ts
- * anywordCount("世界 test");                 // 2
- * anywordCount("héllo", { by: "grapheme" }); // 5
- * ```
- *
- * @param text The text to count in.
- * @param options See {@linkcode AnywordOptions} — same options as {@linkcode anyword}.
- * @returns The number of segments.
- * @throws {TypeError} If `text` is not a string.
- * @throws {RangeError} If `options.by` is unknown.
- * @throws {Error} If `Intl.Segmenter` is unavailable in the runtime (check {@linkcode anyword.supported}).
- */
 function count(text: string, options: AnywordOptions = {}): number {
   let n = 0;
-  for (const _ of walk(text, options)) n++;
+  each(text, options, () => {
+    n++;
+  });
   return n;
 }
 
-/**
- * Cuts text to at most `limit` segments — graphemes by default, so an emoji or
- * an accented letter is never split in half.
- *
- * The cut lands on a segment boundary and keeps everything before it verbatim,
- * trailing whitespace included. With `ellipsis`, that whitespace is trimmed and
- * the ellipsis appended — and only when the text was actually too long, so
- * short input comes back untouched. The ellipsis does not count toward `limit`.
- *
- * @example
- * ```ts
- * anywordTruncate("héllo 👨‍👩‍👧", 6);                       // "héllo "
- * anywordTruncate("héllo 👨‍👩‍👧", 5, { ellipsis: "…" });     // "héllo…"
- * anywordTruncate("one two three", 2, { by: "word" });   // "one two "
- * anywordTruncate("short", 99);                          // "short"
- * ```
- *
- * @param text The text to cut.
- * @param limit Maximum number of segments to keep. A non-negative finite number.
- * @param options See {@linkcode AnywordTruncateOptions}. `by` defaults to `"grapheme"` here.
- * @returns The truncated text, or `text` unchanged if it already fits.
- * @throws {TypeError} If `text` is not a string.
- * @throws {RangeError} If `limit` is negative or not finite, or `options.by` is unknown.
- * @throws {Error} If `Intl.Segmenter` is unavailable in the runtime (check {@linkcode anyword.supported}).
- */
-function truncate(
-  text: string,
-  limit: number,
-  options: AnywordTruncateOptions = {},
-): string {
+function truncate(text: string, limit: number, options: AnywordTruncateOptions = {}): string {
   if (typeof limit !== "number" || !isFinite(limit) || limit < 0)
     throw new RangeError(`Invalid limit: ${limit}`);
 
   const { ellipsis = "", by = "grapheme", ...rest } = options;
+  // "At most `limit` segments": a fractional limit keeps its floor.
+  const keep = Math.floor(limit);
 
   let kept = 0;
   let cut = -1;
-  for (const s of walk(text, { ...rest, by })) {
-    if (kept === limit) {
+  each(text, { ...rest, by }, (s) => {
+    if (kept === keep) {
       cut = s.index;
-      break;
+      return true;
     }
     kept++;
-  }
+  });
 
   if (cut < 0) return text;
 
@@ -273,10 +187,19 @@ function truncate(
  * @example
  * ```ts
  * anyword("don't stop 世界");                 // ["don't", "stop", "世界"]
+ * anyword("don't stop", { raw: true });      // ["don't", " ", "stop"]
  * anyword("👨‍👩‍👧 hi", { by: "grapheme" });      // ["👨‍👩‍👧", " ", "h", "i"]
+ * anyword("Hi. Go now!", { by: "sentence" }); // ["Hi. ", "Go now!"]
  * anyword.count("héllo", { by: "grapheme" }); // 5
  * anyword.truncate("héllo 👨‍👩‍👧", 5, { ellipsis: "…" }); // "héllo…"
  * ```
+ *
+ * @param text The text to segment.
+ * @param options See {@linkcode AnywordOptions}.
+ * @returns The segments, in order.
+ * @throws {TypeError} If `text` is not a string.
+ * @throws {RangeError} If `options.by` is unknown.
+ * @throws {Error} If `Intl.Segmenter` is unavailable in the runtime (check {@linkcode anyword.supported}).
  */
 export const anyword = Object.assign(segment, {
   /**
@@ -284,6 +207,17 @@ export const anyword = Object.assign(segment, {
    * `{ segment, index, isWordLike? }` parts instead of plain strings — the
    * offsets let you highlight, slice, or animate the original text without
    * searching it again.
+   *
+   * Takes the same arguments and throws on the same inputs.
+   *
+   * @example
+   * ```ts
+   * anyword.parts("世界 test");
+   * // [
+   * //   { segment: "世界", index: 0, isWordLike: true },
+   * //   { segment: "test", index: 3, isWordLike: true },
+   * // ]
+   * ```
    */
   parts,
 
@@ -292,12 +226,41 @@ export const anyword = Object.assign(segment, {
    *
    * A grapheme count is the character count users actually see: `"👨‍👩‍👧".length`
    * is 8, `anyword.count("👨‍👩‍👧", { by: "grapheme" })` is 1.
+   *
+   * @example
+   * ```ts
+   * anyword.count("世界 test");                 // 2
+   * anyword.count("héllo", { by: "grapheme" }); // 5
+   * ```
+   *
+   * @returns The number of segments.
+   * @throws The same errors as {@linkcode anyword}.
    */
   count,
 
   /**
    * Cuts text to at most `limit` segments — graphemes by default, so an emoji
    * or an accented letter is never split in half.
+   *
+   * The cut lands on a segment boundary and keeps everything before it
+   * verbatim, trailing whitespace included. With `ellipsis`, that whitespace
+   * is trimmed and the ellipsis appended — and only when the text was
+   * actually too long, so short input comes back untouched. The ellipsis does
+   * not count toward `limit`.
+   *
+   * @example
+   * ```ts
+   * anyword.truncate("héllo 👨‍👩‍👧", 6);                       // "héllo "
+   * anyword.truncate("héllo 👨‍👩‍👧", 5, { ellipsis: "…" });     // "héllo…"
+   * anyword.truncate("one two three", 2, { by: "word" });   // "one two "
+   * anyword.truncate("short", 99);                          // "short"
+   * ```
+   *
+   * @param text The text to cut.
+   * @param limit Maximum number of segments to keep. A non-negative finite number.
+   * @param options See {@linkcode AnywordTruncateOptions}. `by` defaults to `"grapheme"` here.
+   * @returns The truncated text, or `text` unchanged if it already fits.
+   * @throws {RangeError} If `limit` is negative or not finite — plus the same errors as {@linkcode anyword}.
    */
   truncate,
 

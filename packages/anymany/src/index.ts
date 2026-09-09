@@ -2,6 +2,12 @@
 export type Locale = string | readonly string[];
 
 /**
+ * Anything {@linkcode anymany} will join: an array, a `Set`, a generator — any
+ * iterable. Non-string items are coerced with `String()`.
+ */
+export type Items = Iterable<string | number | bigint | boolean>;
+
+/**
  * How to sort items before joining, mapped to `Intl.Collator`:
  *
  * - `true` — default collation for the locale
@@ -29,7 +35,7 @@ export interface AnymanyOptions {
   /**
    * Sort items with `Intl.Collator` before joining. `true` = default
    * collation, `"numeric"` = numeric collation (`"файл2"` before `"файл10"`),
-   * or any `Intl.CollatorOptions` for full control. The input array is never
+   * or any `Intl.CollatorOptions` for full control. The input is never
    * mutated. Defaults to no sorting.
    */
   sort?: Sort;
@@ -64,10 +70,15 @@ const CACHE_LIMIT = 50;
  * matter: a plain FIFO would drop the app's one hot locale every 50 misses, and
  * rebuilding a formatter costs ~50-90µs.
  */
-function cacheGet<V>(cache: Map<string, V>, k: string, create: () => V): V {
+function cacheGet<V>(
+  cache: Map<string, V>,
+  k: string,
+  create: () => V,
+  limit = CACHE_LIMIT,
+): V {
   const hit = cache.get(k);
   if (hit !== undefined) {
-    if (cache.size >= CACHE_LIMIT) {
+    if (cache.size >= limit) {
       // Move to the end — Map iterates in insertion order, and the eviction
       // below takes the first key it sees.
       cache.delete(k);
@@ -76,95 +87,96 @@ function cacheGet<V>(cache: Map<string, V>, k: string, create: () => V): V {
     return hit;
   }
   const v = create();
-  if (cache.size >= CACHE_LIMIT) cache.delete(cache.keys().next().value!);
+  if (cache.size >= limit) cache.delete(cache.keys().next().value!);
   cache.set(k, v);
   return v;
+}
+
+const localeKey = (locale?: Locale): string =>
+  typeof locale === "string" ? locale : locale ? locale.join("\0") : "";
+
+/**
+ * Cache key for a caller-supplied options object. Keys are sorted, so
+ * `{ numeric, sensitivity }` and `{ sensitivity, numeric }` share one
+ * collator; `undefined` values are skipped, as `Intl` skips them.
+ */
+function optKey(o: object): string {
+  const r = o as Record<string, unknown>;
+  let k = "";
+  for (const name of Object.keys(r).sort()) {
+    const v = r[name];
+    if (v !== undefined) k += `${name}=${v};`;
+  }
+  return k;
 }
 
 const lfCache = new Map<string, Intl.ListFormat>();
 const colCache = new Map<string, Intl.Collator>();
 const nfCache = new Map<string, Intl.NumberFormat>();
 
-const localeKey = (locale?: Locale) =>
-  Array.isArray(locale) ? locale.join("\0") : (locale ?? "");
-
-const lf = (
-  l: Locale | undefined,
-  type: Intl.ListFormatType,
-  style: Intl.ListFormatStyle,
-) =>
+const lf = (l: Locale | undefined, type: Intl.ListFormatType, style: Intl.ListFormatStyle) =>
   cacheGet(lfCache, `${localeKey(l)}|${type}|${style}`, () =>
     new Intl.ListFormat(l as Intl.LocalesArgument, { style, type }),
   );
 
-const collator = (l: Locale | undefined, o: Intl.CollatorOptions) =>
-  cacheGet(colCache, `${localeKey(l)}|${JSON.stringify(o)}`, () =>
-    new Intl.Collator(l as Intl.LocalesArgument, o),
+const collator = (l: Locale | undefined, sort: Exclude<Sort, false>) =>
+  cacheGet(
+    colCache,
+    `${localeKey(l)}|${sort === true ? "" : sort === "numeric" ? "n" : optKey(sort)}`,
+    () =>
+      new Intl.Collator(
+        l as Intl.LocalesArgument,
+        sort === true ? undefined : sort === "numeric" ? { numeric: true } : sort,
+      ),
   );
 
 const nf = (l: Locale | undefined) =>
-  cacheGet(nfCache, `${localeKey(l)}`, () =>
-    new Intl.NumberFormat(l as Intl.LocalesArgument),
-  );
+  cacheGet(nfCache, localeKey(l), () => new Intl.NumberFormat(l as Intl.LocalesArgument));
 
 interface Plan {
   f: Intl.ListFormat;
   items: string[];
 }
 
-function plan(items: readonly string[], options: AnymanyOptions): Plan {
-  const {
-    locale,
-    type = "conjunction",
-    style = "long",
-    sort,
-    max,
-    overflow,
-  } = options;
+function plan(items: Items, options: AnymanyOptions): Plan {
+  const { locale, type = "conjunction", style = "long", sort, max, overflow } = options;
+
+  if (max !== undefined && (!Number.isInteger(max) || max <= 0))
+    throw new RangeError(`Invalid max: ${max}`);
 
   const list = Array.from(items, String);
 
-  if (sort) {
-    const opts: Intl.CollatorOptions =
-      sort === true ? {} : sort === "numeric" ? { numeric: true } : sort;
-    list.sort(collator(locale, opts).compare);
-  }
+  if (sort) list.sort(collator(locale, sort).compare);
 
-  if (max !== undefined) {
-    if (!Number.isInteger(max) || max <= 0)
-      throw new RangeError(`Invalid max: ${max}`);
-    if (list.length > max) {
-      const hidden = list.length - max;
-      list.length = max;
-      list.push(overflow ? overflow(hidden) : `+${nf(locale).format(hidden)}`);
-    }
+  if (max !== undefined && list.length > max) {
+    const hidden = list.length - max;
+    list.length = max;
+    list.push(overflow ? overflow(hidden) : `+${nf(locale).format(hidden)}`);
   }
 
   return { f: lf(locale, type, style), items: list };
 }
 
-function format(
-  items: readonly string[],
-  options: AnymanyOptions = {},
-): string {
+function format(items: Items, options: AnymanyOptions = {}): string {
   const p = plan(items, options);
   return p.f.format(p.items);
 }
 
-function parts(
-  items: readonly string[],
-  options: AnymanyOptions = {},
-): AnymanyPart[] {
+function parts(items: Items, options: AnymanyOptions = {}): AnymanyPart[] {
   const p = plan(items, options);
   return p.f.formatToParts(p.items);
 }
 
 /**
- * Joins an array of strings into a human-readable, localized list using
- * native `Intl` — sorted right, joined right, in any locale.
+ * Joins strings into a human-readable, localized list using native `Intl` —
+ * sorted right, joined right, in any locale.
  *
- * Non-string items are coerced via `String()`. An empty array returns `""`;
- * a single item is returned as-is.
+ * Takes any iterable — an array, a `Set`, a generator. Non-string items are
+ * coerced via `String()`. An empty input returns `""`; a single item is
+ * returned as-is.
+ *
+ * The package exports this one name. Anything beyond the plain call hangs off
+ * it — currently {@linkcode anymany.parts}.
  *
  * @example
  * ```ts
@@ -172,13 +184,11 @@ function parts(
  * anymany(["a", "b", "c"], { type: "disjunction", locale: "ru" }); // "a, b или c"
  * anymany(["Öl", "Zebra", "Apfel"], { sort: true, locale: "de" }); // "Apfel, Öl und Zebra"
  * anymany(["x", "y", "z", "a", "b", "c", "d"], { max: 3 });   // "x, y, z, and +4"
+ * anymany(new Set(["read", "write"]));                        // "read and write"
  * ```
  *
- * @param items The strings to join.
+ * @param items The strings to join — any iterable.
  * @param options See {@linkcode AnymanyOptions}.
- * The package exports this one name. Anything beyond the plain call hangs off
- * it — currently {@linkcode anymany.parts}.
- *
  * @returns The formatted list as a string.
  * @throws {RangeError} If `options.max` is not a positive integer, or `options.locale` is invalid.
  */

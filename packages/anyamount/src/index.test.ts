@@ -461,3 +461,21 @@ describe("public surface", () => {
     expect(anyamount.symbol("EUR", { locale: "en" })).toBe("€");
   });
 });
+
+describe("cache keys", () => {
+  it("symbol lookups are stable across repeats and other currencies", () => {
+    expect(anyamount.symbol("EUR", { locale: "en" })).toBe("€");
+    for (const code of ["USD", "GBP", "JPY", "CHF", "CAD", "AUD", "SEK", "NOK"])
+      expect(typeof anyamount.symbol(code, { locale: "en" })).toBe("string");
+    expect(anyamount.symbol("EUR", { locale: "en" })).toBe("€");
+    expect(anyamount.symbol("EUR", { locale: "en", display: "code" })).toBe("EUR");
+  });
+
+  it("the same currency in another display or digit setting is a different formatter", () => {
+    const en = { mode: "currency", currency: "EUR", locale: "en" } as const;
+    expect(anyamount(2.5, en)).toBe("€2.50");
+    expect(anyamount(2.5, { ...en, currencyDisplay: "code" })).toMatch(/^EUR/);
+    expect(anyamount(2.5, { ...en, digits: 0 })).toBe("€3");
+    expect(anyamount(2.5, en)).toBe("€2.50");
+  });
+});

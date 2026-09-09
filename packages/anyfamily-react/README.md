@@ -92,6 +92,9 @@ function Post({ publishedAt, price }: { publishedAt: Date; price: number }) {
   an interval (default 60s, `refresh` to override, `refresh: false` to
   disable) so it doesn't. No tick in `"absolute"` mode or once a date is
   over a day old — nothing left that a minute-granularity poll would change.
+  Hooks with the same interval share one timer: a list of a hundred
+  timestamps is one `setInterval`, not a hundred, and the rows re-render
+  together.
   The default tick is a fixed poll, not synced to unit boundaries: a
   transition like "59 seconds ago" → "1 minute ago" can lag up to one tick
   behind. Pass an explicit `refresh` if you need tighter alignment.
@@ -121,6 +124,23 @@ function Post({ publishedAt, price }: { publishedAt: Date; price: number }) {
   then to the runtime's. Returns an object, memoized on the tag, so it is safe
   as an effect dependency. `anylocaleSupported` is re-exported for
   feature-detecting `Intl.Locale` info.
+
+- `useAnyfamily()` — all eight functions, bound to the provider. Same
+  signatures as the packages, extras included (`anywhen.parts`,
+  `anyaround.info`, `anyamount.symbol`, `anyword.count`), with the provider's
+  locale and defaults already applied. For what a one-value hook does not
+  cover — parts, a list formatted in a loop, a call in an event handler.
+  Memoized on the provider, so it is safe to destructure once. Nothing here
+  ticks; that is `useAnywhen`'s job.
+
+  ```tsx
+  const { anywhen, anyamount } = useAnyfamily();
+
+  anywhen.parts(post.createdAt, { mode: "relative" }).map((p, i) =>
+    p.type === "integer" ? <b key={i}>{p.value}</b> : p.value,
+  );
+  <button onClick={() => copy(anyamount(total, { mode: "currency", currency }))} />
+  ```
 
 `useAnyfamilyLocale()` reads the locale from the nearest provider directly,
 for anything not covered by the hooks above.

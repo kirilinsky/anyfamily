@@ -227,7 +227,7 @@ anyamount(1999, { mode: "currency", currency: "INR", locale: "hi" }); // "₹1,9
 | compact notation | **every locale** | English forms | no |
 | dependencies | **0** | 0 | 0 |
 
-anyamount is 0.8kb gzipped and formats numbers. It is not a money type: it does
+anyamount is 0.9kb gzipped and formats numbers. It is not a money type: it does
 not add prices, hold exchange rates, or protect you from floating-point
 arithmetic. Do the arithmetic in minor units or in a decimal library, then hand
 the result here to be written down.

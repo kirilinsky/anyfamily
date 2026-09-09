@@ -80,7 +80,7 @@ export type DecomposeUnit =
   | "milliseconds";
 
 /**
- * Options for {@linkcode anylong} and {@linkcode anylongParts}. Everything in
+ * Options for {@linkcode anylong} and {@linkcode anylong.parts}. Everything in
  * {@linkcode DurationFormatOptions} passes straight through to `Intl.DurationFormat`.
  */
 export interface AnylongOptions extends DurationFormatOptions {
@@ -94,7 +94,7 @@ export interface AnylongOptions extends DurationFormatOptions {
   smallestUnit?: DecomposeUnit;
 }
 
-/** One piece of formatted output returned by {@linkcode anylongParts}. */
+/** One piece of formatted output returned by {@linkcode anylong.parts}. */
 export interface AnylongPart {
   /** Part kind as reported by `Intl` — `"integer"`, `"literal"`, `"unit"`, … */
   type: string;
@@ -154,52 +154,92 @@ const DECOMPOSE_ORDER: DecomposeUnit[] = [
   "milliseconds",
 ];
 
+/**
+ * Shorthand unit spellings, singular. A trailing `s` is stripped before the
+ * second lookup, so `hrs`, `mins`, `secs`, `months` all resolve too; `ms` and
+ * `s` match directly, before any stripping.
+ */
 const UNIT_ALIASES: Record<string, keyof DurationRecord> = {
   y: "years",
   yr: "years",
-  yrs: "years",
   year: "years",
-  years: "years",
   mo: "months",
-  mos: "months",
   month: "months",
-  months: "months",
   w: "weeks",
   wk: "weeks",
-  wks: "weeks",
   week: "weeks",
-  weeks: "weeks",
   d: "days",
   day: "days",
-  days: "days",
   h: "hours",
   hr: "hours",
-  hrs: "hours",
   hour: "hours",
-  hours: "hours",
   m: "minutes",
   min: "minutes",
-  mins: "minutes",
   minute: "minutes",
-  minutes: "minutes",
   s: "seconds",
   sec: "seconds",
-  secs: "seconds",
   second: "seconds",
-  seconds: "seconds",
   ms: "milliseconds",
   msec: "milliseconds",
-  msecs: "milliseconds",
   millisecond: "milliseconds",
-  milliseconds: "milliseconds",
 };
+
+const unitOf = (token: string): keyof DurationRecord | undefined =>
+  UNIT_ALIASES[token] ?? (token.endsWith("s") ? UNIT_ALIASES[token.slice(0, -1)] : undefined);
 
 const CACHE_LIMIT = 50;
 
-const dfCache = new Map<string, DurationFormat>();
+/**
+ * Formatter cache. LRU, but only once it is full.
+ *
+ * Keeping Map order in step with recency costs a delete + re-set on every hit —
+ * ~120ns, real money against a format call that takes ~500ns. Below the limit
+ * nothing can be evicted, so that order buys nothing and the hit stays a bare
+ * `Map.get`. Once the cache is full, eviction is possible and recency starts to
+ * matter: a plain FIFO would drop the app's one hot locale every 50 misses, and
+ * rebuilding a formatter costs ~50-90µs.
+ */
+function cacheGet<V>(
+  cache: Map<string, V>,
+  k: string,
+  create: () => V,
+  limit = CACHE_LIMIT,
+): V {
+  const hit = cache.get(k);
+  if (hit !== undefined) {
+    if (cache.size >= limit) {
+      // Move to the end — Map iterates in insertion order, and the eviction
+      // below takes the first key it sees.
+      cache.delete(k);
+      cache.set(k, hit);
+    }
+    return hit;
+  }
+  const v = create();
+  if (cache.size >= limit) cache.delete(cache.keys().next().value!);
+  cache.set(k, v);
+  return v;
+}
 
-const localeKey = (locale?: Locale) =>
-  Array.isArray(locale) ? locale.join("\0") : ((locale as string) ?? "");
+const localeKey = (locale?: Locale): string =>
+  typeof locale === "string" ? locale : locale ? locale.join("\0") : "";
+
+/**
+ * Cache key for a caller-supplied options object. Keys are sorted, so
+ * `{ style, hours }` and `{ hours, style }` share one formatter; `undefined`
+ * values are skipped, as `Intl` skips them.
+ */
+function optKey(o: object): string {
+  const r = o as Record<string, unknown>;
+  let k = "";
+  for (const name of Object.keys(r).sort()) {
+    const v = r[name];
+    if (v !== undefined) k += `${name}=${v};`;
+  }
+  return k;
+}
+
+const dfCache = new Map<string, DurationFormat>();
 
 function formatter(locale: Locale | undefined, opts: DurationFormatOptions): DurationFormat {
   if (!DF)
@@ -208,44 +248,26 @@ function formatter(locale: Locale | undefined, opts: DurationFormatOptions): Dur
         "Chrome 129+, Firefox 132+, Safari 16.4+ (Baseline 2025), or a polyfill. " +
         "Check the `anylong.supported` flag before calling anylong.",
     );
-  const k = `${localeKey(locale)}|${JSON.stringify(opts)}`;
-  const hit = dfCache.get(k);
-  if (hit !== undefined) {
-    if (dfCache.size >= CACHE_LIMIT) {
-      // Refresh recency: delete + re-set moves this key to the end of Map's
-      // iteration order, which is what the eviction below reads. Only worth its
-      // ~120ns once the cache is full and something can actually be evicted.
-      dfCache.delete(k);
-      dfCache.set(k, hit);
-    }
-    return hit;
-  }
-  const v = new DF(locale, opts);
-  if (dfCache.size >= CACHE_LIMIT) dfCache.delete(dfCache.keys().next().value!);
-  dfCache.set(k, v);
-  return v;
+  return cacheGet(dfCache, `${localeKey(locale)}|${optKey(opts)}`, () => new DF(locale, opts));
 }
 
 function decompose(
   totalMs: number,
-  largestUnit?: DecomposeUnit,
+  largestUnit: DecomposeUnit = "days",
   smallestUnit?: DecomposeUnit,
 ): DurationRecord {
-  const largest = largestUnit ?? "days";
   const smallest = smallestUnit ?? "milliseconds";
-  const li = DECOMPOSE_ORDER.indexOf(largest);
+  const li = DECOMPOSE_ORDER.indexOf(largestUnit);
   const si = DECOMPOSE_ORDER.indexOf(smallest);
   if (li > si)
     throw new RangeError(
-      `largestUnit "${largest}" is smaller than smallestUnit "${smallest}".`,
+      `largestUnit "${largestUnit}" is smaller than smallestUnit "${smallest}".`,
     );
 
   let rem = Math.round(totalMs / UNIT_MS[smallest]) * UNIT_MS[smallest];
-  if (rem === 0) {
-    const zero: DurationRecord = {};
-    zero[smallestUnit ?? "seconds"] = 0;
-    return zero;
-  }
+  // Nothing left after rounding: render a single zero in the requested unit,
+  // or in seconds when none was asked for ("0 sec" reads better than "0 ms").
+  if (rem === 0) return { [smallestUnit ?? "seconds"]: 0 };
 
   const record: DurationRecord = {};
   for (let i = li; i <= si; i++) {
@@ -319,7 +341,7 @@ function parseShorthand(s: string): DurationRecord {
         `Cannot parse duration string "${s}". Accepted string forms: ` +
           'ISO 8601 ("PT2H30M", "P1DT4H") or shorthand ("2h 30m", "90s", "2 hours 30 minutes").',
       );
-    const unit = UNIT_ALIASES[m[2]];
+    const unit = unitOf(m[2]);
     if (!unit)
       throw new RangeError(
         `Unknown unit "${m[2]}" in "${s}". Known units: y, mo, w, d, h, m, s, ms ` +
@@ -374,7 +396,12 @@ function toTime(d: Date): number {
   return t;
 }
 
-function fromNumber(n: number, options: AnylongOptions): DurationRecord {
+function fromNumber(
+  n: number,
+  unit: "ms" | "s" | undefined,
+  largestUnit?: DecomposeUnit,
+  smallestUnit?: DecomposeUnit,
+): DurationRecord {
   if (Number.isNaN(n)) throw new RangeError(`Invalid duration: NaN. Accepted inputs: ${ACCEPTED}.`);
   if (!Number.isFinite(n))
     throw new RangeError(`Invalid duration: ${n}. Accepted inputs: ${ACCEPTED}.`);
@@ -383,18 +410,18 @@ function fromNumber(n: number, options: AnylongOptions): DurationRecord {
       `Negative durations are not supported: ${n}. Pass the absolute value, ` +
         "or pass two Dates — anylong(dateA, dateB) — which is order-independent.",
     );
-  const ms = (options.unit ?? "ms") === "s" ? n * 1000 : n;
-  return decompose(ms, options.largestUnit, options.smallestUnit);
+  return decompose(unit === "s" ? n * 1000 : n, largestUnit, smallestUnit);
 }
 
-function toRecord(input: DurationInput, options: AnylongOptions): DurationRecord {
+function toRecord(
+  input: DurationInput,
+  unit: "ms" | "s" | undefined,
+  largestUnit?: DecomposeUnit,
+  smallestUnit?: DecomposeUnit,
+): DurationRecord {
   if (input instanceof Date)
-    return decompose(
-      Math.abs(Date.now() - toTime(input)),
-      options.largestUnit,
-      options.smallestUnit,
-    );
-  if (typeof input === "number") return fromNumber(input, options);
+    return decompose(Math.abs(Date.now() - toTime(input)), largestUnit, smallestUnit);
+  if (typeof input === "number") return fromNumber(input, unit, largestUnit, smallestUnit);
   if (typeof input === "string") return parseString(input);
   if (typeof input === "object" && input !== null && !Array.isArray(input))
     return fromRecord(input as Record<string, unknown>);
@@ -408,52 +435,58 @@ function prepare(
   b?: Date | AnylongOptions,
   c?: AnylongOptions,
 ): { record: DurationRecord; locale?: Locale; opts: DurationFormatOptions } {
-  let options: AnylongOptions;
-  let record: DurationRecord;
+  const twoDates = b instanceof Date;
+  if (!twoDates && c !== undefined)
+    throw new TypeError(
+      "A third argument is only allowed in the two-date form: anylong(dateA, dateB, options).",
+    );
 
-  if (b instanceof Date) {
+  // anylong's own options come off here; everything left goes to Intl.DurationFormat.
+  const { locale, unit, largestUnit, smallestUnit, style = "short", ...intl } =
+    (twoDates ? c : b) ?? {};
+  const opts: DurationFormatOptions = { style, ...intl };
+
+  let record: DurationRecord;
+  if (twoDates) {
     if (!(input instanceof Date))
       throw new TypeError(
         `The two-argument date form needs two Dates; the first argument is ${typeof input}.`,
       );
-    options = c ?? {};
-    record = decompose(
-      Math.abs(toTime(input) - toTime(b)),
-      options.largestUnit,
-      options.smallestUnit,
-    );
+    record = decompose(Math.abs(toTime(input) - toTime(b)), largestUnit, smallestUnit);
   } else {
-    if (c !== undefined)
-      throw new TypeError(
-        "A third argument is only allowed in the two-date form: anylong(dateA, dateB, options).",
-      );
-    options = b ?? {};
-    record = toRecord(input, options);
+    record = toRecord(input, unit, largestUnit, smallestUnit);
   }
-
-  const { locale, unit, largestUnit, smallestUnit, style = "short", ...intl } = options;
-  void unit;
-  void largestUnit;
-  void smallestUnit;
-  const opts: DurationFormatOptions = { style, ...intl };
 
   // The default "auto" unit display hides zero-valued units, so an all-zero
   // record would render as "" — force its units visible instead.
   const keys = Object.keys(record) as (keyof DurationRecord)[];
   if (keys.every((k) => record[k] === 0))
-    for (const k of keys) {
-      const d = `${k}Display`;
-      if ((intl as Record<string, unknown>)[d] === undefined)
-        (opts as Record<string, unknown>)[d] = "always";
-    }
+    for (const k of keys) (opts as Record<string, unknown>)[`${k}Display`] ??= "always";
 
   return { record, locale, opts };
+}
+
+function format(input: DurationInput, options?: AnylongOptions): string;
+function format(dateA: Date, dateB: Date, options?: AnylongOptions): string;
+function format(input: DurationInput, b?: Date | AnylongOptions, c?: AnylongOptions): string {
+  const { record, locale, opts } = prepare(input, b, c);
+  return formatter(locale, opts).format(record);
+}
+
+function parts(input: DurationInput, options?: AnylongOptions): AnylongPart[];
+function parts(dateA: Date, dateB: Date, options?: AnylongOptions): AnylongPart[];
+function parts(input: DurationInput, b?: Date | AnylongOptions, c?: AnylongOptions): AnylongPart[] {
+  const { record, locale, opts } = prepare(input, b, c);
+  return formatter(locale, opts).formatToParts(record);
 }
 
 /**
  * Formats any reasonable representation of a duration as a localized string
  * using native `Intl.DurationFormat`. Input detection is deterministic —
  * ambiguous input (like `"1:30"`) throws instead of guessing.
+ *
+ * The package exports this one name. Anything beyond the plain call hangs off
+ * it: {@linkcode anylong.parts} and {@linkcode anylong.supported}.
  *
  * @example
  * ```ts
@@ -471,28 +504,6 @@ function prepare(
  * @throws {TypeError | RangeError} On ambiguous, negative, or unparseable input — the message states what was received and what is accepted.
  * @throws {Error} If `Intl.DurationFormat` is unavailable in the runtime (check {@linkcode anylong.supported}).
  */
-function format(input: DurationInput, options?: AnylongOptions): string;
-function format(dateA: Date, dateB: Date, options?: AnylongOptions): string;
-function format(
-  input: DurationInput,
-  b?: Date | AnylongOptions,
-  c?: AnylongOptions,
-): string {
-  const { record, locale, opts } = prepare(input, b, c);
-  return formatter(locale, opts).format(record);
-}
-
-function parts(input: DurationInput, options?: AnylongOptions): AnylongPart[];
-function parts(dateA: Date, dateB: Date, options?: AnylongOptions): AnylongPart[];
-function parts(
-  input: DurationInput,
-  b?: Date | AnylongOptions,
-  c?: AnylongOptions,
-): AnylongPart[] {
-  const { record, locale, opts } = prepare(input, b, c);
-  return formatter(locale, opts).formatToParts(record);
-}
-
 export const anylong = Object.assign(format, {
   /**
    * Like calling {@linkcode anylong} directly, but returns the output as

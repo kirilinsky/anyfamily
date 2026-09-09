@@ -684,3 +684,24 @@ describe("public surface", () => {
     expect(joined).toBe(anywhen(NOW - 3_600_000, opts));
   });
 });
+
+describe("absolute mode — custom format cache", () => {
+  const d = new Date("2026-03-04T15:06:00Z");
+
+  it("treats the same format options in any key order as one formatter", () => {
+    const a = anywhen(d, { mode: "absolute", locale: "en", format: { hour: "2-digit", minute: "2-digit", timeZone: "UTC" } });
+    const b = anywhen(d, { mode: "absolute", locale: "en", format: { timeZone: "UTC", minute: "2-digit", hour: "2-digit" } });
+    expect(a).toBe(b);
+    expect(a).toMatch(/03:06/);
+  });
+
+  it("the timeZone option wins over the one inside format", () => {
+    const out = anywhen(d, {
+      mode: "absolute",
+      locale: "en",
+      timeZone: "Asia/Tokyo",
+      format: { hour: "2-digit", minute: "2-digit", timeZone: "UTC", hourCycle: "h23" },
+    });
+    expect(out).toMatch(/00:06/);
+  });
+});
