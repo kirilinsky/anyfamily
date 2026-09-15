@@ -35,6 +35,9 @@ export const AMOUNT_PRESETS: Preset[] = [
   { call: `anyamount(3.2, { mode: "unit", unit: "kilometer-per-hour", style: "long" })`, run: () => anyamount(3.2, { mode: "unit", unit: "kilometer-per-hour", style: "long", locale: "en" }) },
   { call: `anyamount(2500000, { style: "long", locale: "fr" })`, run: () => anyamount(2500000, { style: "long", locale: "fr" }) },
   { call: `anyamount(1500.5, { mode: "unit", unit: "gigabyte", style: "long" })`, run: () => anyamount(1500.5, { mode: "unit", unit: "gigabyte", style: "long", locale: "en" }) },
+  { call: `anyamount.range(10, 20, { mode: "currency", currency: "EUR" })`, run: () => anyamount.range(10, 20, { mode: "currency", currency: "EUR", locale: "en" }) },
+  { call: `anyamount.parse("1.999,50", { locale: "de" })`, run: () => String(anyamount.parse("1.999,50", { locale: "de" })) },
+  { call: `anyamount(1234, { compact: true })`, run: () => anyamount(1234, { compact: true, locale: "en" }) },
 ];
 
 const NOW = "2026-07-11T12:00:00";
@@ -45,6 +48,7 @@ export const WHEN_PRESETS: Preset[] = [
   { call: `anywhen("2026-07-14", { mode: "relative" })`, run: () => anywhen("2026-07-14", { mode: "relative", now: NOW }) },
   { call: `anywhen("2026-07-25", { mode: "relative" })`, run: () => anywhen("2026-07-25", { mode: "relative", now: NOW }) },
   { call: `anywhen("2026-07-11", { locale: "ja", format: { dateStyle: "long" } })`, run: () => anywhen("2026-07-11", { mode: "absolute", locale: "ja", format: { dateStyle: "long" } }) },
+  { call: `anywhen.range("2026-07-12", "2026-07-15", { format: { day: "numeric", month: "short" } })`, run: () => anywhen.range("2026-07-12", "2026-07-15", { locale: "en", timeZone: "UTC", format: { day: "numeric", month: "short" } }) },
 ];
 
 export const MANY_PRESETS: Preset[] = [

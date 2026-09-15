@@ -22,7 +22,8 @@
     "Import from the package itself (`import { anywhen } from 'anywhen'`) or all eight from 'anyfamily'. In React use 'anyfamily-react': useAnywhen, useAnyamount, ... or useAnyfamily() for every function bound to the AnyfamilyProvider.",
     "anylong needs Intl.DurationFormat (Node 23+, Baseline 2025), anyword needs Intl.Segmenter, anylocale needs Intl Locale Info; each exposes a `.supported` boolean to branch on.",
     "Functions return plain strings (anyword returns a string[]; anylocale returns a record with lazy fields); `.parts()` returns Intl formatToParts-style arrays.",
-    "For SSR pass `now` to anywhen and an explicit `locale` everywhere so server and client render the same text."
+    "For SSR pass `now` to anywhen and an explicit `locale` everywhere so server and client render the same text.",
+    "Ranges: anywhen.range(from, to, { locale, timeZone, format }) and anyamount.range(from, to, options) collapse shared parts ('Sep 12 – 15', '€10.00 – 20.00'). The other direction for numbers is anyamount.parse(text, { locale }) → number or NaN; there is no date parser by design."
   ],
   "previousVersions": []
 }

@@ -705,3 +705,46 @@ describe("absolute mode — custom format cache", () => {
     expect(out).toMatch(/00:06/);
   });
 });
+
+describe("anywhen.range", () => {
+  const a = new Date("2026-09-12T09:00:00Z");
+  const b = new Date("2026-09-15T11:30:00Z");
+  const short = { locale: "en", timeZone: "UTC", format: { day: "numeric", month: "short" } } as const;
+
+  it("collapses the shared parts", () => {
+    expect(anywhen.range(a, b, short)).toMatch(/^Sep 12\s*–\s*15$/);
+  });
+
+  it("defaults to the short date preset", () => {
+    expect(anywhen.range(a, b, { locale: "en", timeZone: "UTC" })).toMatch(/^Sep 12\s*–\s*15, 2026$/);
+  });
+
+  it("spans months and years without collapsing what differs", () => {
+    expect(anywhen.range("2026-09-30", "2026-10-02", short)).toMatch(/^Sep 30\s*–\s*Oct 2$/);
+    expect(anywhen.range("2026-12-31", "2027-01-01", { locale: "en", timeZone: "UTC" })).toMatch(/2026.*2027/);
+  });
+
+  it("formats a time window", () => {
+    expect(
+      anywhen.range(a, "2026-09-12T11:30:00Z", {
+        locale: "en",
+        timeZone: "UTC",
+        format: { hour: "numeric", minute: "2-digit" },
+      }),
+    ).toMatch(/^9:00\s*–\s*11:30\s*AM$/);
+  });
+
+  it("is order-independent", () => {
+    expect(anywhen.range(b, a, short)).toBe(anywhen.range(a, b, short));
+  });
+
+  it("accepts every date input type and rejects invalid ones", () => {
+    expect(anywhen.range(a.getTime(), b.toISOString(), short)).toBe(anywhen.range(a, b, short));
+    expect(() => anywhen.range("nope", b, short)).toThrow(RangeError);
+    expect(() => anywhen.range(a, NaN, short)).toThrow(RangeError);
+  });
+
+  it("speaks other locales", () => {
+    expect(anywhen.range(a, b, { locale: "de", timeZone: "UTC" })).toMatch(/12\.\s*–\s*15\./);
+  });
+});

@@ -63,7 +63,8 @@ anylong(dateA, dateB, options);
 ```
 
 The two-date form is order-independent and measures real elapsed time, so DST
-boundaries do not distort it.
+boundaries do not distort it. It says *how long*; for *when* the span is
+(`"Sep 12 – 15"`) use [anywhen](https://www.npmjs.com/package/anywhen)`.range(from, to)`.
 
 `anylong.parts()` takes the same arguments — including the two-date form — and
 returns `{ type, value, unit? }` parts instead of a string.

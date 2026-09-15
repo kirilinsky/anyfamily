@@ -56,6 +56,7 @@ export function AnyamountDemo() {
   const [locale, setLocale] = useState("en");
   const [currency, setCurrency] = useState("EUR");
   const [unit, setUnit] = useState<Unit>("gigabyte");
+  const [parseText, setParseText] = useState("1.999,50");
 
   const value = Number(valueStr);
 
@@ -201,6 +202,32 @@ export function AnyamountDemo() {
             {p}
           </button>
         ))}
+      </div>
+
+      {/* The other direction, live: whatever is typed here is read back in the
+          selected locale. */}
+      <div className="w-fit max-w-full rounded-xl border border-white/[0.07] bg-black/30 px-4 py-3.5 font-mono">
+        <div className="flex min-h-9 flex-wrap items-center justify-center gap-x-1 gap-y-1.5 text-sm sm:text-base">
+          <span className="shrink-0 text-accent">anyamount.parse</span>
+          <span className="shrink-0 text-white/30">(</span>
+          <span className="shrink-0 text-sky-300">&quot;</span>
+          <input
+            value={parseText}
+            onChange={(e) => setParseText(e.target.value)}
+            inputMode="decimal"
+            spellCheck={false}
+            aria-label="text to parse"
+            style={{ width: `min(${parseText.length + 2}ch, 100%)` }}
+            className="h-8 max-w-full min-w-[6ch] shrink rounded-md border border-transparent px-1.5 text-sky-300 outline-none transition-colors hover:border-white/10 hover:bg-white/[0.05] focus:border-sky-300/40"
+          />
+          <span className="shrink-0 text-sky-300">&quot;</span>
+          <span className="shrink-0 text-white/30">, {"{"} locale: &quot;{locale}&quot; {"}"})</span>
+          <span className="shrink-0 text-white/30">→</span>
+          <span className="shrink-0 text-accent">{String(anyamount.parse(parseText, { locale }))}</span>
+        </div>
+        <p className="mt-2 text-center font-sans text-xs text-white/35 italic">
+          the other direction — a price field, read back in this locale
+        </p>
       </div>
 
       <div className="flex min-h-28 w-full flex-col items-center justify-center gap-3">

@@ -51,6 +51,9 @@ export interface AnywhenPart {
   unit?: string;
 }
 
+/** Options for {@linkcode anywhen.range}: the absolute-mode subset — a range has no "now". */
+export type AnywhenRangeOptions = Pick<AnywhenOptions, "locale" | "timeZone" | "format">;
+
 /** Options for {@linkcode anywhen} and {@linkcode anywhen.parts}. Each mode reads only the options that apply to it. */
 export interface AnywhenOptions {
   /** Rendering strategy. Defaults to `"smart"`. */
@@ -277,6 +280,17 @@ function format(input: DateInput, options: AnywhenOptions = {}): string {
   return out;
 }
 
+function range(from: DateInput, to: DateInput, options: AnywhenRangeOptions = {}): string {
+  const { locale, timeZone, format } = options;
+  let a = toDate(from);
+  let b = toDate(to);
+  // Order-independent, like anylong's two-date form: a range is a span, and
+  // older engines throw when the ends are reversed.
+  if (a.getTime() > b.getTime()) [a, b] = [b, a];
+  const f = format ? custom(locale, format, timeZone) : preset(locale, "date", timeZone);
+  return f.formatRange(a, b);
+}
+
 function parts(input: DateInput, options: AnywhenOptions = {}): AnywhenPart[] {
   return plan(input, options).flatMap((s) =>
     "t" in s
@@ -334,4 +348,22 @@ export const anywhen = Object.assign(format, {
    * ```
    */
   parts,
+
+  /**
+   * Formats two dates as one range, the way the locale writes it — the shared
+   * parts collapse, so `"Sep 12 – Sep 15"` becomes `"Sep 12 – 15"`. Absolute
+   * mode only: `locale`, `timeZone` and `format` apply, a range has no "now".
+   * Order-independent — the earlier date is always the start.
+   *
+   * @example
+   * ```ts
+   * anywhen.range("2026-09-12", "2026-09-15", { locale: "en", format: { day: "numeric", month: "short" } });
+   * // "Sep 12 – 15"
+   * anywhen.range(a, b, { locale: "de" });                                     // "12.–15. Sept. 2026"
+   * anywhen.range(a, b, { locale: "en", format: { hour: "numeric", minute: "2-digit" } }); // "9:00 – 11:30 AM"
+   * ```
+   *
+   * @throws {RangeError} If either input is not a valid date.
+   */
+  range,
 });

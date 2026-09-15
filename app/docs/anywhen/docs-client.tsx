@@ -19,6 +19,7 @@ const NAV: DocsNavItem[] = [
   { id: "anywhen", label: "anywhen()" },
   { id: "migrating", label: "From 1.x" },
   { id: "parts", label: "anywhen.parts()" },
+  { id: "range", label: "anywhen.range()" },
   { id: "modes", label: "Modes" },
   { id: "thresholds", label: "Thresholds" },
   { id: "options", label: "Options" },
@@ -174,6 +175,41 @@ anywhen.parts(date, { mode: 'relative' }).map((p, i) =>
           Note: part values keep the original Intl characters — the space before
           AM/PM can be U+202F (narrow no-break space), which some engines replace
           with a regular space in the joined string.
+        </p>
+      </Section>
+
+      <Section id="range" title="anywhen.range()">
+        <p>
+          Two dates as one range — a delivery window, an event, opening hours —
+          the way the locale writes it, with the shared parts collapsed. Absolute
+          only: <Mono>locale</Mono>, <Mono>timeZone</Mono> and{" "}
+          <Mono>format</Mono> apply, a range has no &quot;now&quot;. The earlier
+          date is always the start, whichever order you pass them in. It says{" "}
+          <em>when</em>; for <em>how long</em> the span is —{" "}
+          <Mono>&quot;3 days&quot;</Mono> — that is{" "}
+          <Mono>anylong(from, to)</Mono>.
+        </p>
+        <Code>{`import { anywhen } from 'anywhen'
+
+anywhen.range(from, to, { locale: 'en', format: { day: 'numeric', month: 'short' } })
+// "Sep 12 – 15"
+
+anywhen.range(from, to, { locale: 'en' })
+// "Sep 12 – 15, 2026"   — the default short date
+
+anywhen.range(from, to, { locale: 'de' })
+// "12.–15. Sept. 2026"
+
+anywhen.range('2026-09-30', '2026-10-02', { locale: 'en', format: { day: 'numeric', month: 'short' } })
+// "Sep 30 – Oct 2"      — only what differs is spelled twice
+
+anywhen.range(open, close, { locale: 'en', format: { hour: 'numeric', minute: '2-digit' } })
+// "9:00 – 11:30 AM"`}</Code>
+        <p style={{ color: "var(--text-muted)" }} className="text-xs">
+          Built on Intl.DateTimeFormat.formatRange. The dash and the spacing are
+          the locale&apos;s — en dash, thin spaces — so compare output with a
+          pattern, not a literal. Same input types as the plain call; either end
+          invalid is a RangeError.
         </p>
       </Section>
 
@@ -407,7 +443,11 @@ anywhen(date, { locale: 'en', time: false })
 // "yesterday"
 
 // SSR-safe: freeze the anchor and the zone
-anywhen(createdAt, { locale: 'en', now: requestTime, timeZone: 'Europe/Belgrade' })`}</Code>
+anywhen(createdAt, { locale: 'en', now: requestTime, timeZone: 'Europe/Belgrade' })
+
+// Delivery window
+anywhen.range(order.earliest, order.latest, { locale: 'en', format: { day: 'numeric', month: 'short' } })
+// "Sep 12 – 15"`}</Code>
       </Section>
 
       <Section id="react" title="React / Next.js">

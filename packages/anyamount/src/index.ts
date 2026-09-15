@@ -103,6 +103,13 @@ export interface SmartOptions extends BaseOptions {
   mode?: "smart";
   /** Wording length for compact suffixes (`"1.2M"` / `"1.2 million"`). Defaults to `"short"`. */
   style?: Style;
+  /**
+   * When compact notation (`"1.2K"`, `"3.4M"`) kicks in. `true` — always,
+   * for counters and badges; `false` — never; a number — from that absolute
+   * value up. Defaults to `10000`, so `9999` stays plain and `12345` reads
+   * `"12.3K"`.
+   */
+  compact?: boolean | number;
 }
 
 /** Options for currency mode. */
@@ -138,6 +145,7 @@ type ResolvedOptions = BaseOptions & {
   currencyDisplay?: CurrencyDisplay;
   unit?: Unit;
   style?: Style;
+  compact?: boolean | number;
 };
 
 /** Compact notation kicks in at this absolute value in smart mode. */
@@ -205,18 +213,31 @@ function currencyFormat(
   });
 }
 
-function plan(value: number | bigint, options: AnyamountOptions): Intl.NumberFormat {
-  const { mode = "smart", locale, currency, currencyDisplay, unit, style = "short", digits } =
-    options as ResolvedOptions;
-
+function check(value: number | bigint): void {
   if (!(typeof value === "bigint" || (typeof value === "number" && !Number.isNaN(value))))
     throw new TypeError(`Invalid amount: ${String(value)}`);
+}
+
+function plan(value: number | bigint, options: AnyamountOptions): Intl.NumberFormat {
+  const {
+    mode = "smart",
+    locale,
+    currency,
+    currencyDisplay,
+    unit,
+    style = "short",
+    digits,
+    compact = COMPACT_MIN,
+  } = options as ResolvedOptions;
+
+  check(value);
 
   const lk = localeKey(locale);
 
   if (mode === "smart") {
     const abs = typeof value === "bigint" ? (value < 0 ? -value : value) : Math.abs(value);
-    if (abs >= COMPACT_MIN) {
+    const from = compact === true ? 0 : compact === false ? Infinity : compact;
+    if (abs >= from) {
       const compactDisplay = style === "long" ? "long" : "short";
       const max = digits ?? 1;
       return cacheGet(nfCache, `${lk}|c|${compactDisplay}|${max}`, () =>
@@ -264,6 +285,129 @@ function format(value: number | bigint, options: AnyamountOptions = {}): string 
 
 function parts(value: number | bigint, options: AnyamountOptions = {}): AnyamountPart[] {
   return plan(value, options).formatToParts(value);
+}
+
+const larger = (a: number | bigint, b: number | bigint) => {
+  const absA = typeof a === "bigint" ? (a < 0 ? -a : a) : Math.abs(a);
+  const absB = typeof b === "bigint" ? (b < 0 ? -b : b) : Math.abs(b);
+  return absA >= absB ? a : b;
+};
+
+function range(
+  from: number | bigint,
+  to: number | bigint,
+  options: AnyamountOptions = {},
+): string {
+  check(from);
+  check(to);
+  // Smart mode picks compact notation from the value's size; a range is as big
+  // as its bigger end.
+  const f = plan(larger(from, to), options) as Intl.NumberFormat & {
+    formatRange?: (a: number | bigint, b: number | bigint) => string;
+  };
+  // `Intl.NumberFormat.formatRange` is ES2023 — absent on Node 18, where the
+  // two ends are formatted separately and joined with an en dash instead.
+  return f.formatRange ? f.formatRange(from, to) : `${f.format(from)} – ${f.format(to)}`;
+}
+
+/** Options for {@linkcode anyamount.parse}. */
+export interface ParseOptions {
+  /** The locale the text was written in. Defaults to the runtime locale. */
+  locale?: Locale;
+}
+
+/** What a locale writes numbers with, read off `Intl` rather than stored. */
+interface Notation {
+  group: string;
+  decimal: string;
+  minus: string;
+  /** The locale's digits (every numbering system), each mapped to its value. */
+  digits: Map<string, number>;
+}
+
+const notationCache = new Map<string, Notation>();
+
+function notation(locale: Locale | undefined): Notation {
+  return cacheGet(notationCache, localeKey(locale), () => {
+    const n: Notation = { group: "", decimal: "", minus: "-", digits: new Map() };
+    // One number that exercises every digit, a group, a fraction and the sign.
+    const parts = new Intl.NumberFormat(locale).formatToParts(-9876543210.5);
+    let seen = "";
+    for (const p of parts) {
+      if (p.type === "group") n.group = p.value;
+      else if (p.type === "decimal") n.decimal = p.value;
+      else if (p.type === "minusSign") n.minus = p.value;
+      else if (p.type === "integer" || p.type === "fraction") seen += p.value;
+    }
+    // `seen` is "98765432105" in the locale's own digits, in that order.
+    Array.from(seen).forEach((ch, i) => n.digits.set(ch, +"98765432105"[i]));
+    for (let d = 0; d <= 9; d++) n.digits.set(String(d), d);
+    return n;
+  });
+}
+
+const isSpace = (ch: string) => ch === " " || ch === "\u00a0" || ch === "\u202f" || ch === "\u2009";
+
+function parse(text: string, options: ParseOptions = {}): number {
+  if (typeof text !== "string") throw new TypeError(`Invalid text: ${String(text)}`);
+  const { group, decimal, minus, digits } = notation(options.locale);
+
+  const chars = Array.from(text);
+  const isDigit = (ch: string) => digits.has(ch);
+  // Any of the separators a locale uses, whichever locale this is — so a
+  // German writing "1'234" the Swiss way, or a Swiss typing the curly
+  // apostrophe their keyboard offers, still parses.
+  const isSep = (ch: string) =>
+    ch === group || ch === decimal || ch === "," || ch === "." || ch === "'" || ch === "\u2019";
+
+  // The number proper runs from the first digit to the last one; whatever
+  // wraps it — a currency symbol or code, a unit, a percent sign, whitespace —
+  // is ignored, but only there. Letters between digits are not a number.
+  let start = chars.findIndex(isDigit);
+  if (start < 0) return NaN;
+  let end = chars.length - 1;
+  while (!isDigit(chars[end])) end--;
+
+  const before = chars.slice(0, start);
+  const after = chars.slice(end + 1);
+  const isMinus = (ch: string) => ch === minus || ch === "-" || ch === "\u2212";
+  // One sign at most: a minus on either side, or accounting parentheses.
+  const signs =
+    before.filter(isMinus).length +
+    after.filter(isMinus).length +
+    (before.includes("(") && after.includes(")") ? 1 : 0);
+  if (signs > 1) return NaN;
+  const negative = signs === 1;
+
+  // Separators: the locale's decimal is the decimal, its group is skipped.
+  // The one rule beyond that — a separator that occurs once and is followed
+  // by one or two digits is a decimal point whatever the locale says, since
+  // "1.5" typed into a German form means one and a half, not fifteen
+  // hundred — and "1.500" keeps the locale's reading.
+  const core = chars.slice(start, end + 1);
+  const seps = core.filter(isSep);
+  let decimalChar = decimal;
+  if (seps.length === 1) {
+    const at = core.lastIndexOf(seps[0]);
+    const trailing = core.length - at - 1;
+    if (seps[0] !== decimal && trailing > 0 && trailing < 3) decimalChar = seps[0];
+  }
+
+  let out = "";
+  let sawDecimal = false;
+  for (const ch of core) {
+    const d = digits.get(ch);
+    if (d !== undefined) out += d;
+    else if (ch === decimalChar) {
+      if (sawDecimal) return NaN;
+      sawDecimal = true;
+      out += ".";
+    } else if (ch === group || isSpace(ch) || (isSep(ch) && ch !== decimalChar)) continue;
+    else return NaN;
+  }
+
+  const n = Number(out);
+  return negative ? -n : n;
 }
 
 /** Options for {@linkcode anyamount.symbol}. */
@@ -360,4 +504,54 @@ export const anyamount = Object.assign(format, {
    * @throws {RangeError} If `currency` is not a well-formed ISO 4217 code — `Intl` decides.
    */
   symbol,
+
+  /**
+   * Formats two numbers as one range, the way the locale writes it — the
+   * shared parts collapse, so `"€10.00 – €20.00"` becomes `"€10.00–20.00"`.
+   * Same options as {@linkcode anyamount}; both ends are validated the same
+   * way. Built on `Intl.NumberFormat.formatRange`; where the runtime lacks it
+   * (Node 18) the two ends are formatted separately and joined with an en dash.
+   *
+   * @example
+   * ```ts
+   * anyamount.range(10, 20, { mode: "currency", currency: "EUR", locale: "en" }); // "€10.00 – 20.00"
+   * anyamount.range(1, 2.5, { mode: "unit", unit: "kilogram", locale: "en" });     // "1–2.5 kg"
+   * anyamount.range(1500, 2400, { compact: true, locale: "en" });                  // "1.5K – 2.4K"
+   * ```
+   */
+  range,
+
+  /**
+   * The other direction: reads a number the way a person wrote it in a locale
+   * — `"1.999,00"` in German is `1999`, `"1 234,5"` in French is `1234.5`,
+   * Arabic-Indic digits count too. For amount, price and quantity inputs,
+   * where the formatted text has to come back as a number.
+   *
+   * The locale's group separator is skipped, its decimal separator is the
+   * decimal, its digits are read, and anything around the number — a currency
+   * symbol or code, a percent sign, whitespace — is ignored. A minus sign on
+   * either side, or accounting parentheses, makes it negative. One rule
+   * beyond the locale: a separator that appears once and is followed by one
+   * or two digits is a decimal point (`"1.5"` in German is one and a half),
+   * while three digits keep the locale's reading (`"1.500"` is fifteen
+   * hundred). Anything else — letters between digits, two decimal points,
+   * no digits at all — is `NaN`, never a throw: unparseable input is the
+   * normal case for a text field. Compact suffixes (`"1.2K"`) are not read.
+   *
+   * @example
+   * ```ts
+   * anyamount.parse("1.999,00", { locale: "de" });   // 1999
+   * anyamount.parse("€1,999.00", { locale: "en" });  // 1999
+   * anyamount.parse("-1 234,5", { locale: "fr" });   // -1234.5
+   * anyamount.parse("١٬٢٣٤٫٥", { locale: "ar-EG" });  // 1234.5
+   * anyamount.parse("1.5", { locale: "de" });        // 1.5
+   * anyamount.parse("abc", { locale: "en" });        // NaN
+   * ```
+   *
+   * @param text The text as the user wrote it.
+   * @param options See {@linkcode ParseOptions}.
+   * @returns The number, or `NaN` when the text is not one.
+   * @throws {TypeError} If `text` is not a string.
+   */
+  parse,
 });

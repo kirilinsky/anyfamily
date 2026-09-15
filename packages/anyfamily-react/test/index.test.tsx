@@ -516,3 +516,23 @@ describe("the shared tick", () => {
     vi.useRealTimers();
   });
 });
+
+describe("useAnyfamily — range and parse", () => {
+  it("binds anywhen.range and anyamount.range to the provider's locale", () => {
+    const { result } = renderHook(() => useAnyfamily(), { wrapper: wrapper("en") });
+    const f = result.current;
+    expect(
+      f.anywhen.range("2026-09-12", "2026-09-15", {
+        timeZone: "UTC",
+        format: { day: "numeric", month: "short" },
+      }),
+    ).toMatch(/^Sep 12\s*–\s*15$/);
+    expect(f.anyamount.range(10, 20, { mode: "currency", currency: "EUR" })).toMatch(/^€10\.00/);
+  });
+
+  it("parses with the provider's locale", () => {
+    const { result } = renderHook(() => useAnyfamily(), { wrapper: wrapper("de") });
+    expect(result.current.anyamount.parse("1.999,50")).toBe(1999.5);
+    expect(result.current.anyamount.parse("1,999.50", { locale: "en" })).toBe(1999.5);
+  });
+});

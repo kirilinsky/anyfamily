@@ -81,6 +81,18 @@ anywhen.parts(date, { mode: "relative" }).map((p, i) =>
 );
 ```
 
+`anywhen.range()` formats two dates as one range — delivery windows, event
+dates, opening hours — the way the locale writes it, shared parts collapsed.
+Absolute only: `locale`, `timeZone` and `format` apply. Order-independent.
+It says *when*; for *how long* the span is (`"3 days"`) use
+[anylong](https://www.npmjs.com/package/anylong)`(from, to)`.
+
+```ts
+anywhen.range(from, to, { locale: "en", format: { day: "numeric", month: "short" } }); // "Sep 12 – 15"
+anywhen.range(from, to, { locale: "de" });                                              // "12.–15. Sept. 2026"
+anywhen.range(open, close, { locale: "en", format: { hour: "numeric", minute: "2-digit" } }); // "9:00 – 11:30 AM"
+```
+
 ---
 
 ## recipes
@@ -112,6 +124,10 @@ anywhen(invoice.date, {
 
 // SSR-safe: freeze the anchor and the zone
 anywhen(createdAt, { locale: "en", now: requestTime, timeZone: "Europe/Belgrade" });
+
+// Delivery window
+anywhen.range(order.earliest, order.latest, { locale: "en", format: { day: "numeric", month: "short" } });
+// "Sep 12 – 15"
 ```
 
 In React, `now` is what keeps server and client output identical across the

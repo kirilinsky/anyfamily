@@ -20,6 +20,8 @@ const NAV: DocsNavItem[] = [
   { id: "migrating", label: "From 1.x" },
   { id: "parts", label: "anyamount.parts()" },
   { id: "symbol", label: "anyamount.symbol()" },
+  { id: "range", label: "anyamount.range()" },
+  { id: "parse", label: "anyamount.parse()" },
   { id: "modes", label: "Modes" },
   { id: "units", label: "units" },
   { id: "options", label: "Options" },
@@ -206,6 +208,91 @@ anyamount.symbol('USD', { locale: 'en', display: 'name' })   // "US dollars"`}</
         </p>
       </Section>
 
+      <Section id="range" title="anyamount.range()">
+        <p>
+          Two numbers as one range, the way the locale writes it — the shared
+          parts collapse, so a price band or a weight bracket reads as one
+          thing. Same options as the plain call; both ends are validated the
+          same way, and smart mode picks compact notation from the bigger end.
+        </p>
+        <Code>{`import { anyamount } from 'anyamount'
+
+anyamount.range(10, 20, { mode: 'currency', currency: 'EUR', locale: 'en' })  // "€10.00 – 20.00"
+anyamount.range(1, 2.5, { mode: 'unit', unit: 'kilogram', locale: 'en' })      // "1–2.5 kg"
+anyamount.range(1500, 2400, { compact: true, locale: 'en' })                   // "1.5K – 2.4K"
+anyamount.range(3, 7, { locale: 'de' })                                        // "3–7"`}</Code>
+        <p style={{ color: "var(--text-muted)" }} className="text-xs">
+          Built on Intl.NumberFormat.formatRange (ES2023). Where the runtime
+          lacks it — Node 18 — the two ends are formatted separately and joined
+          with an en dash, so the call never throws for that reason.
+        </p>
+      </Section>
+
+      <Section id="parse" title="anyamount.parse()">
+        <p>
+          The other direction: the text a person typed, in their locale, back
+          to a number. For amount, price and quantity inputs — where{" "}
+          <Mono>Number(&quot;1.999,00&quot;)</Mono> is <Mono>NaN</Mono> and{" "}
+          <Mono>parseFloat</Mono> stops at the first comma.
+        </p>
+        <Code>{`import { anyamount } from 'anyamount'
+
+anyamount.parse('1.999,00', { locale: 'de' })    // 1999
+anyamount.parse('1,999.00', { locale: 'en' })    // 1999
+anyamount.parse('1 234,5', { locale: 'fr' })     // 1234.5
+anyamount.parse('١٬٢٣٤٫٥', { locale: 'ar-EG' })   // 1234.5
+
+anyamount.parse('€1,999.00', { locale: 'en' })   // 1999   — what wraps the number is ignored
+anyamount.parse('1 234,5 kr', { locale: 'sv' })  // 1234.5
+anyamount.parse('12%', { locale: 'en' })         // 12
+anyamount.parse('(1,999.00)', { locale: 'en' })  // -1999  — accounting parentheses
+anyamount.parse('−42', { locale: 'sv' })         // -42    — the locale's own minus
+
+anyamount.parse('abc', { locale: 'en' })         // NaN
+anyamount.parse('12abc34', { locale: 'en' })     // NaN    — letters between digits
+anyamount.parse('1.2.3', { locale: 'en' })       // NaN    — two decimal points`}</Code>
+        <p>
+          Everything is read off <Mono>Intl</Mono>: the locale&apos;s group and
+          decimal separators, its minus sign and its digits — every numbering
+          system, no tables. The locale&apos;s group separator is skipped, its
+          decimal separator is the decimal, ASCII digits are always accepted.
+          A minus on either side, or accounting parentheses, makes the result
+          negative; two signs make it <Mono>NaN</Mono>.
+        </p>
+        <p>
+          One rule beyond the locale, because people type what they mean: a
+          separator that appears <strong style={{ color: "var(--text-primary)" }}>once</strong>{" "}
+          and is followed by one or two digits is a decimal point, whatever the
+          locale says — <Mono>&apos;1.5&apos;</Mono> in a German form is one and
+          a half, not fifteen hundred. Three digits keep the locale&apos;s
+          reading: <Mono>&apos;1.500&apos;</Mono> is fifteen hundred in German
+          and one and a half in English.
+        </p>
+        <Code>{`anyamount.parse('1.5', { locale: 'de' })     // 1.5
+anyamount.parse('1.500', { locale: 'de' })   // 1500
+anyamount.parse('1,50', { locale: 'en' })    // 1.5
+anyamount.parse('1,500', { locale: 'en' })   // 1500`}</Code>
+        <p style={{ color: "var(--text-muted)" }} className="text-xs">
+          Returns NaN rather than throwing: unparseable input is the normal case
+          for a text field, not an error. Compact suffixes (&apos;1.2K&apos;) are
+          not read — that would be guessing. The only throw is a TypeError for a
+          non-string.
+        </p>
+        <Code>{`// A price field: format on blur, parse on change
+const [text, setText] = useState(anyamount(price, { mode: 'currency', currency, locale }))
+
+<input
+  value={text}
+  inputMode="decimal"
+  onChange={(e) => {
+    setText(e.target.value)
+    const n = anyamount.parse(e.target.value, { locale })
+    if (!Number.isNaN(n)) onChange(n)
+  }}
+  onBlur={() => setText(anyamount(price, { mode: 'currency', currency, locale }))}
+/>`}</Code>
+      </Section>
+
       <Section id="modes" title="Modes">
         <p>
           The <Mono>mode</Mono> option picks the rendering strategy. Each mode
@@ -365,6 +452,12 @@ anyamount(2, { mode: 'unit', unit: 'meter-per-second' })       // "2 m/s"`}</Cod
           desc="Smart and unit modes. Wording length: '1.2M' vs '1.2 million', '3.2 GB' vs '3.2 gigabytes'."
         />
         <Prop
+          name="compact"
+          type="boolean | number"
+          def="10000"
+          desc="Smart mode only. When compact notation ('1.2K', '3.4M') kicks in: true — always, for counters and badges; false — never; a number — from that absolute value up. The default keeps 9,999 plain and turns 12,345 into '12.3K'."
+        />
+        <Prop
           name="digits"
           type="number"
           def="per mode"
@@ -424,7 +517,23 @@ anyamount(120, { mode: 'unit', unit: 'kilometer-per-hour', locale: 'ru' })
 
 // Currency affix inside an input, amount rendered separately
 anyamount.symbol(account.currency)
-// "$" `}</Code>
+// "$"
+
+// Badge / counter
+anyamount(post.likes, { compact: true })
+// "1.2K"
+
+// A table that must never abbreviate
+anyamount(row.total, { compact: false })
+// "15,000"
+
+// Price band
+anyamount.range(plan.min, plan.max, { mode: 'currency', currency: 'USD' })
+// "$10.00 – 20.00"
+
+// What the user typed, back to a number
+anyamount.parse(input.value, { locale })
+// 1999.5`}</Code>
       </Section>
 
       <Section id="react" title="React / Next.js">
@@ -502,7 +611,7 @@ anyamount(120, { mode: 'unit', unit: 'kilometer-per-hour', locale: 'ru' })
             ["dependencies", "0", "0", "0"],
           ]}
         />
-        <p>anyamount is 0.9kb gzipped and formats numbers. It is not a money type: it does not add prices, hold exchange rates, or protect you from floating-point arithmetic. Do the arithmetic in minor units or in a decimal library, then hand the result here to be written down.</p>
+        <p>anyamount is 1.6kb gzipped and formats numbers — and reads them back. It is not a money type: it does not add prices, hold exchange rates, or protect you from floating-point arithmetic. Do the arithmetic in minor units or in a decimal library, then hand the result here to be written down.</p>
       </Section>
 
       <Section id="compatibility" title="Compatibility">

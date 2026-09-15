@@ -16,6 +16,7 @@ export { anywhen } from "anywhen";
 export type {
   AnywhenOptions,
   AnywhenPart,
+  AnywhenRangeOptions,
   DateInput,
   Locale,
   Mode as AnywhenMode,
@@ -31,6 +32,7 @@ export type {
   AnyamountPart,
   CurrencyOptions as AnyamountCurrencyOptions,
   Mode as AnyamountMode,
+  ParseOptions as AnyamountParseOptions,
   SingleUnit,
   SmartOptions as AnyamountSmartOptions,
   Style as AnyamountStyle,

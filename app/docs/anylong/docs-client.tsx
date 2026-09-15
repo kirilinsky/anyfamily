@@ -105,7 +105,9 @@ yarn add anylong`}</Code>
 anylong(dateA, dateB, options?)`}</Code>
         <p>
           The two-date form is order-independent and measures real elapsed time,
-          so DST boundaries do not distort it.
+          so DST boundaries do not distort it. It says <em>how long</em>; for{" "}
+          <em>when</em> the span is — <Mono>&quot;Sep 12 – 15&quot;</Mono> — that
+          is <Mono>anywhen.range(from, to)</Mono>.
         </p>
         <Code>{`anylong(startedAt, finishedAt)             // "1 day, 4 hr, 30 min"
 anylong(finishedAt, startedAt)             // same

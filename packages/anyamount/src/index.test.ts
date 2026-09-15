@@ -479,3 +479,138 @@ describe("cache keys", () => {
     expect(anyamount(2.5, en)).toBe("€2.50");
   });
 });
+
+describe("compact option", () => {
+  it("defaults to the 10,000 threshold", () => {
+    expect(anyamount(9999, { locale: "en" })).toBe("9,999");
+    expect(anyamount(12345, { locale: "en" })).toBe("12.3K");
+  });
+
+  it("true compacts from zero, for badges and counters", () => {
+    expect(anyamount(1234, { locale: "en", compact: true })).toBe("1.2K");
+    expect(anyamount(999, { locale: "en", compact: true })).toBe("999");
+    expect(anyamount(1_234_567, { locale: "en", compact: true, style: "long" })).toBe("1.2 million");
+  });
+
+  it("false never compacts", () => {
+    expect(anyamount(15000, { locale: "en", compact: false })).toBe("15,000");
+    expect(anyamount(1_234_567, { locale: "en", compact: false })).toBe("1,234,567");
+    expect(anyamount(9_007_199_254_740_993n, { locale: "en", compact: false })).toBe(
+      "9,007,199,254,740,993",
+    );
+  });
+
+  it("a number is the threshold, on the absolute value", () => {
+    expect(anyamount(1234, { locale: "en", compact: 1000 })).toBe("1.2K");
+    expect(anyamount(-1234, { locale: "en", compact: 1000 })).toBe("-1.2K");
+    expect(anyamount(999, { locale: "en", compact: 1000 })).toBe("999");
+  });
+
+  it("is ignored outside smart mode", () => {
+    expect(
+      anyamount(1234, { mode: "currency", currency: "EUR", locale: "en", compact: true } as never),
+    ).toBe("€1,234.00");
+  });
+});
+
+describe("anyamount.range", () => {
+  const en = { locale: "en" } as const;
+
+  it("formats a range in every mode", () => {
+    expect(anyamount.range(10, 20, { ...en, mode: "currency", currency: "EUR" })).toMatch(
+      /^€10\.00\s*–\s*(€)?20\.00$/,
+    );
+    expect(anyamount.range(1, 2.5, { ...en, mode: "unit", unit: "kilogram" })).toMatch(
+      /^1\s*–\s*2\.5 kg$/,
+    );
+    expect(anyamount.range(3, 7, en)).toMatch(/^3\s*–\s*7$/);
+  });
+
+  it("picks compact notation from the bigger end", () => {
+    expect(anyamount.range(1500, 2400, { ...en, compact: true })).toMatch(/^1\.5K\s*–\s*2\.4K$/);
+    expect(anyamount.range(500, 15000, en)).toMatch(/15K$/);
+    expect(anyamount.range(15000, 500, en)).toMatch(/^15K/);
+  });
+
+  it("accepts bigint on either end", () => {
+    expect(anyamount.range(1n, 2n, { ...en, compact: false })).toMatch(/^1\s*–\s*2$/);
+  });
+
+  it("validates both ends like the plain call", () => {
+    expect(() => anyamount.range(NaN, 2, en)).toThrow(TypeError);
+    expect(() => anyamount.range(1, NaN, en)).toThrow(TypeError);
+    expect(() => anyamount.range(1, 2, { ...en, mode: "currency" } as never)).toThrow(TypeError);
+  });
+});
+
+describe("anyamount.parse", () => {
+  it("reads the locale's group and decimal separators", () => {
+    expect(anyamount.parse("1.999,00", { locale: "de" })).toBe(1999);
+    expect(anyamount.parse("1,999.00", { locale: "en" })).toBe(1999);
+    expect(anyamount.parse("1 234,5", { locale: "fr" })).toBe(1234.5);
+    expect(anyamount.parse("1 234,5", { locale: "fr" })).toBe(1234.5);
+    expect(anyamount.parse("1.234.567,89", { locale: "de" })).toBe(1234567.89);
+    expect(anyamount.parse("1'234.50", { locale: "de-CH" })).toBe(1234.5);
+    expect(anyamount.parse("1’234.50", { locale: "de-CH" })).toBe(1234.5);
+  });
+
+  it("reads the locale's digits", () => {
+    expect(anyamount.parse("١٬٢٣٤٫٥", { locale: "ar-EG" })).toBe(1234.5);
+    expect(anyamount.parse("१२३४", { locale: "hi-IN-u-nu-deva" })).toBe(1234);
+    // ASCII digits are always accepted, whatever the locale writes.
+    expect(anyamount.parse("1234", { locale: "ar-EG" })).toBe(1234);
+  });
+
+  it("ignores what wraps the number", () => {
+    expect(anyamount.parse("€1,999.00", { locale: "en" })).toBe(1999);
+    expect(anyamount.parse("1,999.00 US dollars", { locale: "en" })).toBe(1999);
+    expect(anyamount.parse("1 234,5 kr", { locale: "sv" })).toBe(1234.5);
+    expect(anyamount.parse("12%", { locale: "en" })).toBe(12);
+    expect(anyamount.parse("  42  ", { locale: "en" })).toBe(42);
+    expect(anyamount.parse("CHF 1'234.50", { locale: "de-CH" })).toBe(1234.5);
+  });
+
+  it("reads a minus on either side, the locale's own minus, and accounting parentheses", () => {
+    expect(anyamount.parse("-1,999.00", { locale: "en" })).toBe(-1999);
+    expect(anyamount.parse("€-1,999.00", { locale: "en" })).toBe(-1999);
+    expect(anyamount.parse("1.999,00-", { locale: "de" })).toBe(-1999);
+    expect(anyamount.parse("−42", { locale: "sv" })).toBe(-42);
+    expect(anyamount.parse("(1,999.00)", { locale: "en" })).toBe(-1999);
+  });
+
+  it("a lone separator followed by one or two digits is a decimal point", () => {
+    expect(anyamount.parse("1.5", { locale: "de" })).toBe(1.5);
+    expect(anyamount.parse("1.50", { locale: "de" })).toBe(1.5);
+    expect(anyamount.parse("1,50", { locale: "en" })).toBe(1.5);
+    // Three digits keep the locale's reading.
+    expect(anyamount.parse("1.500", { locale: "de" })).toBe(1500);
+    expect(anyamount.parse("1,500", { locale: "en" })).toBe(1500);
+    expect(anyamount.parse("1.500", { locale: "en" })).toBe(1.5);
+  });
+
+  it("returns NaN for anything that is not a number, and never throws on text", () => {
+    for (const bad of ["", "   ", "abc", "12abc34", "1e5", "1.2.3", "1,2,3.4.5", "€", "--1"])
+      expect(anyamount.parse(bad, { locale: "en" })).toBeNaN();
+    expect(anyamount.parse("1.2.3", { locale: "de" })).toBe(123);
+  });
+
+  it("rejects a non-string", () => {
+    expect(() => anyamount.parse(42 as never)).toThrow(TypeError);
+  });
+
+  it("round-trips the package's own output", () => {
+    for (const locale of ["en", "de", "fr", "ru", "ar-EG", "hi", "de-CH", "ja"]) {
+      for (const n of [0, 1, 1999, 1234567.89, -0.5, 42.42]) {
+        const text = anyamount(n, { locale, compact: false, digits: 2 });
+        expect(anyamount.parse(text, { locale })).toBe(n);
+        const money = anyamount(n, { locale, mode: "currency", currency: "EUR" });
+        expect(anyamount.parse(money, { locale })).toBe(n);
+      }
+    }
+  });
+
+  it("keeps the notation cache honest past its limit", () => {
+    for (let i = 0; i < 60; i++) anyamount.parse("1", { locale: `en-u-nu-latn-x-${i}` });
+    expect(anyamount.parse("1.999,5", { locale: "de" })).toBe(1999.5);
+  });
+});

@@ -27,7 +27,7 @@
 
 ---
 
-**One export. Three modes. Any locale. ~1kb gzip. Zero dependencies.**
+**One export. Three modes, a range, and parse. Any locale. ~1.6kb gzip. Zero dependencies.**
 
 `Intl.NumberFormat` is powerful. anyamount makes it usable. Built for
 dashboards, pricing, storage meters and stats — anywhere a raw number should
@@ -85,6 +85,31 @@ anyamount.symbol("USD", { locale: "en", display: "code" }); // "USD"
 anyamount.symbol("USD", { locale: "en", display: "name" }); // "US dollars"
 ```
 
+`anyamount.range()` formats two numbers as one range, the way the locale
+writes it — shared parts collapse. Same options as the plain call.
+
+```ts
+anyamount.range(10, 20, { mode: "currency", currency: "EUR", locale: "en" }); // "€10.00 – 20.00"
+anyamount.range(1, 2.5, { mode: "unit", unit: "kilogram", locale: "en" });     // "1–2.5 kg"
+```
+
+`anyamount.parse()` goes the other way: the text a person typed, in their
+locale, back to a number. The locale's separators and digits are read,
+whatever wraps the number (currency, `%`, spaces) is ignored, and anything
+that is not a number is `NaN` — never a throw.
+
+```ts
+anyamount.parse("1.999,00", { locale: "de" });   // 1999
+anyamount.parse("€1,999.00", { locale: "en" });  // 1999
+anyamount.parse("-1 234,5", { locale: "fr" });   // -1234.5
+anyamount.parse("١٬٢٣٤٫٥", { locale: "ar-EG" });  // 1234.5
+anyamount.parse("abc", { locale: "en" });        // NaN
+```
+
+One rule beyond the locale: a separator that appears once and is followed by
+one or two digits is a decimal point — `"1.5"` typed into a German form is one
+and a half, not fifteen hundred; `"1.500"` keeps the locale's reading.
+
 ---
 
 ## recipes
@@ -119,6 +144,18 @@ anyamount(120, { mode: "unit", unit: "kilometer-per-hour", locale: "ru" });
 // Currency affix inside an input, amount rendered separately
 anyamount.symbol(account.currency);
 // "$"
+
+// Badge / counter — and a table that must never abbreviate
+anyamount(post.likes, { compact: true });   // "1.2K"
+anyamount(row.total, { compact: false });   // "15,000"
+
+// Price band
+anyamount.range(plan.min, plan.max, { mode: "currency", currency: "USD" });
+// "$10.00 – 20.00"
+
+// What the user typed, back to a number
+anyamount.parse(input.value, { locale });
+// 1999.5
 ```
 
 Output is pure — no clock reads, no environment sniffing — so server and client
@@ -161,6 +198,7 @@ discriminated union on `mode`, so TypeScript requires them at compile time.
 | `currencyDisplay` | `"symbol" \| "narrowSymbol" \| "code" \| "name"` | `"symbol"` | currency |
 | `unit` | sanctioned unit identifier | required | unit |
 | `style` | `"long" \| "short" \| "narrow"` | `"short"` | smart, unit |
+| `compact` | `boolean \| number` — always / never / from this value | `10000` | smart |
 | `digits` | `number` → `maximumFractionDigits` | per mode | all |
 
 `digits` is a **ceiling, not a fixed width** — trailing zeros are never padded
@@ -227,7 +265,7 @@ anyamount(1999, { mode: "currency", currency: "INR", locale: "hi" }); // "₹1,9
 | compact notation | **every locale** | English forms | no |
 | dependencies | **0** | 0 | 0 |
 
-anyamount is 0.9kb gzipped and formats numbers. It is not a money type: it does
+anyamount is 1.6kb gzipped and formats numbers — and reads them back. It is not a money type: it does
 not add prices, hold exchange rates, or protect you from floating-point
 arithmetic. Do the arithmetic in minor units or in a decimal library, then hand
 the result here to be written down.

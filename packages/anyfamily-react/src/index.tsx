@@ -12,13 +12,20 @@ import {
 import {
   anyamount,
   type AnyamountOptions,
+  type ParseOptions as AnyamountParseOptions,
   type SymbolOptions as AnyamountSymbolOptions,
 } from "anyamount";
 import { anymany, type AnymanyOptions, type Items } from "anymany";
 import { anyaround, type AnyaroundOptions } from "anyaround";
 import { anylocale, type AnylocaleInfo } from "anylocale";
 import { anylong, type AnylongOptions, type DurationInput } from "anylong";
-import { anywhen, type AnywhenOptions, type DateInput, type Locale } from "anywhen";
+import {
+  anywhen,
+  type AnywhenOptions,
+  type AnywhenRangeOptions,
+  type DateInput,
+  type Locale,
+} from "anywhen";
 import { anyplural, type AnypluralOptions, type Forms } from "anyplural";
 import {
   anyword,
@@ -48,12 +55,12 @@ export {
 };
 
 export type { AnyamountOptions } from "anyamount";
-export type { AnyamountSymbolOptions };
+export type { AnyamountParseOptions, AnyamountSymbolOptions };
 export type { AnymanyOptions, Items } from "anymany";
 export type { AnyaroundOptions } from "anyaround";
 export type { AnylocaleInfo, Direction, Weekday } from "anylocale";
 export type { AnylongOptions, DurationInput } from "anylong";
-export type { AnywhenOptions, DateInput } from "anywhen";
+export type { AnywhenOptions, AnywhenRangeOptions, DateInput } from "anywhen";
 export type { AnypluralOptions, Forms } from "anyplural";
 export type { AnywordOptions, AnywordTruncateOptions, Granularity } from "anyword";
 
@@ -370,6 +377,8 @@ function bind({ locale, defaults: d = {} }: AnyfamilyContextValue): Anyfamily {
       {
         parts: (input: DateInput, options?: AnywhenOptions) =>
           anywhen.parts(input, opt(options, d.anywhen)),
+        range: (from: DateInput, to: DateInput, options?: AnywhenRangeOptions) =>
+          anywhen.range(from, to, opt(options, d.anywhen)),
       },
     ),
     anyamount: Object.assign(
@@ -380,6 +389,11 @@ function bind({ locale, defaults: d = {} }: AnyfamilyContextValue): Anyfamily {
           anyamount.parts(value, opt(options, d.anyamount)),
         symbol: (currency: string, options?: AnyamountSymbolOptions) =>
           anyamount.symbol(currency, opt(options, d.anyamountSymbol)),
+        range: (from: number | bigint, to: number | bigint, options?: AnyamountOptions) =>
+          anyamount.range(from, to, opt(options, d.anyamount)),
+        // Parsing reads the locale only, so the provider's is all that applies.
+        parse: (text: string, options?: AnyamountParseOptions) =>
+          anyamount.parse(text, opt(options, { locale: d.anyamount?.locale })),
       },
     ),
     anymany: Object.assign(
