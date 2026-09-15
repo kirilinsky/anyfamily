@@ -1,5 +1,15 @@
 # anyfamily-react
 
+## 2.3.1
+
+### Patch Changes
+
+- 15a27e3: `useAnyfamily()` binds the new `anywhen.range`, `anyamount.range` and `anyamount.parse` to the provider's locale and defaults; `AnywhenRangeOptions` and `AnyamountParseOptions` are re-exported.
+- Updated dependencies [15a27e3]
+- Updated dependencies [15a27e3]
+  - anyamount@2.1.0
+  - anywhen@2.1.0
+
 ## 2.3.0
 
 ### Minor Changes

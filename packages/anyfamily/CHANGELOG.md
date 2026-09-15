@@ -1,5 +1,15 @@
 # anyfamily
 
+## 2.1.3
+
+### Patch Changes
+
+- 15a27e3: Re-exports the new `AnywhenRangeOptions` and `AnyamountParseOptions` types; `anywhen.range`, `anyamount.range` and `anyamount.parse` come through the function objects as before.
+- Updated dependencies [15a27e3]
+- Updated dependencies [15a27e3]
+  - anyamount@2.1.0
+  - anywhen@2.1.0
+
 ## 2.1.2
 
 ### Patch Changes
