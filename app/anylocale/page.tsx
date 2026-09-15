@@ -38,7 +38,7 @@ export const metadata: Metadata = {
     description:
       "RTL detection and first-day-of-week without a hand-kept table. Try it live.",
   },
-  alternates: { canonical: url },
+  alternates: { canonical: url, types: { "text/markdown": `${url}/llms.txt` } },
 };
 
 const jsonLd = {

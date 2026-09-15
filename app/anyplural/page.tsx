@@ -37,7 +37,7 @@ export const metadata: Metadata = {
     description:
       "Correct plural forms in any locale over Intl.PluralRules. Try it live.",
   },
-  alternates: { canonical: url },
+  alternates: { canonical: url, types: { "text/markdown": `${url}/llms.txt` } },
 };
 
 const jsonLd = {

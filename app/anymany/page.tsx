@@ -37,7 +37,7 @@ export const metadata: Metadata = {
     description:
       "Sort and join string arrays per locale, over Intl.ListFormat. Try it live.",
   },
-  alternates: { canonical: url },
+  alternates: { canonical: url, types: { "text/markdown": `${url}/llms.txt` } },
 };
 
 const jsonLd = {

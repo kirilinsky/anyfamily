@@ -38,7 +38,7 @@ export const metadata: Metadata = {
     description:
       "Emoji-safe counting and truncation via native Intl.Segmenter. Try it live.",
   },
-  alternates: { canonical: url },
+  alternates: { canonical: url, types: { "text/markdown": `${url}/llms.txt` } },
 };
 
 const jsonLd = {

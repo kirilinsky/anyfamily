@@ -37,7 +37,7 @@ export const metadata: Metadata = {
     description:
       "Relative when near, absolute when far, in any locale. Try it live.",
   },
-  alternates: { canonical: url },
+  alternates: { canonical: url, types: { "text/markdown": `${url}/llms.txt` } },
 };
 
 const jsonLd = {

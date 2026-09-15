@@ -1,8 +1,10 @@
 import { execSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { gzipSync } from "node:zlib";
 
 import { BASE_URL, PACKAGES } from "@/lib/packages";
+import { PITCH } from "@/lib/pitch";
 
 /** The two metas, which are not in `PACKAGES` because they have no demo route. */
 export const METAS = [
@@ -56,15 +58,71 @@ export function lastModified(): Date {
   return new Date();
 }
 
+/** Every package that has a README and a pitch, in family order. */
+export const ALL_IDS = [...PACKAGES.map((p) => p.id), ...METAS.map((m) => m.id)];
+
+/** The built bundle's gzip size, as the README quotes it; `null` before a build. */
+export function packageSize(id: string): string | null {
+  try {
+    const raw = readFileSync(join(process.cwd(), "packages", id, "dist", "index.mjs"));
+    return `${(gzipSync(raw, { level: 9 }).byteLength / 1024).toFixed(1)} kB gzip`;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * `/<id>/llms.txt` — one package for an agent that was handed its URL: the
+ * pitch up top in a fixed shape, the README underneath for the detail.
+ */
+export function packagePitch(id: string): string {
+  const pitch = PITCH[id];
+  const size = packageSize(id);
+  const core = PACKAGES.find((p) => p.id === id);
+  const tagline = core?.tagline ?? METAS.find((m) => m.id === id)?.tagline ?? "";
+  const demo = core ? `- demo: ${BASE_URL}/${id}\n` : "";
+  return `# ${id} — ${tagline}
+
+> ${pitch.does}
+
+- wraps: ${pitch.wraps}
+- install: npm install ${id}
+- size: ${size ?? "about a kilobyte"}, zero dependencies, ESM + CJS, TypeScript types included
+- runtime: ${pitch.runtime}
+- docs: ${BASE_URL}/docs/${id}
+${demo}- npm: https://www.npmjs.com/package/${id}
+- source: ${GITHUB}/tree/main/packages/${id}
+- family: ${BASE_URL}/llms.txt
+
+## why
+
+${pitch.why}
+
+## usage
+
+\`\`\`ts
+${pitch.usage}
+\`\`\`
+
+## not for
+
+${pitch.notFor}
+
+---
+
+${readme(id).trim()}
+`;
+}
+
 /** `/llms.txt` — the index an agent reads first: what exists, what each does, where the full text is. */
 export function llmsIndex(): string {
   const core = PACKAGES.map(
     (p) =>
-      `- [${p.id}](${BASE_URL}/docs/${p.id}): ${p.tagline} — ${p.description} npm: ${p.npm}. README: ${RAW}/${p.id}/README.md`,
+      `- [${p.id}](${BASE_URL}/${p.id}/llms.txt): ${p.tagline} — ${p.description} Docs: ${BASE_URL}/docs/${p.id}. npm: ${p.npm}`,
   );
   const metas = METAS.map(
     (m) =>
-      `- [${m.id}](${BASE_URL}/docs/${m.id}): ${m.tagline} — ${m.description} npm: https://www.npmjs.com/package/${m.id}. README: ${RAW}/${m.id}/README.md`,
+      `- [${m.id}](${BASE_URL}/${m.id}/llms.txt): ${m.tagline} — ${m.description} Docs: ${BASE_URL}/docs/${m.id}. npm: https://www.npmjs.com/package/${m.id}`,
   );
   return `# anyfamily
 
@@ -72,7 +130,7 @@ export function llmsIndex(): string {
 
 Every package exports exactly one name. The bare call does the job; extras hang off that name (\`anywhen.parts(date)\`, \`anyword.count(text)\`, \`anylong.supported\`). Options are a plain object; \`locale\` is a BCP 47 tag or a fallback chain. ESM + CJS, TypeScript types included, SSR-safe, MIT.
 
-Full documentation as one file: ${BASE_URL}/llms-full.txt
+Each package link below is its own page for agents — pitch, usage, what it is not for, then the full README. Everything as one file: ${BASE_URL}/llms-full.txt
 
 ## Core packages
 

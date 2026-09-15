@@ -38,7 +38,7 @@ export const metadata: Metadata = {
     description:
       "Codes to localized names, with country flags, over Intl.DisplayNames. Try it live.",
   },
-  alternates: { canonical: url },
+  alternates: { canonical: url, types: { "text/markdown": `${url}/llms.txt` } },
 };
 
 const jsonLd = {

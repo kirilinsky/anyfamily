@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import { FamilyLogo } from "@/components/family-logo";
 import { MountGate } from "@/components/mount-gate";
+import { PackagePitch } from "@/components/pitch";
 import type { Pkg } from "@/lib/packages";
 
 /**
@@ -48,6 +49,7 @@ export function DemoShell({
           className={logoClassName}
         />
         <MountGate>{children}</MountGate>
+        <PackagePitch pkg={pkg} />
       </div>
 
       <DemoFooter pkg={pkg} />
@@ -85,6 +87,13 @@ function DemoFooter({ pkg }: { pkg: Pkg }) {
             className="px-3 py-2 text-xs tracking-widest text-white/25 uppercase transition-colors hover:text-white/60 sm:py-3"
           >
             npm
+          </a>
+          <a
+            href={`/${pkg.id}/llms.txt`}
+            title="this package as one Markdown page, for agents"
+            className="px-3 py-2 text-xs tracking-widest text-white/25 uppercase transition-colors hover:text-white/60 sm:py-3"
+          >
+            llms.txt
           </a>
         </div>
       </div>

@@ -177,10 +177,15 @@ that metadata cannot be rewritten.
 ## README vs docs — who owns what
 
 The README is also what machines read. The site serves `/llms.txt` (an index
-over `lib/packages.ts`) and `/llms-full.txt` (every README concatenated at
-build time, in family order) for AI crawlers and agents — so there is no
-separate `llms.txt` per package to maintain, and a README that goes stale goes
-stale there too. Per-page structured data (`SoftwareApplication` with the
+over `lib/packages.ts`), `/<pkg>/llms.txt` (one package: the pitch from
+`lib/pitch.ts` in a fixed shape — does / wraps / install / size / runtime /
+why / usage / not for — then the README) and `/llms-full.txt` (every README
+concatenated at build time, in family order) for AI crawlers and agents — so
+there is no separate `llms.txt` file per package to maintain, and a README
+that goes stale goes stale there too. The same pitch renders as the collapsed
+"about" block under each demo, so an agent handed the demo URL gets it from
+the HTML without a second request; `lib/pitch.ts` is a required entry for
+every package, metas included. Per-page structured data (`SoftwareApplication` with the
 published version, `TechArticle` with `dateModified`, `FAQPage` from the docs
 page's limitations list in `app/docs/<pkg>/limitations.ts`) is generated from
 the same sources.

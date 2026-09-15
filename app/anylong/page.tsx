@@ -36,7 +36,7 @@ export const metadata: Metadata = {
     description:
       "Any duration in, a localized string out, over Intl.DurationFormat. Try it live.",
   },
-  alternates: { canonical: url },
+  alternates: { canonical: url, types: { "text/markdown": `${url}/llms.txt` } },
 };
 
 const jsonLd = {

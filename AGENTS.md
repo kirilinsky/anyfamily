@@ -59,8 +59,9 @@ Update all of it in one change: `src/index.ts` and its tests, the package
 `README.md`, `app/<pkg>/` (demo), `app/docs/<pkg>/` (reference, including
 `limitations.ts`, which also feeds the FAQ structured data), both metas
 (`packages/anyfamily/src/index.ts`, `packages/anyfamily-react/src/index.tsx`)
-with their READMEs and tests, `lib/packages.ts` if the tagline moved, and a
-changeset. READMEs are also served to AI crawlers as `/llms-full.txt`, so a
+with their READMEs and tests, `lib/packages.ts` if the tagline moved,
+`lib/pitch.ts` if the usage lines or the "not for" changed (it feeds the demo
+page's about block and `/<pkg>/llms.txt`), and a changeset. READMEs are also served to AI crawlers as `/llms-full.txt`, so a
 stale README is stale there too.
 
 ## changesets
