@@ -1,0 +1,20 @@
+{
+  "name": "anyfamily",
+  "metadata": {
+    "description": "The any* family of micro Intl formatters, packaged for coding agents."
+  },
+  "owner": {
+    "name": "kirilinsky",
+    "url": "https://github.com/kirilinsky"
+  },
+  "plugins": [
+    {
+      "name": "anyfamily",
+      "source": "./",
+      "description": "Agent Skill for the any* family: locale-aware dates, numbers, lists, names, durations, plurals, text segmentation and locale info over native Intl.",
+      "homepage": "https://anyfamily.site",
+      "license": "MIT",
+      "skills": ["./skills/anyfamily"]
+    }
+  ]
+}

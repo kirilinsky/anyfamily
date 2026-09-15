@@ -1,0 +1,17 @@
+{
+  "name": "anyfamily-example-vanilla",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "anyfamily": "^2.1.3"
+  },
+  "devDependencies": {
+    "typescript": "~5.9.3",
+    "vite": "^8.3.0"
+  }
+}

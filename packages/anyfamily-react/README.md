@@ -14,7 +14,9 @@ React hooks for the **any\*** family:
 locale and keeping relative time fresh without hand-rolled `setInterval`
 plumbing.
 
-**→ [anyfamily.site](https://anyfamily.site)**
+**→ [anyfamily.site](https://anyfamily.site)** ·
+[try it on StackBlitz](https://stackblitz.com/github/kirilinsky/anyfamily/tree/main/examples/react?file=src/App.tsx) ·
+AI agents: `npx skills add kirilinsky/anyfamily`
 
 ```bash
 npm install anyfamily-react

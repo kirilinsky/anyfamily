@@ -117,6 +117,11 @@ jobs:
 
       - run: pnpm lint
 
+      # skills/anyfamily/SKILL.md is generated from lib/pitch.ts. A pitch edit
+      # without a regenerated skill would ship agents a stale API.
+      - name: skill is up to date
+        run: pnpm skill --check
+
       # Deliberately the same two commands Vercel runs, with no extra build
       # step: the site resolves the workspace packages through their dist/, and
       # `prebuild` is what builds them. Keeping this identical means a deploy

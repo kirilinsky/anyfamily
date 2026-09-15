@@ -129,6 +129,8 @@ These live at the repo root only:
 | `.github/` | GitHub Actions only reads workflows at the repo root; nested ones silently never run |
 | `pnpm-lock.yaml` | the workspace has exactly one lockfile |
 | `RELEASING.md`, `PACKAGE-STANDARD.md`, `plans.md` | repo-level docs |
+| `examples/` | StackBlitz starters on the published npm ranges, outside the workspace |
+| `skills/`, `.claude-plugin/` | the Agent Skill, generated from `lib/pitch.ts` by `pnpm skill` |
 
 Also absent: `demo/`. Demos live in the landing app at `app/<package>/`, with
 the API reference at `app/docs/<package>/`.

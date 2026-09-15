@@ -28,6 +28,33 @@ demo sites have been folded in.
 | **anyword** | words / graphemes / sentences, count + truncate | `Intl.Segmenter` | [demo](https://anyfamily.site/anyword) · [docs](https://anyfamily.site/docs/anyword) · [npm](https://www.npmjs.com/package/anyword) · [source](https://github.com/kirilinsky/anyfamily/tree/main/packages/anyword) |
 | **anylocale** | how a locale behaves: direction, week, calendars, time zones | `Intl.Locale` info | [demo](https://anyfamily.site/anylocale) · [docs](https://anyfamily.site/docs/anylocale) · [npm](https://www.npmjs.com/package/anylocale) · [source](https://github.com/kirilinsky/anyfamily/tree/main/packages/anylocale) |
 
+## try it
+
+No install — open a starter in the browser:
+
+[![Open vanilla in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz_small.svg)](https://stackblitz.com/github/kirilinsky/anyfamily/tree/main/examples/vanilla?file=src/main.ts)
+all eight packages on one page ·
+[![Open React in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz_small.svg)](https://stackblitz.com/github/kirilinsky/anyfamily/tree/main/examples/react?file=src/App.tsx)
+`anyfamily-react` with a provider — more in [examples/](examples)
+
+## for AI coding agents
+
+An [Agent Skill](skills/anyfamily/SKILL.md) teaches Claude Code, Cursor, Codex
+and other agents which package fits a task and the exact API, so they reach for
+it instead of hand-rolling `toFixed` or `join(", ")`.
+
+```bash
+npx skills add kirilinsky/anyfamily          # any agent that reads Agent Skills
+```
+
+```text
+/plugin marketplace add kirilinsky/anyfamily   # Claude Code
+/plugin install anyfamily@anyfamily
+```
+
+Agents without skills can read [`/llms.txt`](https://anyfamily.site/llms.txt)
+or pull the docs through [Context7](https://context7.com).
+
 ## how it works
 
 - **Honest examples.** Each demo imports the real package — workspace-linked to

@@ -37,7 +37,9 @@ import { anywhen, anyamount, anymany, anyaround, anylong, anyplural, anyword, an
 ESM + CJS, fully typed, `sideEffects: false` — bundlers tree-shake away whatever
 you don't use.
 
-**→ [anyfamily.site](https://anyfamily.site)**
+**→ [anyfamily.site](https://anyfamily.site)** ·
+[try it on StackBlitz](https://stackblitz.com/github/kirilinsky/anyfamily/tree/main/examples/vanilla?file=src/main.ts) ·
+AI agents: `npx skills add kirilinsky/anyfamily`
 
 ## one shape everywhere
 

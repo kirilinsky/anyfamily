@@ -61,7 +61,10 @@ Update all of it in one change: `src/index.ts` and its tests, the package
 (`packages/anyfamily/src/index.ts`, `packages/anyfamily-react/src/index.tsx`)
 with their READMEs and tests, `lib/packages.ts` if the tagline moved,
 `lib/pitch.ts` if the usage lines or the "not for" changed (it feeds the demo
-page's about block and `/<pkg>/llms.txt`), and a changeset. READMEs are also served to AI crawlers as `/llms-full.txt`, so a
+page's about block and `/<pkg>/llms.txt`; run `pnpm skill` afterwards —
+`skills/anyfamily/SKILL.md` is generated from it and CI fails when it is
+stale), the StackBlitz starters in `examples/` if a call they make changed,
+and a changeset. READMEs are also served to AI crawlers as `/llms-full.txt`, so a
 stale README is stale there too.
 
 ## changesets

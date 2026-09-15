@@ -13,6 +13,7 @@
   "scripts": {
     "versions": "node scripts/versions.mjs",
     "bench": "node scripts/bench.mjs",
+    "skill": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/skill.mjs",
     "predev": "pnpm run build:packages && node scripts/versions.mjs",
     "prebuild": "pnpm run build:packages && node scripts/versions.mjs",
     "dev": "next dev",

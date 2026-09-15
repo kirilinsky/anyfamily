@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>anyfamily — vanilla playground</title>
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>anyfamily</h1>
+        <label>
+          locale
+          <select id="locale">
+            <option>en-US</option>
+            <option>de-DE</option>
+            <option>ru-RU</option>
+            <option>ja-JP</option>
+            <option>ar-EG</option>
+            <option>hi-IN</option>
+          </select>
+        </label>
+      </header>
+      <p class="hint">Every value below is computed live by the real packages. Edit <code>src/main.ts</code>.</p>
+      <table id="out"></table>
+    </main>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
