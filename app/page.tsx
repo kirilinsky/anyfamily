@@ -9,8 +9,8 @@ import { Tag } from "@/components/ui";
 import versions from "@/data/versions.json";
 import colors from "@/data/colors.json";
 import { BASE_URL, PACKAGES, STACKBLITZ, demoHref, type Pkg } from "@/lib/packages";
+import { CodeAnimation } from "@/components/code-animation/code-animation";
 import {
-  CodeAnimation,
   type Preset,
   AROUND_PRESETS,
   AMOUNT_PRESETS,
@@ -22,7 +22,7 @@ import {
   LOCALE_PRESETS,
   FAMILY_PRESETS,
   REACT_PRESETS,
-} from "@/components/examples";
+} from "@/components/code-animation/presets";
 
 /**
  * Demo presets live in a client module, so they are joined onto the shared
