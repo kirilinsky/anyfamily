@@ -6,8 +6,9 @@
 
 <p align="center">
   <a href="https://www.npmjs.com/package/anywhen"><img src="https://img.shields.io/npm/v/anywhen?style=flat-square&color=black" alt="npm" /></a>
-  <a href="https://bundlephobia.com/package/anywhen"><img src="https://img.shields.io/bundlephobia/minzip/anywhen?style=flat-square&color=black&label=gzip" /></a>
-  <a href="https://github.com/kirilinsky/anyfamily/actions/workflows/ci.yml"><img src="https://github.com/kirilinsky/anyfamily/actions/workflows/ci.yml/badge.svg" alt="CI" /></a>
+  <a href="https://www.npmjs.com/package/anywhen"><img src="https://img.shields.io/npm/dm/anywhen?style=flat-square&color=black&label=downloads" alt="downloads per month" /></a>
+  <a href="https://bundlephobia.com/package/anywhen"><img src="https://img.shields.io/bundlephobia/minzip/anywhen?style=flat-square&color=black&label=gzip" alt="gzip size" /></a>
+  <a href="https://github.com/kirilinsky/anyfamily/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/kirilinsky/anyfamily/ci.yml?style=flat-square&color=black&label=CI" alt="CI" /></a>
   <a href="./LICENSE"><img src="https://img.shields.io/npm/l/anywhen?style=flat-square&color=black" alt="license" /></a>
 </p>
 
