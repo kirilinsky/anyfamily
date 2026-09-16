@@ -234,6 +234,10 @@ export function CodeAnimation({
   const [done, setDone] = useState(false);
   const [fill, setFill] = useState(0);
   const [hover, setHover] = useState<number | null>(null);
+  // A click on a dot means "let me look at this one": autoplay stops until the
+  // active dot is clicked again. `run` restarts the typewriter on resume.
+  const [paused, setPaused] = useState(false);
+  const [run, setRun] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
 
   // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time hydration gate
@@ -272,14 +276,14 @@ export function CodeAnimation({
       }
     }, TYPE_MS);
     return () => clearInterval(id);
-  }, [mounted, inView, i, call]);
+  }, [mounted, inView, i, call, run]);
 
   // Advance to the next preset after a hold.
   useEffect(() => {
-    if (!done || !inView) return;
+    if (!done || !inView || paused) return;
     const id = setTimeout(() => setI((p) => (p + 1) % presets.length), HOLD_MS);
     return () => clearTimeout(id);
-  }, [done, inView, presets.length]);
+  }, [done, inView, paused, presets.length]);
 
   // Drive the active dot's progress bar across the whole cycle: type the call
   // out (≈ call.length · TYPE_MS) then hold (HOLD_MS). Reset to 0, then flip to
@@ -291,6 +295,11 @@ export function CodeAnimation({
       setFill(0);
       return;
     }
+    // Paused: the active dot sits full and still — nothing is counting down.
+    if (paused) {
+      setFill(100);
+      return;
+    }
     setFill(0);
     let inner = 0;
     const outer = requestAnimationFrame(() => {
@@ -300,7 +309,17 @@ export function CodeAnimation({
       cancelAnimationFrame(outer);
       cancelAnimationFrame(inner);
     };
-  }, [mounted, inView, i, call]);
+  }, [mounted, inView, i, call, paused, run]);
+
+  function pick(k: number) {
+    if (k === i && paused) {
+      setPaused(false);
+      setRun((r) => r + 1);
+      return;
+    }
+    setPaused(true);
+    setI(k);
+  }
 
   const typed = mounted ? call.slice(0, len) : call;
   const fnPart = typed.slice(0, activeFn.length);
@@ -360,9 +379,10 @@ export function CodeAnimation({
         </div>
       </div>
 
-      {/* preset progress dots — click to jump; the active dot fills across the
-          cycle so the countdown to the next preset is visible. */}
-      <div className="mt-3 flex items-center gap-2 sm:mt-4">
+      {/* preset progress dots — the active dot fills across the cycle so the
+          countdown to the next preset is visible. A click jumps there and
+          stops autoplay; clicking the active dot again resumes it. */}
+      <div className="mt-3 flex items-center gap-3 sm:mt-4">
         {presets.map((_, k) => {
           const active = k === i;
           const hovered = k === hover;
@@ -370,20 +390,25 @@ export function CodeAnimation({
             <button
               key={k}
               type="button"
-              onClick={() => setI(k)}
+              onClick={() => pick(k)}
               onMouseEnter={() => setHover(k)}
               onMouseLeave={() => setHover(null)}
-              aria-label={`Show example ${k + 1}`}
+              aria-label={
+                active && paused
+                  ? "Resume autoplay"
+                  : `Show example ${k + 1}`
+              }
+              title={active && paused ? "resume autoplay" : undefined}
               aria-current={active ? "true" : undefined}
-              className="group -my-2 cursor-pointer py-2"
+              className="group -my-3 cursor-pointer px-0.5 py-3"
             >
               {/* The pill's own width is named rather than animated through
                   `all`. It stays a width: scaling it would squash the progress
                   fill inside, and this one only moves on hover or a click. */}
               <span
-                className="block h-1.5 overflow-hidden rounded-full transition-[width,background-color] duration-150 ease-out"
+                className="block h-2.5 overflow-hidden rounded-full transition-[width,background-color] duration-150 ease-out"
                 style={{
-                  width: active ? 24 : hovered ? 14 : 6,
+                  width: active ? 40 : hovered ? 22 : 10,
                   background:
                     !active && hovered
                       ? "rgba(255,255,255,0.35)"
@@ -399,7 +424,7 @@ export function CodeAnimation({
                     style={{
                       transform: `scaleX(${fill / 100})`,
                       background: accent,
-                      transition: `transform ${fill === 0 ? 0 : cycleMs}ms linear`,
+                      transition: `transform ${fill === 0 || paused ? 0 : cycleMs}ms linear`,
                     }}
                   />
                 )}
