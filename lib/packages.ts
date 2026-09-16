@@ -149,6 +149,18 @@ export const PACKAGES: Pkg[] = [
 
 export const BASE_URL = "https://anyfamily.site";
 
+/**
+ * The runnable starters in `examples/`, opened straight from GitHub. They
+ * install the published packages rather than the workspace, so what someone
+ * runs there is what `npm install` gives them.
+ */
+export const STACKBLITZ = {
+  vanilla:
+    "https://stackblitz.com/github/kirilinsky/anyfamily/tree/main/examples/vanilla?file=src/main.ts",
+  react:
+    "https://stackblitz.com/github/kirilinsky/anyfamily/tree/main/examples/react?file=src/App.tsx",
+} as const;
+
 export function getPackage(id: string): Pkg {
   const pkg = PACKAGES.find((p) => p.id === id);
   if (!pkg) throw new Error(`Unknown any* package: ${id}`);

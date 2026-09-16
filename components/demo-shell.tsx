@@ -4,7 +4,7 @@ import Link from "next/link";
 import { FamilyLogo } from "@/components/family-logo";
 import { MountGate } from "@/components/mount-gate";
 import { PackagePitch } from "@/components/pitch";
-import type { Pkg } from "@/lib/packages";
+import { STACKBLITZ, type Pkg } from "@/lib/packages";
 
 /**
  * Chrome shared by every per-package demo route: the noise wash, the centered
@@ -87,6 +87,15 @@ function DemoFooter({ pkg }: { pkg: Pkg }) {
             className="px-3 py-2 text-xs tracking-widest text-white/25 uppercase transition-colors hover:text-white/60 sm:py-3"
           >
             npm
+          </a>
+          <a
+            href={STACKBLITZ.vanilla}
+            target="_blank"
+            rel="noopener noreferrer"
+            title="run the whole family in the browser, no install"
+            className="px-3 py-2 text-xs tracking-widest text-white/25 uppercase transition-colors hover:text-white/60 sm:py-3"
+          >
+            playground
           </a>
           <a
             href={`/${pkg.id}/llms.txt`}

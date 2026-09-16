@@ -1,4 +1,4 @@
-import type { Pkg } from "@/lib/packages";
+import { STACKBLITZ, type Pkg } from "@/lib/packages";
 import { PITCH } from "@/lib/pitch";
 
 /**
@@ -29,6 +29,17 @@ export function PackagePitch({ pkg }: { pkg: Pkg }) {
           <dd>
             <a href={`/docs/${pkg.id}`} className="underline decoration-white/20 hover:text-white/80">
               anyfamily.site/docs/{pkg.id}
+            </a>
+          </dd>
+          <dt className="text-white/30">playground</dt>
+          <dd>
+            <a
+              href={STACKBLITZ.vanilla}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline decoration-white/20 hover:text-white/80"
+            >
+              run the family on StackBlitz
             </a>
           </dd>
         </dl>

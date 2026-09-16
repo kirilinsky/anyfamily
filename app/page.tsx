@@ -8,7 +8,7 @@ import { SectionNav } from "@/components/section-nav";
 import { Tag } from "@/components/ui";
 import versions from "@/data/versions.json";
 import colors from "@/data/colors.json";
-import { BASE_URL, PACKAGES, demoHref, type Pkg } from "@/lib/packages";
+import { BASE_URL, PACKAGES, STACKBLITZ, demoHref, type Pkg } from "@/lib/packages";
 import {
   CodeAnimation,
   type Preset,
@@ -343,6 +343,11 @@ export default function Home() {
             <div className="mt-1 hidden flex-wrap items-center gap-2 md:flex">
               <DocsLink href="/docs/anyfamily" accent={colors.anyfamily} />
               <ExtLink
+                href={STACKBLITZ.vanilla}
+                label="playground"
+                accent={colors.anyfamily}
+              />
+              <ExtLink
                 href="https://www.npmjs.com/package/anyfamily"
                 label="npm"
                 accent={colors.anyfamily}
@@ -380,6 +385,11 @@ export default function Home() {
             />
             <div className="mt-2 flex flex-wrap items-center gap-2 md:hidden">
               <DocsLink href="/docs/anyfamily" accent={colors.anyfamily} />
+              <ExtLink
+                href={STACKBLITZ.vanilla}
+                label="playground"
+                accent={colors.anyfamily}
+              />
               <ExtLink
                 href="https://www.npmjs.com/package/anyfamily"
                 label="npm"
@@ -430,6 +440,11 @@ export default function Home() {
                 accent={colors["anyfamily-react"]}
               />
               <ExtLink
+                href={STACKBLITZ.react}
+                label="playground"
+                accent={colors["anyfamily-react"]}
+              />
+              <ExtLink
                 href="https://www.npmjs.com/package/anyfamily-react"
                 label="npm"
                 accent={colors["anyfamily-react"]}
@@ -468,6 +483,11 @@ export default function Home() {
             <div className="mt-2 flex flex-wrap items-center gap-2 md:hidden">
               <DocsLink
                 href="/docs/anyfamily-react"
+                accent={colors["anyfamily-react"]}
+              />
+              <ExtLink
+                href={STACKBLITZ.react}
+                label="playground"
                 accent={colors["anyfamily-react"]}
               />
               <ExtLink

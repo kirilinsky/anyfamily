@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { gzipSync } from "node:zlib";
 
-import { BASE_URL, PACKAGES } from "@/lib/packages";
+import { BASE_URL, PACKAGES, STACKBLITZ } from "@/lib/packages";
 import { PITCH } from "@/lib/pitch";
 
 /** The two metas, which are not in `PACKAGES` because they have no demo route. */
@@ -90,7 +90,8 @@ export function packagePitch(id: string): string {
 - size: ${size ?? "about a kilobyte"}, zero dependencies, ESM + CJS, TypeScript types included
 - runtime: ${pitch.runtime}
 - docs: ${BASE_URL}/docs/${id}
-${demo}- npm: https://www.npmjs.com/package/${id}
+${demo}- playground: ${id === "anyfamily-react" ? STACKBLITZ.react : STACKBLITZ.vanilla}
+- npm: https://www.npmjs.com/package/${id}
 - source: ${GITHUB}/tree/main/packages/${id}
 - family: ${BASE_URL}/llms.txt
 
