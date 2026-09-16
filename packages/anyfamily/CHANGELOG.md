@@ -1,5 +1,15 @@
 # anyfamily
 
+## 2.1.4
+
+### Patch Changes
+
+- 9510212: Docs only, no code change. anywhen's README gets a monthly-downloads badge, a
+  CI badge in the same style as the rest, and a new logo. Both metas link to the
+  StackBlitz starters and the Agent Skill for coding agents.
+- Updated dependencies [9510212]
+  - anywhen@2.1.1
+
 ## 2.1.3
 
 ### Patch Changes
