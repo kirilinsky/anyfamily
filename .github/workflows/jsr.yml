@@ -62,6 +62,13 @@ jobs:
       - run: pnpm --filter "${{ steps.pkg.outputs.name }}" build
         if: steps.pkg.outputs.skip != 'true'
 
-      - run: npx jsr publish
+      # --allow-slow-types: every package exports one name built with
+      # Object.assign (`export const anywhen = Object.assign(format, { … })`),
+      # which JSR's slow-types check rejects because the symbol carries no
+      # explicit type annotation. That is the family's API shape, required by
+      # PACKAGE-STANDARD, so the flag stays until the eight exports are given
+      # explicit interfaces. Without it every 2.x publish failed and JSR sat a
+      # major behind npm.
+      - run: npx jsr publish --allow-slow-types
         if: steps.pkg.outputs.skip != 'true'
         working-directory: packages/${{ steps.pkg.outputs.name }}

@@ -81,6 +81,15 @@ the package directory:
 gh workflow run jsr.yml -f package=anywhen
 ```
 
+**JSR rejects the family's export shape unless `--allow-slow-types` is passed.**
+`export const anywhen = Object.assign(format, { … })` has no explicit type
+annotation, and JSR's slow-types check refuses to publish such a symbol. This
+is separate from the tag trap above and was the reason every 2.x JSR publish
+failed: on 2026-09-16, npm was at `anywhen@2.1.1` while JSR still showed
+`1.0.4`, and `anyword` and `anylocale` had never published there at all. The
+flag is in `jsr.yml`; drop it only after all eight exports carry explicit
+interfaces.
+
 **npm first, mirrors second.** `pnpm publish` turns each `workspace:^` into a
 real version range, so the leaf versions must already be on npmjs before a meta
 that depends on them can be published anywhere. That ordering is why the mirrors
