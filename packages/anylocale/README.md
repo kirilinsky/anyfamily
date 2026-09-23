@@ -125,7 +125,7 @@ render identically.
 | `direction` | `"ltr" \| "rtl"` | text direction of the locale's script |
 | `weekStart` | `1`–`7` | first day of the week, **ISO** numbering |
 | `weekend` | `number[]` | days counted as the weekend, ISO numbering |
-| `minimalDays` | `number` | days of a week that must fall in a year for it to be that year's first week |
+| `minimalDays` | `number \| undefined` | days of a week that must fall in a year for it to be that year's first week; `undefined` where the runtime no longer reports it (Node 24+) |
 | `calendars` | `string[]` | usable calendars, preferred first |
 | `timeZones` | `string[]` | IANA zones for the region; empty for language-only tags |
 | `hourCycles` | `string[]` | `"h12"`, `"h23"`, … preferred first |

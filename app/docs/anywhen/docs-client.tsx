@@ -328,8 +328,11 @@ anywhen(date, { locale: 'en', thresholds: { second: 120 } })
         <p>
           In smart mode <Mono>thresholds.second</Mono> widens the
           &quot;now&quot; window and <Mono>thresholds.minute</Mono> the sub-hour
-          minutes window, symmetrically in both directions. Calendar labels
-          (today, yesterday, tomorrow, weekday) are not affected.
+          minutes window, symmetrically in both directions. The rest are
+          ignored there. Smart mode&apos;s own <Mono>minute</Mono> default is{" "}
+          <Mono>3600</Mono>, not 2700, and minutes never go past 59: beyond
+          that come calendar labels (today, yesterday, tomorrow, weekday),
+          which thresholds do not move.
         </p>
       </Section>
       <Section id="options" title="Options">

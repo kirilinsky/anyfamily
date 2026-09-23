@@ -50,8 +50,10 @@ describe.skipIf(!anylocale.supported)("week info", () => {
     expect(anylocale("fa-IR").weekend).toEqual([5]);
   });
 
-  it("exposes minimalDays as a number", () => {
-    expect(typeof anylocale("en-US").minimalDays).toBe("number");
+  it("reports minimalDays only when the runtime does, never a guess", () => {
+    // Node 22 reports 4 for de-DE; Node 24 dropped the field. A default of 1
+    // would be wrong here, so the only acceptable answers are these two.
+    expect([4, undefined]).toContain(anylocale("de-DE").minimalDays);
   });
 });
 

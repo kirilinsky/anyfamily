@@ -215,7 +215,7 @@ anymany(['x', 'y', 'z', 'a', 'b'], { max: 3, overflow: (n) => \`\${n} more\` })
           name="max"
           type="number"
           def="no limit"
-          desc="Maximum items to show (after sorting). The rest collapse into a trailing '+N' counter with localized digits. Throws RangeError when zero, negative, or fractional."
+          desc="Maximum input items to show (after sorting). The rest collapse into one extra trailing '+N' element on top of them — max: 3 shows three items plus the counter. Digits are localized. Throws RangeError when zero, negative, or fractional."
         />
         <Prop
           name="overflow"

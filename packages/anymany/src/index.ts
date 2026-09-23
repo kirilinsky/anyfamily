@@ -40,9 +40,11 @@ export interface AnymanyOptions {
    */
   sort?: Sort;
   /**
-   * Maximum items to show. The rest collapse into a trailing `"+N"` counter
-   * (digits localized via `Intl.NumberFormat` — no words, locale-safe).
-   * Applied after sorting. Defaults to no limit.
+   * Maximum input items to show. The rest collapse into one extra trailing
+   * `"+N"` element, on top of the `max` items: `max: 3` gives
+   * `"a, b, c, and +4"` (digits localized via `Intl.NumberFormat` — no words,
+   * locale-safe). Applied after sorting. Must be a positive integer. Defaults
+   * to no limit.
    */
   max?: number;
   /**
@@ -198,7 +200,9 @@ export const anymany = Object.assign(format, {
    * `{ type, value }` parts instead of a string — style the items apart from
    * the separators, or rebuild the output your own way.
    *
-   * Takes the same arguments and throws on the same inputs.
+   * Takes the same arguments and throws on the same inputs. The `max`
+   * counter comes back as a plain `"element"`, like the items it stands in
+   * for; it is always the last element.
    *
    * @example
    * ```ts

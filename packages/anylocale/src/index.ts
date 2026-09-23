@@ -18,6 +18,10 @@ export type Weekday = 1 | 2 | 3 | 4 | 5 | 6 | 7;
  * Properties are computed on access, so reading only `direction` never asks the
  * runtime for calendars or time zones. They are still plain own enumerable
  * properties, so spreading and `JSON.stringify` work as expected.
+ *
+ * Every engine that ships Locale Info ships all of these fields together except
+ * `minimalDays`. The fixed fallbacks (`"ltr"`, Monday, Saturday and Sunday,
+ * `[]`) only apply under a partial polyfill.
  */
 export interface AnylocaleInfo {
   /** The canonical tag the runtime resolved the input to — `"en-us"` → `"en-US"`. */
@@ -28,8 +32,13 @@ export interface AnylocaleInfo {
   weekStart: Weekday;
   /** Days the locale counts as the weekend, ISO numbering. Not always two — `fa-IR` has only Friday. */
   weekend: Weekday[];
-  /** Days of a week that must fall in a year for it to count as that year's first week. */
-  minimalDays: number;
+  /**
+   * Days of a week that must fall in a year for it to count as that year's
+   * first week. `undefined` when the runtime does not say: the field was
+   * dropped from the Locale Info spec, and newer engines (Node 24) no longer
+   * report it.
+   */
+  minimalDays: number | undefined;
   /** Calendars the locale can use, preferred first — `["persian", "gregory", …]`. */
   calendars: string[];
   /** IANA time zones for the region, when the tag carries one. Empty for language-only tags. */
@@ -48,9 +57,9 @@ type WeekInfo = {
 
 /**
  * The Intl Locale Info data moved from properties (`locale.weekInfo`) to methods
- * (`locale.getWeekInfo()`) late in standardisation, and engines are split: Node
- * 22 ships only the properties, newer engines only the methods. Read whichever
- * the runtime has.
+ * (`locale.getWeekInfo()`) late in standardisation. Older engines (Node 22) ship
+ * only the properties, newer ones the methods, some both. Prefer the method,
+ * fall back to the property.
  */
 function read<T>(locale: Intl.Locale, method: string, prop: string): T | undefined {
   const l = locale as unknown as Record<string, unknown>;
@@ -200,8 +209,11 @@ function build(locale: Intl.Locale): AnylocaleInfo {
       const days = week()?.weekend;
       return Array.isArray(days) ? days.filter(isWeekday) : [6, 7];
     },
-    get minimalDays(): number {
-      return week()?.minimalDays ?? 1;
+    get minimalDays(): number | undefined {
+      // No default: the rule is 1 for en-US but 4 for de-DE, so any guess
+      // would be a wrong answer for part of the world.
+      const n = week()?.minimalDays;
+      return typeof n === "number" ? n : undefined;
     },
     get calendars(): string[] {
       return read<string[]>(locale, "getCalendars", "calendars") ?? [];
@@ -267,6 +279,8 @@ export const anylocale = Object.assign(info, {
    * Whether this runtime exposes Intl Locale Info, in either the property or the
    * method shape. `false` on engines that predate the proposal, where every
    * anylocale call throws.
+   *
+   * Checked once, at import. A polyfill must be loaded before anylocale is.
    *
    * @example
    * ```ts

@@ -154,7 +154,9 @@ anymany(["a", "A"], { sort: { caseFirst: "upper" } });
 | `max` | `number` (positive integer) | no limit |
 | `overflow` | `(hidden: number) => string` | `` `+${N}` `` |
 
-`max` throws a `RangeError` when it is zero, negative or fractional.
+`max` counts input items; the `+N` counter comes on top, so `max: 3` shows three
+items and the counter. It throws a `RangeError` when it is zero, negative or
+fractional.
 
 → [What each option does, with examples](https://anyfamily.site/docs/anymany#options)
 

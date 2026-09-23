@@ -13,7 +13,11 @@ export const LIMITATIONS: { title: string; body: string }[] = [
   },
   {
     title: "Smart calendar cutoff is fixed at 7 days",
-    body: "Unit cutoffs (seconds → minutes → hours…) are configurable via the thresholds option since 1.0. The calendar switch from weekday ('Wednesday, 11:20') to absolute date still happens at 7 days and is not configurable.",
+    body: "Unit cutoffs (seconds → minutes → hours…) are configurable via the thresholds option since 1.0. Relative mode reads all of them, but smart mode reads only second and minute. After the first hour it uses calendar labels, and the switch from weekday ('Wednesday, 11:20') to absolute date still happens at 7 days and is not configurable.",
+  },
+  {
+    title: "Smart mode joins label and clock with a comma",
+    body: "'yesterday, 14:35' is two Intl outputs, a relative-day word and a time, joined by a literal ', '. Intl has no API that combines the two, so the separator is not localized. Pass time: false and render the clock yourself if a locale needs a different join, or use anywhen.parts and replace the literal part.",
   },
   {
     title: "Node.js < 18",

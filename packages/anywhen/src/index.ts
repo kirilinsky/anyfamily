@@ -28,10 +28,16 @@ export type ThresholdUnit =
   | "month";
 
 /**
- * Per-unit cutoffs, in seconds, for picking the display unit in smart and
- * relative modes. Each unit is shown while the distance from `now` is below
- * its cutoff. Override any subset — the rest keep their defaults:
+ * Per-unit cutoffs, in seconds, for picking the display unit. Each unit is
+ * shown while the distance from `now` is below its cutoff. Override any
+ * subset — the rest keep their defaults.
+ *
+ * Relative mode reads all six:
  * `{ second: 45, minute: 2700, hour: 79200, day: 518400, week: 2160000, month: 28512000 }`.
+ *
+ * Smart mode reads only `second` (the "now" window, default `45`) and
+ * `minute` (the minutes window, default `3600`, capped at 59 minutes). Past
+ * that it switches to calendar labels, which thresholds do not move.
  *
  * @example
  * ```ts
@@ -72,7 +78,7 @@ export interface AnywhenOptions {
   style?: Style;
   /** Absolute mode: any `Intl.DateTimeFormatOptions`. Defaults to a short date (`{ day, month, year }`). */
   format?: Intl.DateTimeFormatOptions;
-  /** Smart and relative modes: per-unit cutoff overrides in seconds. */
+  /** Per-unit cutoff overrides in seconds. Relative mode reads all units; smart mode only `second` and `minute`. */
   thresholds?: Thresholds;
 }
 

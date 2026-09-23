@@ -33,7 +33,7 @@ const FIELDS: [string, string, string][] = [
   ["direction", '"ltr" | "rtl"', "text direction of the locale's script"],
   ["weekStart", "1–7", "first day of the week, ISO numbering"],
   ["weekend", "number[]", "days counted as the weekend, ISO numbering"],
-  ["minimalDays", "number", "days of a week that must fall in a year for it to be that year's first week"],
+  ["minimalDays", "number | undefined", "days of a week that must fall in a year for it to be that year's first week; undefined where the runtime no longer reports it"],
   ["calendars", "string[]", "usable calendars, preferred first"],
   ["timeZones", "string[]", "IANA zones for the region; empty for language-only tags"],
   ["hourCycles", "string[]", '"h12", "h23", … preferred first'],
@@ -191,7 +191,9 @@ days.map((d) => ({ day: d, weekend: isWeekend.has(d) }))`}</Code>
         <p>
           <Mono>minimalDays</Mono> is the ISO-8601 week-numbering rule: how many
           days of a week must fall inside a year for that week to count as the
-          year&apos;s first. Most locales say 1; a few say 4.
+          year&apos;s first. Most locales say 1; a few say 4. The field was
+          dropped from the spec, so newer engines (Node 24) return{" "}
+          <Mono>undefined</Mono> rather than a guess.
         </p>
       </Section>
 

@@ -17,6 +17,6 @@ export const LIMITATIONS: { title: string; body: string }[] = [
   },
   {
     title: "Support is uneven and moving",
-    body: "The proposal was standardised twice — properties first, then methods — and engines are split. anylocale reads either shape, but where neither exists it throws. Branch on anylocale.supported.",
+    body: "The proposal was standardised twice — properties first, then methods — and engines are split. anylocale reads either shape, but where neither exists it throws. Branch on anylocale.supported. minimalDays was dropped along the way: newer engines return undefined for it.",
   },
 ];
