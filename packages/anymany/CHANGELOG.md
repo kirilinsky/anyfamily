@@ -1,5 +1,11 @@
 # anymany
 
+## 2.1.1
+
+### Patch Changes
+
+- d38b7ef: Docs: `max` counts input items, and the `+N` counter is one extra element on top of them. `anymany.parts` returns that counter as a plain `"element"`, always the last one.
+
 ## 2.1.0
 
 ### Minor Changes

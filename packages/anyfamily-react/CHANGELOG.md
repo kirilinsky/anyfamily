@@ -1,5 +1,20 @@
 # anyfamily-react
 
+## 2.4.0
+
+### Minor Changes
+
+- d38b7ef: Picks up anylocale 1.1: `useAnylocale()` and the re-exported `AnylocaleInfo` now type `minimalDays` as `number | undefined`. Newer engines (Node 24) no longer report the field, and anylocale used to fill it with a wrong `1`.
+
+### Patch Changes
+
+- Updated dependencies [d38b7ef]
+- Updated dependencies [d38b7ef]
+- Updated dependencies [d38b7ef]
+  - anylocale@1.1.0
+  - anymany@2.1.1
+  - anywhen@2.1.2
+
 ## 2.3.2
 
 ### Patch Changes

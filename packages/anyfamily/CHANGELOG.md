@@ -1,5 +1,20 @@
 # anyfamily
 
+## 2.2.0
+
+### Minor Changes
+
+- d38b7ef: Picks up anylocale 1.1: the re-exported `AnylocaleInfo.minimalDays` is now `number | undefined`. Newer engines (Node 24) no longer report the field, and anylocale used to fill it with a wrong `1`. Also picks up the anywhen and anymany doc fixes (smart-mode `thresholds`, `max` counting).
+
+### Patch Changes
+
+- Updated dependencies [d38b7ef]
+- Updated dependencies [d38b7ef]
+- Updated dependencies [d38b7ef]
+  - anylocale@1.1.0
+  - anymany@2.1.1
+  - anywhen@2.1.2
+
 ## 2.1.4
 
 ### Patch Changes
