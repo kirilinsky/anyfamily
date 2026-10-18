@@ -1,5 +1,11 @@
 # anyfamily
 
+## 2.2.1
+
+### Patch Changes
+
+- Picks up anywhen 2.1.3: smart mode writes the clock the locale's own way (`"yesterday, 2:35 PM"`, not `"02:35 PM"`), and smart mode with `timeZone` is faster. The published range now starts at `anywhen@^2.1.3`.
+
 ## 2.2.0
 
 ### Minor Changes
