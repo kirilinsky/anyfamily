@@ -359,6 +359,16 @@ describe("smart mode — time option", () => {
       }),
     ).toMatch(/today, 0?1:00/);
   });
+  it("writes the clock the locale's own way", () => {
+    const at = (locale: string) =>
+      anywhen("2024-01-01T09:05:00.000Z", {
+        locale,
+        now: "2024-01-01T12:00:00.000Z",
+        timeZone: "UTC",
+      });
+    expect(at("en-US")).toBe("today, 9:05 AM");
+    expect(at("de")).toBe("heute, 09:05");
+  });
 });
 
 describe("mode validation", () => {
